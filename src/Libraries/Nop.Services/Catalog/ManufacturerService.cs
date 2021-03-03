@@ -252,21 +252,20 @@ namespace Nop.Services.Catalog
                 select pc;
 
             // get manufacturers of the products
-            var manufacturersQuery = 
+            var manufacturersQuery =
                 from m in _manufacturerRepository.Table
                 join pm in _productManufacturerRepository.Table on m.Id equals pm.ManufacturerId
                 join p in productsQuery on pm.ProductId equals p.Id
                 join pc in productCategoryQuery on p.Id equals pc.ProductId
+                where !m.Deleted
                 orderby
-                   pm.DisplayOrder, m.Name
-                //linq2db don't specify 'pm' in 'SELECT' statement
-                //see also https://github.com/nopSolutions/nopCommerce/issues/5425
-                select new { pm, m };
+                   m.DisplayOrder, m.Name
+                select m;
 
             var key = _staticCacheManager
                 .PrepareKeyForDefaultCache(NopCatalogDefaults.ManufacturersByCategoryCacheKey, categoryId.ToString());
 
-            return await _staticCacheManager.GetAsync(key, async () => (await manufacturersQuery.Distinct().ToListAsync()).Select(query => query.m).ToList());
+            return await _staticCacheManager.GetAsync(key, async () => await manufacturersQuery.Distinct().ToListAsync());
         }
 
         /// <summary>
