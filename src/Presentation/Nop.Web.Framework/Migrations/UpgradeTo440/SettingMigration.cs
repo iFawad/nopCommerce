@@ -176,6 +176,13 @@ namespace Nop.Web.Framework.Migrations.UpgradeTo440
                 catalogSettings.AttributeValueOutOfStockDisplayType = AttributeValueOutOfStockDisplayType.AlwaysDisplay;
                 settingService.SaveSettingAsync(catalogSettings).Wait();
             }
+
+            //#5349
+            if (!settingService.SettingExistsAsync(shippingSettings, settings => settings.EstimateShippingCityNameEnabled).Result)
+            {
+                shippingSettings.EstimateShippingCityNameEnabled = false;
+                settingService.SaveSettingAsync(shippingSettings).Wait();
+            }
         }
 
         public override void Down()
