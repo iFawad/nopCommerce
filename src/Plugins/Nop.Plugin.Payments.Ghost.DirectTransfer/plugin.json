@@ -1,0 +1,11 @@
+{
+  "Group": "Payment methods",
+  "FriendlyName": "Direct Transfer",
+  "SystemName": "Payments.Ghost.DirectTransfer",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.Ghost.DirectTransfer.dll",
+  "Description": "This plugin enables direct bank trnsfers."
+}
