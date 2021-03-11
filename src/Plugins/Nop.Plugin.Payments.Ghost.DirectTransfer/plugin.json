@@ -7,5 +7,5 @@
   "Author": "Ghost Product",
   "DisplayOrder": 1,
   "FileName": "Nop.Plugin.Payments.Ghost.DirectTransfer.dll",
-  "Description": "This plugin enables direct bank trnsfers."
+  "Description": "This plugin enables direct bank transfers."
 }
