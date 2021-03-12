@@ -1,0 +1,11 @@
+{
+  "Group": "Payment methods",
+  "FriendlyName": "Cash on delivery",
+  "SystemName": "Payments.Ghost.CashOnDelivery",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.Ghost.CashOnDelivery.dll",
+  "Description": "This plugin enables cash on delivery payment method."
+}
