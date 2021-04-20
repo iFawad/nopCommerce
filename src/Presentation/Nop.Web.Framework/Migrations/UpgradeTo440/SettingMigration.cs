@@ -134,9 +134,9 @@ namespace Nop.Web.Framework.Migrations.UpgradeTo440
                 settingService.SaveSettingAsync(catalogSettings).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPageAutomaticallyCalculatePriceRange).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.SearchPageManuallyPriceRange).Result)
             {
-                catalogSettings.SearchPageAutomaticallyCalculatePriceRange = true;
+                catalogSettings.SearchPageManuallyPriceRange = false;
                 settingService.SaveSettingAsync(catalogSettings).Wait();
             }
 
@@ -158,9 +158,9 @@ namespace Nop.Web.Framework.Migrations.UpgradeTo440
                 settingService.SaveSettingAsync(catalogSettings).Wait();
             }
 
-            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagAutomaticallyCalculatePriceRange).Result)
+            if (!settingService.SettingExistsAsync(catalogSettings, settings => settings.ProductsByTagManuallyPriceRange).Result)
             {
-                catalogSettings.ProductsByTagAutomaticallyCalculatePriceRange = true;
+                catalogSettings.ProductsByTagManuallyPriceRange = false;
                 settingService.SaveSettingAsync(catalogSettings).Wait();
             }
 
@@ -182,6 +182,13 @@ namespace Nop.Web.Framework.Migrations.UpgradeTo440
             //#5482
             settingService.SetSettingAsync("avalarataxsettings.gettaxratebyaddressonly", true).Wait();
             settingService.SetSettingAsync("avalarataxsettings.taxratebyaddresscachetime", 480).Wait();
+
+            //#5349
+            if (!settingService.SettingExistsAsync(shippingSettings, settings => settings.EstimateShippingCityNameEnabled).Result)
+            {
+                shippingSettings.EstimateShippingCityNameEnabled = false;
+                settingService.SaveSettingAsync(shippingSettings).Wait();
+            }
         }
 
         public override void Down()
