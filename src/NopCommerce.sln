@@ -63,7 +63,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Widgets.AccessiB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Payments.Ghost.DirectTransfer", "Plugins\Nop.Plugin.Payments.Ghost.DirectTransfer\Nop.Plugin.Payments.Ghost.DirectTransfer.csproj", "{DB4170F6-70AA-4BD7-8D49-2DA65E581C28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Payments.Ghost.CashOnDelivery", "Plugins\Nop.Plugin.Payments.Ghost.CashOnDelivery\Nop.Plugin.Payments.Ghost.CashOnDelivery.csproj", "{53CA54EE-CB63-4154-AAF4-07CA8280C372}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Payments.Ghost.CashOnDelivery", "Plugins\Nop.Plugin.Payments.Ghost.CashOnDelivery\Nop.Plugin.Payments.Ghost.CashOnDelivery.csproj", "{53CA54EE-CB63-4154-AAF4-07CA8280C372}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Widgets.BsLiveChat", "Plugins\Nop.Plugin.Widgets.BsLiveChat\Nop.Plugin.Widgets.BsLiveChat.csproj", "{DF06BE7F-5155-4F23-A029-F5278725B66F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -375,6 +377,18 @@ Global
 		{53CA54EE-CB63-4154-AAF4-07CA8280C372}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{53CA54EE-CB63-4154-AAF4-07CA8280C372}.Release|x86.ActiveCfg = Release|Any CPU
 		{53CA54EE-CB63-4154-AAF4-07CA8280C372}.Release|x86.Build.0 = Release|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Debug|x86.Build.0 = Debug|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Release|x86.ActiveCfg = Release|Any CPU
+		{DF06BE7F-5155-4F23-A029-F5278725B66F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -407,6 +421,7 @@ Global
 		{80CEF733-A369-4854-823D-847DFD5D8D87} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{DB4170F6-70AA-4BD7-8D49-2DA65E581C28} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{53CA54EE-CB63-4154-AAF4-07CA8280C372} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
+		{DF06BE7F-5155-4F23-A029-F5278725B66F} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE72A8B2-332A-4175-9319-6726D36E9D25}
