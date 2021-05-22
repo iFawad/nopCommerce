@@ -16,7 +16,7 @@
 
         //Age verification popup.
         jQuery(document).ready(function ($) {
-            if (sessionStorage.getItem('advertOnce') !== 'true') {
+            if (localStorage.getItem('advertOnce') !== 'true') {
                 displayPopupContentFromUrlYesNoAgeVerification('@Url.RouteUrl("TopicPopup", new {SystemName = "AgeVerification"})', 'Age Verification', true);
             }
         });
