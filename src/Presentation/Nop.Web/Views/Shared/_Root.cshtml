@@ -13,6 +13,13 @@
             AjaxCartFailure: "@T("AjaxCart.Failure")"
         };
         AjaxCart.init(false, '.header-links .cart-qty', '.header-links .wishlist-qty', '#flyout-cart', localized_data);
+
+        //Age verification popup.
+        jQuery(document).ready(function ($) {
+            if (sessionStorage.getItem('advertOnce') !== 'true') {
+                displayPopupContentFromUrlYesNoAgeVerification('@Url.RouteUrl("TopicPopup", new {SystemName = "AgeVerification"})', 'Age Verification', true);
+            }
+        });
     </script>
     <div class="header-menu">
         @await Component.InvokeAsync("TopMenu")
