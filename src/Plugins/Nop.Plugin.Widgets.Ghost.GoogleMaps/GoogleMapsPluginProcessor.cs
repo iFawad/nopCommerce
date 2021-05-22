@@ -72,8 +72,8 @@ namespace Nop.Plugin.Widgets.Ghost.GoogleMaps
 
             await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
-                ["Plugins.Widgets.BsLiveChat.MapEmbedScript"] = "Google Maps Embed HTML code:",
-                ["Plugins.Widgets.BsLiveChat.MapEmbedScript.Hint"] = "Paste the html code generated from Google Maps Embed option."
+                ["Plugin.Widgets.Ghost.GoogleMaps.MapEmbedScript"] = "Google Maps Embed HTML code:",
+                ["Plugins.Widgets.Ghost.GoogleMaps.MapEmbedScript.Hint"] = "Paste the html code generated from Google Maps Embed option."
             });
 
 
