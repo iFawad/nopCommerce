@@ -16,7 +16,7 @@ function displayPopupContentFromUrlYesNoAgeVerification(url, title, modal, width
       buttons: [{
         text: "Yes, I'm 21+",
         click: function (event, ui) {
-          sessionStorage.setItem('advertOnce', 'true');
+          localStorage.setItem('advertOnce', 'true');
           $(this).dialog('destroy').remove();
         }
       },
