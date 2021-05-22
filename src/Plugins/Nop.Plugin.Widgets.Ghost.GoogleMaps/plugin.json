@@ -1,0 +1,11 @@
+{
+  "Group": "Widgets",
+  "FriendlyName": "Google Maps",
+  "SystemName": "Widgets.Ghost.GoogleMaps",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.Ghost.GoogleMaps.dll",
+  "Description": "This plugin displays Google Maps widget for a particular location."
+}
