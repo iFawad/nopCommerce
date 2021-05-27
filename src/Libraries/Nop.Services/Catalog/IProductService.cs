@@ -41,6 +41,15 @@ namespace Nop.Services.Catalog
         Task<IList<Product>> GetAllProductsDisplayedOnHomepageAsync();
 
         /// <summary>
+        /// Gets all products
+        /// </summary>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the products
+        /// </returns>
+        Task<IList<Product>> GetAllProductsAsync();
+
+        /// <summary>
         /// Gets featured products by a category identifier
         /// </summary>
         /// <param name="categoryId">Category identifier</param>
