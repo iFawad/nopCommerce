@@ -9,6 +9,6 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts
 {
     public class ComingSoonProductsSettings : ISettings
     {
-        public string Instructions { get; set; }
+        public string CategoryName { get; set; }
     }
 }

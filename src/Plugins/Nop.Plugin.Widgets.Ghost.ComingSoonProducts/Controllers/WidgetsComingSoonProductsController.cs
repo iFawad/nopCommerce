@@ -61,13 +61,13 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Controllers
 
             var model = new ConfigurationModel
             {
-                Instructions = comingSoonProductsSettings.Instructions,
+                CategoryName = comingSoonProductsSettings.CategoryName,
                 ActiveStoreScopeConfiguration = storeScope
             };
 
             if (storeScope > 0)
             {
-                model.Instructions_OverrideForStore = await _settingService.SettingExistsAsync(comingSoonProductsSettings, x => x.Instructions, storeScope);
+                model.CategoryName_OverrideForStore = await _settingService.SettingExistsAsync(comingSoonProductsSettings, x => x.CategoryName, storeScope);
             }
 
             return View("~/Plugins/Widgets.Ghost.ComingSoonProducts/Views/Configure.cshtml", model);
@@ -87,12 +87,12 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Controllers
             var comingSoonProductsSettings = await _settingService.LoadSettingAsync<ComingSoonProductsSettings>(storeScope);
 
             //save settings
-            comingSoonProductsSettings.Instructions = model.Instructions;
+            comingSoonProductsSettings.CategoryName = model.CategoryName;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
              * and loaded from database after each update */
-            await _settingService.SaveSettingOverridablePerStoreAsync(comingSoonProductsSettings, x => x.Instructions, model.Instructions_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(comingSoonProductsSettings, x => x.CategoryName, model.CategoryName_OverrideForStore, storeScope, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();

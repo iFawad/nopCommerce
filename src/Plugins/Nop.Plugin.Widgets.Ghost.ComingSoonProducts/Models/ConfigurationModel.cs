@@ -12,8 +12,8 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Models
     {
         public int ActiveStoreScopeConfiguration { get; set; }
 
-        [NopResourceDisplayName("Plugin.Widgets.Ghost.ComingSoonProducts.Instructions")]
-        public string Instructions { get; set; }
-        public bool Instructions_OverrideForStore { get; set; }
+        [NopResourceDisplayName("Plugin.Widgets.Ghost.ComingSoonProducts.CategoryName")]
+        public string CategoryName { get; set; }
+        public bool CategoryName_OverrideForStore { get; set; }
     }
 }

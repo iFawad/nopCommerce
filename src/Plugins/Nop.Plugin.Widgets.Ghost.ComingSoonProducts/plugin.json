@@ -7,5 +7,5 @@
   "Author": "Ghost Product",
   "DisplayOrder": 1,
   "FileName": "Nop.Plugin.Widgets.Ghost.ComingSoonProducts.dll",
-  "Description": "Add product to category named 'Coming-Soon' and it will be displyed on Homepage."
+  "Description": "Displays product of a custom category on the home page. example: 'Coming-Soon'"
 }
