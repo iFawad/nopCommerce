@@ -1,0 +1,11 @@
+{
+  "Group": "Widgets",
+  "FriendlyName": "Coming Soon Products",
+  "SystemName": "Widgets.Ghost.ComingSoonProducts",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.Ghost.ComingSoonProducts.dll",
+  "Description": "Add product to category named 'Coming-Soon' and it will be displyed on Homepage."
+}
