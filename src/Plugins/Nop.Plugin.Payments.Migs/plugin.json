@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Mastercard MiGS",
+  "SystemName": "Payments.Ghost.Migs",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.Ghost.Migs.dll",
+  "Description": "This plugin enables Mastercard Payment Gateway Services."
+}
