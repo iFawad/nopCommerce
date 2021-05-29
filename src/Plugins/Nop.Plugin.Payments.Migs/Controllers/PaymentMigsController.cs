@@ -73,6 +73,9 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
                 locale.DescriptionText = await _localizationService
                     .GetLocalizedSettingAsync(migsPaymentSettings, x => x.DescriptionText, languageId, 0, false, false);
             });
+            model.MerchantId = migsPaymentSettings.MerchantId;
+            model.AccessCode = migsPaymentSettings.AccessCode;
+            model.HashSecret = migsPaymentSettings.HashSecret;
             model.AdditionalFee = migsPaymentSettings.AdditionalFee;
             model.AdditionalFeePercentage = migsPaymentSettings.AdditionalFeePercentage;
             model.ShippableProductRequired = migsPaymentSettings.ShippableProductRequired;
@@ -80,6 +83,9 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             model.ActiveStoreScopeConfiguration = storeScope;
             if (storeScope > 0)
             {
+                model.MerchantId_OverrideForStore = await _settingService.SettingExistsAsync(migsPaymentSettings, x => x.MerchantId, storeScope);
+                model.AccessCode_OverrideForStore = await _settingService.SettingExistsAsync(migsPaymentSettings, x => x.AccessCode, storeScope);
+                model.HashSecret_OverrideForStore = await _settingService.SettingExistsAsync(migsPaymentSettings, x => x.HashSecret, storeScope);
                 model.DescriptionText_OverrideForStore = await _settingService.SettingExistsAsync(migsPaymentSettings, x => x.DescriptionText, storeScope);
                 model.AdditionalFee_OverrideForStore = await _settingService.SettingExistsAsync(migsPaymentSettings, x => x.AdditionalFee, storeScope);
                 model.AdditionalFeePercentage_OverrideForStore = await _settingService.SettingExistsAsync(migsPaymentSettings, x => x.AdditionalFeePercentage, storeScope);
@@ -104,6 +110,9 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             var migsPaymentSettings = await _settingService.LoadSettingAsync<MigsPaymentSettings>(storeScope);
 
             //save settings
+            migsPaymentSettings.MerchantId = model.MerchantId;
+            migsPaymentSettings.AccessCode = model.AccessCode;
+            migsPaymentSettings.HashSecret = model.HashSecret;
             migsPaymentSettings.DescriptionText = model.DescriptionText;
             migsPaymentSettings.AdditionalFee = model.AdditionalFee;
             migsPaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
@@ -113,6 +122,9 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
              * and loaded from database after each update */
+            await _settingService.SaveSettingOverridablePerStoreAsync(migsPaymentSettings, x => x.MerchantId, model.MerchantId_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(migsPaymentSettings, x => x.AccessCode, model.AccessCode_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(migsPaymentSettings, x => x.HashSecret, model.HashSecret_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(migsPaymentSettings, x => x.DescriptionText, model.DescriptionText_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(migsPaymentSettings, x => x.AdditionalFee, model.AdditionalFee_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(migsPaymentSettings, x => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, storeScope, false);

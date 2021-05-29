@@ -17,6 +17,18 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Models
 
         public int ActiveStoreScopeConfiguration { get; set; }
 
+        [NopResourceDisplayName("Plugin.Payments.Ghost.Migs.MerchantId")]
+        public string MerchantId { get; set; }
+        public bool MerchantId_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Plugin.Payments.Ghost.Migs.AccessCode")]
+        public string AccessCode { get; set; }
+        public bool AccessCode_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Plugin.Payments.Ghost.Migs.HashSecret")]
+        public string HashSecret { get; set; }
+        public bool HashSecret_OverrideForStore { get; set; }
+
         [NopResourceDisplayName("Plugin.Payments.Ghost.Migs.DescriptionText")]
         public string DescriptionText { get; set; }
         public bool DescriptionText_OverrideForStore { get; set; }

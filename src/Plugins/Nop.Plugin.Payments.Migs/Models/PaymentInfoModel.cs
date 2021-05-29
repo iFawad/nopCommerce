@@ -18,6 +18,8 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Models
             ExpireYears = new List<SelectListItem>();
         }
 
+        public string DescriptionText { get; set; }
+
         [NopResourceDisplayName("Payment.SelectCreditCard")]
         public string CreditCardType { get; set; }
 

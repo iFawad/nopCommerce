@@ -208,6 +208,12 @@ namespace Nop.Plugin.Payments.Ghost.Migs
             //locales
             await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
+                ["Plugin.Payments.Ghost.Migs.MerchantId"] = "Merchant Id",
+                ["Plugin.Payments.Ghost.Migs.MerchantId.Hint"] = "Merchant Id provided by the payment gateway.",
+                ["Plugin.Payments.Ghost.Migs.AccessCode"] = "Access Code",
+                ["Plugin.Payments.Ghost.Migs.AccessCode.Hint"] = "Access Code provided by the payment gateway.",
+                ["Plugin.Payments.Ghost.Migs.HashSecret"] = "Hash Secret",
+                ["Plugin.Payments.Ghost.Migs.HashSecret.Hint"] = "Hash Secret provided by the payment gateway.",
                 ["Plugin.Payments.Ghost.Migs.DescriptionText"] = "Description",
                 ["Plugin.Payments.Ghost.Migs.DescriptionText.Hint"] = "Enter info that will be shown to customers during checkout",
                 ["Plugin.Payments.Ghost.Migs.AdditionalFee"] = "Additional fee",
