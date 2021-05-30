@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
+using Nop.Core.Domain.Payments;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Orders;
@@ -54,7 +55,34 @@ namespace Nop.Plugin.Payments.Ghost.Migs
         /// <returns>Process payment result</returns>
         public Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
-            return Task.FromResult(new ProcessPaymentResult());
+            var result = new ProcessPaymentResult
+            {
+                AllowStoringCreditCardNumber = true
+            };
+            
+            //switch (_migsPaymentSettings.TransactMode)
+            //{
+            //    case TransactMode.Pending:
+                    
+            //        break;
+            //    case TransactMode.Authorize:
+                    
+            //        break;
+            //    case TransactMode.AuthorizeAndCapture:
+                    
+            //        break;
+            //    default:
+            //        result.AddError("Not supported transaction type");
+            //        break;
+            //}
+
+            //result.NewPaymentStatus = PaymentStatus.Pending;
+            //result.NewPaymentStatus = PaymentStatus.Authorized;
+            result.NewPaymentStatus = PaymentStatus.Paid;
+
+
+            return Task.FromResult(result);
+            //return Task.FromResult(new ProcessPaymentResult());
         }
 
         /// <summary>
@@ -286,7 +314,7 @@ namespace Nop.Plugin.Payments.Ghost.Migs
         /// <summary>
         /// Gets a payment method type
         /// </summary>
-        public PaymentMethodType PaymentMethodType => PaymentMethodType.Standard;
+        public PaymentMethodType PaymentMethodType => PaymentMethodType.Redirection;
 
         /// <summary>
         /// Gets a value indicating whether we should display a payment information page for this plugin

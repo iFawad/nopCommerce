@@ -8,7 +8,7 @@
             @Html.Raw(Model.DescriptionText)
         </td>
     </tr>
-    <tr>
+    @*<tr>
         <td>
             <label asp-for="CreditCardTypes">@T("Payment.SelectCreditCard"):</label>
         </td>
@@ -52,5 +52,5 @@
             <input type="text" asp-for="CardCode" style="width:60px;" autocomplete="off" maxlength="4" />
             <span asp-validation-for="CardCode"></span>
         </td>
-    </tr>
+    </tr>*@
 </table>
