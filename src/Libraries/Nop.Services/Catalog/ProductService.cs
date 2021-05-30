@@ -539,27 +539,6 @@ namespace Nop.Services.Catalog
         }
 
         /// <summary>
-        /// Gets all products
-        /// </summary>
-        /// <returns>
-        /// A task that represents the asynchronous operation
-        /// The task result contains the products
-        /// </returns>
-        public virtual async Task<IList<Product>> GetAllProductsAsync()
-        {
-            var products = await _productRepository.GetAllAsync(query =>
-            {
-                return from p in query
-                       orderby p.DisplayOrder, p.Id
-                       where p.Published &&
-                             !p.Deleted
-                       select p;
-            }, cache => cache.PrepareKeyForDefaultCache(NopCatalogDefaults.ProductsHomepageCacheKey));
-
-            return products;
-        }
-
-        /// <summary>
         /// Gets product
         /// </summary>
         /// <param name="productId">Product identifier</param>
