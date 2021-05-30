@@ -10,6 +10,7 @@ using Nop.Services.Stores;
 //using Nop.Web.Areas.Admin.Factories;
 using Nop.Web.Framework.Components;
 using Nop.Web.Factories;
+using Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Services;
 
 namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
 {
@@ -19,25 +20,22 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
         private readonly ComingSoonProductsSettings _comingSoonProductsSettings;
         private readonly IAclService _aclService;
         private readonly IProductModelFactory _productModelFactory;
-        private readonly IProductService _productService;
+        private readonly ICSPProductService _cspProductService;
         private readonly IStoreMappingService _storeMappingService;
-        private readonly ICatalogModelFactory _catalogModelFactory;
         private readonly ICategoryService _categoryService;
 
         public WidgetsComingSoonProductsViewComponent(ComingSoonProductsSettings comingSoonProductsSettings,
             IAclService aclService,
             IProductModelFactory productModelFactory,
-            IProductService productService,
+            ICSPProductService cspProductService,
             IStoreMappingService storeMappingService,
-            ICatalogModelFactory catalogModelFactory,
             ICategoryService categoryService)
         {
             _comingSoonProductsSettings = comingSoonProductsSettings;
             _aclService = aclService;
             _productModelFactory = productModelFactory;
-            _productService = productService;
+            _cspProductService = cspProductService;
             _storeMappingService = storeMappingService;
-            _catalogModelFactory = catalogModelFactory;
             _categoryService = categoryService;
         }
 
@@ -48,11 +46,11 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
             {
                 categoryName = _comingSoonProductsSettings.CategoryName;
             }
-            var products = await (await _productService.GetAllProductsAsync())
+            var products = await (await _cspProductService.GetAllProductsAsync())
             //ACL and store mapping
             .WhereAwait(async p => await _aclService.AuthorizeAsync(p) && await _storeMappingService.AuthorizeAsync(p))
             //availability dates
-            .Where(p => _productService.ProductIsAvailable(p))
+            .Where(p => _cspProductService.GetProductServiceInstance().ProductIsAvailable(p))
             //visible individually
             .Where(p => p.VisibleIndividually)
             .ToListAsync();
