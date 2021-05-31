@@ -15,5 +15,9 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Models
         [NopResourceDisplayName("Plugin.Widgets.Ghost.ComingSoonProducts.CategoryName")]
         public string CategoryName { get; set; }
         public bool CategoryName_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Plugin.Widgets.Ghost.ComingSoonProducts.SectionName")]
+        public string SectionName { get; set; }
+        public bool SectionName_OverrideForStore { get; set; }
     }
 }
