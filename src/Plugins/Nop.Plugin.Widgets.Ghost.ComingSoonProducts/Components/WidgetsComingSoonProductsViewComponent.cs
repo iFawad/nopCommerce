@@ -11,6 +11,9 @@ using Nop.Services.Stores;
 using Nop.Web.Framework.Components;
 using Nop.Web.Factories;
 using Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Services;
+using Nop.Plugin.Widgets.Ghost.ComingSoonProducts.ViewModels;
+using Nop.Services.Configuration;
+using Nop.Core;
 
 namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
 {
@@ -23,13 +26,17 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
         private readonly ICSPProductService _cspProductService;
         private readonly IStoreMappingService _storeMappingService;
         private readonly ICategoryService _categoryService;
+        private readonly ISettingService _settingService;
+        private readonly IStoreContext _storeContext;
 
         public WidgetsComingSoonProductsViewComponent(ComingSoonProductsSettings comingSoonProductsSettings,
             IAclService aclService,
             IProductModelFactory productModelFactory,
             ICSPProductService cspProductService,
             IStoreMappingService storeMappingService,
-            ICategoryService categoryService)
+            ICategoryService categoryService,
+            ISettingService settingService,
+            IStoreContext storeContext)
         {
             _comingSoonProductsSettings = comingSoonProductsSettings;
             _aclService = aclService;
@@ -37,10 +44,13 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
             _cspProductService = cspProductService;
             _storeMappingService = storeMappingService;
             _categoryService = categoryService;
+            _settingService = settingService;
+            _storeContext = storeContext;
         }
 
         public async Task<IViewComponentResult> InvokeAsync(string widgetZone, object additionalData)
         {
+            ComingSoonProductsViewModel viewModel = new ComingSoonProductsViewModel();
             string categoryName = "Coming-soon";
             if (!string.IsNullOrWhiteSpace(_comingSoonProductsSettings.CategoryName))
             {
@@ -75,8 +85,13 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
             if (!products.Any())
                 return Content("");
 
-            var model = (await _productModelFactory.PrepareProductOverviewModelsAsync(products, true, true)).ToList();
-            return View("~/Plugins/Widgets.Ghost.ComingSoonProducts/Views/ComingSoonProducts.cshtml", model);
+            viewModel.Products = (await _productModelFactory.PrepareProductOverviewModelsAsync(products, true, true)).ToList();
+
+            //Get Settings
+            var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
+            viewModel.ComingSoonProductsSettings = await _settingService.LoadSettingAsync<ComingSoonProductsSettings>(storeScope);
+
+            return View("~/Plugins/Widgets.Ghost.ComingSoonProducts/Views/ComingSoonProducts.cshtml", viewModel);
         }
     }
 }
