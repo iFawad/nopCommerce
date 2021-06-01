@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
 using Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Models;
+using Nop.Services.Catalog;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Messages;
@@ -28,6 +30,7 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Controllers
         private readonly IPermissionService _permissionService;
         private readonly ISettingService _settingService;
         private readonly IStoreContext _storeContext;
+        private readonly ICategoryService _categoryService;
 
         #endregion
 
@@ -37,13 +40,15 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Controllers
             INotificationService notificationService,
             IPermissionService permissionService,
             ISettingService settingService,
-            IStoreContext storeContext)
+            IStoreContext storeContext,
+            ICategoryService categoryService)
         {
             _localizationService = localizationService;
             _notificationService = notificationService;
             _permissionService = permissionService;
             _settingService = settingService;
             _storeContext = storeContext;
+            _categoryService = categoryService;
         }
 
         #endregion
@@ -58,18 +63,37 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Controllers
             //load settings for a chosen store scope
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
             var comingSoonProductsSettings = await _settingService.LoadSettingAsync<ComingSoonProductsSettings>(storeScope);
+            var categories = await _categoryService.GetAllCategoriesAsync();
 
             var model = new ConfigurationModel
             {
-                CategoryName = comingSoonProductsSettings.CategoryName,
                 SectionName = comingSoonProductsSettings.SectionName,
-                ActiveStoreScopeConfiguration = storeScope
+                ActiveStoreScopeConfiguration = storeScope,
+                AvailableCategories = new List<SelectListItem>()
             };
+
+            //Set Default selection item
+            SelectListItem defaultItem = new SelectListItem
+            {
+                Value = "0",
+                Text = "Select category"
+            };
+            model.AvailableCategories.Add(defaultItem);
+
+            foreach (var category in categories)
+            {
+                SelectListItem item = new SelectListItem
+                {
+                    Value = category.Id.ToString(),
+                    Text = category.Name
+                };
+                model.AvailableCategories.Add(item);
+            }
 
             if (storeScope > 0)
             {
-                model.CategoryName_OverrideForStore = await _settingService.SettingExistsAsync(comingSoonProductsSettings, x => x.CategoryName, storeScope);
                 model.SectionName_OverrideForStore = await _settingService.SettingExistsAsync(comingSoonProductsSettings, x => x.SectionName, storeScope);
+                model.CategoryId_OverrideForStore = await _settingService.SettingExistsAsync(comingSoonProductsSettings, x => x.CategoryId, storeScope);
             }
 
             return View("~/Plugins/Widgets.Ghost.ComingSoonProducts/Views/Configure.cshtml", model);
@@ -89,14 +113,14 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Controllers
             var comingSoonProductsSettings = await _settingService.LoadSettingAsync<ComingSoonProductsSettings>(storeScope);
 
             //save settings
-            comingSoonProductsSettings.CategoryName = model.CategoryName;
             comingSoonProductsSettings.SectionName = model.SectionName;
+            comingSoonProductsSettings.CategoryId = model.CategoryId;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
              * and loaded from database after each update */
-            await _settingService.SaveSettingOverridablePerStoreAsync(comingSoonProductsSettings, x => x.CategoryName, model.CategoryName_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(comingSoonProductsSettings, x => x.SectionName, model.SectionName_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(comingSoonProductsSettings, x => x.CategoryId, model.CategoryId_OverrideForStore, storeScope, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();

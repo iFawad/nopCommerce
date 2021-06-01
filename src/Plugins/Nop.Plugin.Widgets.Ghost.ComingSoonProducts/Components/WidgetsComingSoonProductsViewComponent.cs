@@ -51,11 +51,7 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
         public async Task<IViewComponentResult> InvokeAsync(string widgetZone, object additionalData)
         {
             ComingSoonProductsViewModel viewModel = new ComingSoonProductsViewModel();
-            string categoryName = "Coming-soon";
-            if (!string.IsNullOrWhiteSpace(_comingSoonProductsSettings.CategoryName))
-            {
-                categoryName = _comingSoonProductsSettings.CategoryName;
-            }
+            int categoryId = _comingSoonProductsSettings.CategoryId;
             var products = await (await _cspProductService.GetAllProductsAsync())
             //ACL and store mapping
             .WhereAwait(async p => await _aclService.AuthorizeAsync(p) && await _storeMappingService.AuthorizeAsync(p))
@@ -65,12 +61,10 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
             .Where(p => p.VisibleIndividually)
             .ToListAsync();
 
-            var allCategories = await _categoryService.GetAllCategoriesAsync();
-            var comingSoonCategory = allCategories.Where(category => category.Name == categoryName).FirstOrDefault();
-            int categoryId = 0;
+            //var comingSoonCategory = await _categoryService.GetCategoryByIdAsync(categoryId);
 
-            if (comingSoonCategory != null)
-                categoryId = comingSoonCategory.Id;
+            //if (comingSoonCategory != null)
+            //    categoryId = comingSoonCategory.Id;
 
             var existingProductCategories = await _categoryService.GetProductCategoriesByCategoryIdAsync(categoryId, showHidden: true);
             

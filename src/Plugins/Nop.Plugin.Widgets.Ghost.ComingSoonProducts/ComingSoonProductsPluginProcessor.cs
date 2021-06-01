@@ -72,8 +72,8 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts
 
             await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
-                ["Plugin.Widgets.Ghost.ComingSoonProducts.CategoryName"] = "Category name:",
-                ["Plugin.Widgets.Ghost.ComingSoonProducts.CategoryName.Hint"] = "Category name example 'Coming-Soon' prodcuts of which will display on home screen.",
+                ["Plugin.Widgets.Ghost.ComingSoonProducts.CategoryList"] = "Category:",
+                ["Plugin.Widgets.Ghost.ComingSoonProducts.CategoryList.Hint"] = "Select a category, prodcuts of which will display on home screen.",
                 ["Plugin.Widgets.Ghost.ComingSoonProducts.SectionName"] = "Section name:",
                 ["Plugin.Widgets.Ghost.ComingSoonProducts.SectionName.Hint"] = "Section name example 'Coming soon' which will display as a heading for the products."
             });
