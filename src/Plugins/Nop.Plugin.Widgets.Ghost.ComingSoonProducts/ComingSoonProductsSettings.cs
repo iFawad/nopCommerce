@@ -9,7 +9,7 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts
 {
     public class ComingSoonProductsSettings : ISettings
     {
-        public string CategoryName { get; set; }
         public string SectionName { get; set; }
+        public int CategoryId { get; set; }
     }
 }
