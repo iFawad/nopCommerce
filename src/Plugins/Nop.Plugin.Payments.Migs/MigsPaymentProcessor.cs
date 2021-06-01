@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Elsheimy.Components.ePayment.Migs;
+using Elsheimy.Components.ePayment.Migs.Commands;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
@@ -23,6 +27,7 @@ namespace Nop.Plugin.Payments.Ghost.Migs
         private readonly ISettingService _settingService;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IWebHelper _webHelper;
+        private readonly IActionContextAccessor _actionContextAccessor;
 
         #endregion
 
@@ -33,7 +38,8 @@ namespace Nop.Plugin.Payments.Ghost.Migs
             IPaymentService paymentService,
             ISettingService settingService,
             IShoppingCartService shoppingCartService,
-            IWebHelper webHelper)
+            IWebHelper webHelper,
+            IActionContextAccessor actionContextAccessor)
         {
             _migsPaymentSettings = migsPaymentSettings;
             _localizationService = localizationService;
@@ -41,6 +47,7 @@ namespace Nop.Plugin.Payments.Ghost.Migs
             _settingService = settingService;
             _shoppingCartService = shoppingCartService;
             _webHelper = webHelper;
+            _actionContextAccessor = actionContextAccessor;
         }
 
         #endregion
@@ -55,21 +62,21 @@ namespace Nop.Plugin.Payments.Ghost.Migs
         /// <returns>Process payment result</returns>
         public Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
-            var result = new ProcessPaymentResult
-            {
-                AllowStoringCreditCardNumber = true
-            };
-            
+            //var result = new ProcessPaymentResult
+            //{
+            //    AllowStoringCreditCardNumber = true
+            //};
+
             //switch (_migsPaymentSettings.TransactMode)
             //{
             //    case TransactMode.Pending:
-                    
+
             //        break;
             //    case TransactMode.Authorize:
-                    
+
             //        break;
             //    case TransactMode.AuthorizeAndCapture:
-                    
+
             //        break;
             //    default:
             //        result.AddError("Not supported transaction type");
@@ -78,11 +85,12 @@ namespace Nop.Plugin.Payments.Ghost.Migs
 
             //result.NewPaymentStatus = PaymentStatus.Pending;
             //result.NewPaymentStatus = PaymentStatus.Authorized;
-            result.NewPaymentStatus = PaymentStatus.Paid;
+            
+            //result.NewPaymentStatus = PaymentStatus.Paid;
 
 
-            return Task.FromResult(result);
-            //return Task.FromResult(new ProcessPaymentResult());
+            //return Task.FromResult(result);
+            return Task.FromResult(new ProcessPaymentResult());
         }
 
         /// <summary>
@@ -91,9 +99,40 @@ namespace Nop.Plugin.Payments.Ghost.Migs
         /// <param name="postProcessPaymentRequest">Payment info required for an order processing</param>
         public Task PostProcessPaymentAsync(PostProcessPaymentRequest postProcessPaymentRequest)
         {
+            return ExecuteServerHostedCommand(postProcessPaymentRequest);
+
             //nothing
-            return Task.CompletedTask;
+            //return Task.CompletedTask;
         }
+
+        //[HttpPost]
+        public async Task ExecuteServerHostedCommand(PostProcessPaymentRequest postProcessPaymentRequest)
+        {
+            VpcClient client = new VpcClient(_migsPaymentSettings.MerchantId, _migsPaymentSettings.AccessCode, _migsPaymentSettings.HashSecret);
+
+            VpcServerHostedPaymentCommand cmd = new VpcServerHostedPaymentCommand();
+            cmd.ActualAmount = postProcessPaymentRequest.Order.OrderTotal;
+            cmd.MerchantTxnReference = postProcessPaymentRequest.Order.OrderGuid.ToString();
+            cmd.OrderInfo = postProcessPaymentRequest.Order.PaymentMethodSystemName;
+            cmd.ReturnUrl = this.GetAbsoluteUrl() + "/PaymentMigs/ServerHostedPaymentCallback";
+            //cmd.Locale = migsPaymentSettings.Locale;
+
+            string url = client.ComputeCommand(cmd);
+
+            _actionContextAccessor.ActionContext.HttpContext.Response.Redirect(url);
+            //Redirect(url);
+        }
+
+        private string GetAbsoluteUrl()
+        {
+            HttpRequest request = _actionContextAccessor.ActionContext.HttpContext.Request;
+            return request.Scheme + "://" + request.Host.Value;
+        }
+
+        //public async Task<int?> HandleTransactionAsync(VpcPaymentResult result)
+        //{
+        //    return 0; //Convert.ToInt32(result.TransactionNo);
+        //}
 
         /// <summary>
         /// Returns a value indicating whether payment method should be hidden during checkout

@@ -3,21 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Elsheimy.Components.ePayment.Migs.Commands;
+using Elsheimy.Components.ePayment.Migs.Web;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Plugin.Payments.Ghost.Migs.Models;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Messages;
+using Nop.Services.Orders;
+using Nop.Services.Payments;
 using Nop.Services.Security;
+using Nop.Web.Factories;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Controllers;
 using Nop.Web.Framework.Mvc.Filters;
+using Nop.Web.Models.Checkout;
 
 namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
 {
-    [AuthorizeAdmin]
-    [Area(AreaNames.Admin)]
+    
     [AutoValidateAntiforgeryToken]
     public class PaymentMigsController : BasePaymentController
     {
@@ -29,6 +35,10 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
         private readonly IPermissionService _permissionService;
         private readonly ISettingService _settingService;
         private readonly IStoreContext _storeContext;
+        private readonly IWorkContext _workContext;
+        private readonly IPaymentPluginManager _paymentPluginManager;
+        private readonly IOrderService _orderService;
+        private readonly ICheckoutModelFactory _checkoutModelFactory;
 
         #endregion
 
@@ -39,7 +49,11 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             INotificationService notificationService,
             IPermissionService permissionService,
             ISettingService settingService,
-            IStoreContext storeContext)
+            IStoreContext storeContext,
+            IWorkContext workContext,
+            IPaymentPluginManager paymentPluginManager,
+            IOrderService orderService,
+            ICheckoutModelFactory checkoutModelFactory)
         {
             _languageService = languageService;
             _localizationService = localizationService;
@@ -47,12 +61,17 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             _permissionService = permissionService;
             _settingService = settingService;
             _storeContext = storeContext;
+            _workContext = workContext;
+            _paymentPluginManager = paymentPluginManager;
+            _orderService = orderService;
+            _checkoutModelFactory = checkoutModelFactory;
         }
 
         #endregion
 
         #region Methods
-
+        [AuthorizeAdmin]
+        [Area(AreaNames.Admin)]
         public async Task<IActionResult> Configure()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePaymentMethods))
@@ -97,6 +116,8 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAdmin]
+        [Area(AreaNames.Admin)]
         public async Task<IActionResult> Configure(ConfigurationModel model)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManagePaymentMethods))
@@ -144,6 +165,64 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
 
             return await Configure();
+        }
+
+        public async Task<IActionResult> ServerHostedPaymentCallback()
+        {
+            var queryParameters = HttpContext.Request.Query.Select(a => new QueryParameter(a.Key, a.Value));
+            List<QueryParameter> paramList = new List<QueryParameter>();
+
+            foreach (var par in queryParameters)
+            {
+                paramList.Add(new QueryParameter(par.Name, par.Value));
+            }
+
+            VpcPaymentResult result = new VpcPaymentResult();
+            result.LoadParameters(paramList);
+
+
+            TempData["QueryParams"] = JsonConvert.SerializeObject(result, Formatting.Indented);
+
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var paymentMethod = await _paymentPluginManager.LoadPluginBySystemNameAsync("Payments.Ghost.Migs", customer, store.Id);
+            if (!_paymentPluginManager.IsPluginActive(paymentMethod) || paymentMethod is not MigsPaymentProcessor plugin)
+                throw new NopException($"{"Payments.Ghost.Migs"} error. Module cannot be loaded");
+
+            //var orderId = await plugin.HandleTransactionAsync(result);
+            //if (!orderId.HasValue)
+            //    throw new NopException($"{"Payments.Ghost.Migs"} error. Order not found");
+
+            if(result.TxnResponseCode != "0")
+            {
+                //return View();
+                //something failed, redisplay form
+                //var paymenInfoModel = await _checkoutModelFactory.PreparePaymentInfoModelAsync(paymentMethod);
+                //return Json(new
+                //{
+                //    update_section = new UpdateSectionJsonModel
+                //    {
+                //        name = "payment-info",
+                //        html = await RenderPartialViewToStringAsync("OpcPaymentInfo", paymenInfoModel)
+                //    }
+                //});
+                //return Content(await _localizationService.GetResourceAsync("Checkout.RedirectMessage"));
+                
+                return RedirectToRoute("CheckoutOnePage");
+                //return RedirectToRoute("CheckoutPaymentMethod");
+            }
+
+            //get the order
+            var order = (await _orderService.SearchOrdersAsync(storeId: (await _storeContext.GetCurrentStoreAsync()).Id,
+            customerId: (await _workContext.GetCurrentCustomerAsync()).Id, pageSize: 1)).FirstOrDefault();
+
+            return RedirectToRoute("CheckoutCompleted", new { orderId = order.Id });
+            //return RedirectToAction(nameof(Results));
+        }
+
+        public IActionResult Results()
+        {
+            return View();
         }
 
         #endregion
