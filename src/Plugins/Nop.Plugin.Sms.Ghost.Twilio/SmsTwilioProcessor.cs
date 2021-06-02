@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Routing;
 using Nop.Core;
 using Nop.Core.Domain.Seo;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Plugins;
+using Nop.Web.Framework.Menu;
 
 namespace Nop.Plugin.Sms.Ghost.Twilio
 {
-    public class SmsTwilioProcessor : BasePlugin, IPlugin
+    public class SmsTwilioProcessor : BasePlugin, IPlugin, IAdminMenuPlugin
     {
         private readonly ISettingService _settingService;
         private readonly IWebHelper _webHelper;
@@ -68,6 +70,27 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
 
 
             await base.InstallAsync();
+        }
+
+        public Task ManageSiteMapAsync(SiteMapNode rootNode)
+        {
+            var menuItem = new SiteMapNode()
+            {
+                SystemName = "Sms.Ghost.Twilio",
+                Title = "Sms accounts",
+                ControllerName = "SmsTwilioController",
+                ActionName = "ConfigureSmsAccounts",
+                Visible = true,
+                IconClass = "far fa-dot-circle",
+                RouteValues = new RouteValueDictionary() { { "area", null } },
+            };
+            var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Configuration");
+            if (pluginNode != null)
+                pluginNode.ChildNodes.Add(menuItem);
+            else
+                rootNode.ChildNodes.Add(menuItem);
+
+            return Task.CompletedTask;
         }
 
         /// <summary>

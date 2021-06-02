@@ -62,7 +62,6 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             //load settings for a chosen store scope
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
             var smsTwilioSettings = await _settingService.LoadSettingAsync<SmsTwilioSettings>(storeScope);
-            var categories = await _categoryService.GetAllCategoriesAsync();
 
             var model = new ConfigurationModel
             {
@@ -110,6 +109,22 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
 
             return await Configure();
+        }
+
+        public async Task<IActionResult> ConfigureSmsAccounts()
+        {
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
+                return AccessDeniedView();
+
+            //load settings for a chosen store scope
+            var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
+            var smsTwilioSettings = await _settingService.LoadSettingAsync<SmsTwilioSettings>(storeScope);
+
+            var model = new ConfigurationModel
+            {
+                ActiveStoreScopeConfiguration = storeScope
+            };
+            return View("~/Plugins/Sms.Ghost.Twilio/Views/ConfigureSmsAccounts.cshtml", model);
         }
 
         #endregion
