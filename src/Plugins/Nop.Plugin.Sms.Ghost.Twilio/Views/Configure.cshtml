@@ -1,0 +1,60 @@
+﻿
+@model Nop.Plugin.Sms.Ghost.Twilio.Models.ConfigurationModel
+@using Nop.Web.Framework;
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+
+
+<form asp-controller="SmsTwilio" asp-action="Configure" method="post">
+    <div class="cards-group">
+         
+        <div class="card card-default">
+            <div class="card-body">
+
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="AccountSid_OverrideForStore" asp-input="AccountSid" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="AccountSid" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="AccountSid" />
+                        <span asp-validation-for="AccountSid"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="AuthToken_OverrideForStore" asp-input="AuthToken" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="AuthToken" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="AuthToken" />
+                        <span asp-validation-for="AuthToken"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="TwilioPhoneNumber_OverrideForStore" asp-input="TwilioPhoneNumber" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="TwilioPhoneNumber" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="TwilioPhoneNumber" />
+                        <span asp-validation-for="TwilioPhoneNumber"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-9">
+                        &nbsp;
+                    </div>
+                    <div class="col-md-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
