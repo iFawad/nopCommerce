@@ -97,29 +97,31 @@ namespace Nop.Plugin.Payments.Ghost.Migs
         /// Post process payment (used by payment gateways that require redirecting to a third-party URL)
         /// </summary>
         /// <param name="postProcessPaymentRequest">Payment info required for an order processing</param>
-        public Task PostProcessPaymentAsync(PostProcessPaymentRequest postProcessPaymentRequest)
+        public async Task PostProcessPaymentAsync(PostProcessPaymentRequest postProcessPaymentRequest)
         {
-            return ExecuteServerHostedCommand(postProcessPaymentRequest);
+            //await ExecuteServerHostedCommand(postProcessPaymentRequest);
 
             //nothing
             //return Task.CompletedTask;
-        }
 
-        //[HttpPost]
-        public async Task ExecuteServerHostedCommand(PostProcessPaymentRequest postProcessPaymentRequest)
-        {
             VpcClient client = new VpcClient(_migsPaymentSettings.MerchantId, _migsPaymentSettings.AccessCode, _migsPaymentSettings.HashSecret);
 
             VpcServerHostedPaymentCommand cmd = new VpcServerHostedPaymentCommand();
             cmd.ActualAmount = postProcessPaymentRequest.Order.OrderTotal;
             cmd.MerchantTxnReference = postProcessPaymentRequest.Order.OrderGuid.ToString();
             cmd.OrderInfo = postProcessPaymentRequest.Order.PaymentMethodSystemName;
-            cmd.ReturnUrl = this.GetAbsoluteUrl() + "/PaymentMigs/ServerHostedPaymentCallback";
+            cmd.ReturnUrl = this.GetAbsoluteUrl() + "/PaymentMigs/PDTHandler";
             //cmd.Locale = migsPaymentSettings.Locale;
 
             string url = client.ComputeCommand(cmd);
 
             _actionContextAccessor.ActionContext.HttpContext.Response.Redirect(url);
+        }
+
+        //[HttpPost]
+        public async Task ExecuteServerHostedCommand(PostProcessPaymentRequest postProcessPaymentRequest)
+        {
+            
             //Redirect(url);
         }
 

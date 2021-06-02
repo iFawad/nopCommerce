@@ -8,9 +8,11 @@ using Elsheimy.Components.ePayment.Migs.Web;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Nop.Core;
+using Nop.Core.Domain.Orders;
 using Nop.Plugin.Payments.Ghost.Migs.Models;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
+using Nop.Services.Logging;
 using Nop.Services.Messages;
 using Nop.Services.Orders;
 using Nop.Services.Payments;
@@ -39,6 +41,8 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
         private readonly IPaymentPluginManager _paymentPluginManager;
         private readonly IOrderService _orderService;
         private readonly ICheckoutModelFactory _checkoutModelFactory;
+        private readonly ILogger _logger;
+        private readonly IOrderProcessingService _orderProcessingService;
 
         #endregion
 
@@ -53,7 +57,9 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             IWorkContext workContext,
             IPaymentPluginManager paymentPluginManager,
             IOrderService orderService,
-            ICheckoutModelFactory checkoutModelFactory)
+            ICheckoutModelFactory checkoutModelFactory,
+            ILogger logger,
+            IOrderProcessingService orderProcessingService)
         {
             _languageService = languageService;
             _localizationService = localizationService;
@@ -65,6 +71,8 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             _paymentPluginManager = paymentPluginManager;
             _orderService = orderService;
             _checkoutModelFactory = checkoutModelFactory;
+            _logger = logger;
+            _orderProcessingService = orderProcessingService;
         }
 
         #endregion
@@ -167,7 +175,7 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             return await Configure();
         }
 
-        public async Task<IActionResult> ServerHostedPaymentCallback()
+        public async Task<IActionResult> PDTHandler()
         {
             var queryParameters = HttpContext.Request.Query.Select(a => new QueryParameter(a.Key, a.Value));
             List<QueryParameter> paramList = new List<QueryParameter>();
@@ -180,7 +188,7 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             VpcPaymentResult result = new VpcPaymentResult();
             result.LoadParameters(paramList);
 
-
+            //For Adding to order note.
             TempData["QueryParams"] = JsonConvert.SerializeObject(result, Formatting.Indented);
 
             var customer = await _workContext.GetCurrentCustomerAsync();
@@ -189,34 +197,69 @@ namespace Nop.Plugin.Payments.Ghost.Migs.Controllers
             if (!_paymentPluginManager.IsPluginActive(paymentMethod) || paymentMethod is not MigsPaymentProcessor plugin)
                 throw new NopException($"{"Payments.Ghost.Migs"} error. Module cannot be loaded");
 
-            //var orderId = await plugin.HandleTransactionAsync(result);
-            //if (!orderId.HasValue)
-            //    throw new NopException($"{"Payments.Ghost.Migs"} error. Order not found");
-
-            if(result.TxnResponseCode != "0")
-            {
-                //return View();
-                //something failed, redisplay form
-                //var paymenInfoModel = await _checkoutModelFactory.PreparePaymentInfoModelAsync(paymentMethod);
-                //return Json(new
-                //{
-                //    update_section = new UpdateSectionJsonModel
-                //    {
-                //        name = "payment-info",
-                //        html = await RenderPartialViewToStringAsync("OpcPaymentInfo", paymenInfoModel)
-                //    }
-                //});
-                //return Content(await _localizationService.GetResourceAsync("Checkout.RedirectMessage"));
-                
-                return RedirectToRoute("CheckoutOnePage");
-                //return RedirectToRoute("CheckoutPaymentMethod");
-            }
-
             //get the order
             var order = (await _orderService.SearchOrdersAsync(storeId: (await _storeContext.GetCurrentStoreAsync()).Id,
             customerId: (await _workContext.GetCurrentCustomerAsync()).Id, pageSize: 1)).FirstOrDefault();
 
+            if (order == null)
+                return RedirectToAction("Index", "Home", new { area = string.Empty });
+
+            //Transaction failed at payment Gateway.
+            if (result.TxnResponseCode != "0")
+            {
+                //order note
+                await _orderService.InsertOrderNoteAsync(new OrderNote
+                {
+                    OrderId = order.Id,
+                    Note = "Migs PDT failed. " + TempData["QueryParams"].ToString(),
+                    DisplayToCustomer = false,
+                    CreatedOnUtc = DateTime.UtcNow
+                });
+
+                return RedirectToRoute("CheckoutCompleted", new { orderId = order.Id });
+            }
+
+            //order note
+            await _orderService.InsertOrderNoteAsync(new OrderNote
+            {
+                OrderId = order.Id,
+                Note = TempData["QueryParams"].ToString(),
+                DisplayToCustomer = false,
+                CreatedOnUtc = DateTime.UtcNow
+            });
+
+            //Check if total amount returned is same as actual order amount.
+            if(order.OrderTotal != result.ActualAmount)
+            {
+                var errorStr = $"Migs PDT. Returned order total {result.ActualAmount} doesn't equal order total {order.OrderTotal}. Order# {order.Id}.";
+                //log
+                await _logger.ErrorAsync(errorStr);
+                //order note
+                await _orderService.InsertOrderNoteAsync(new OrderNote
+                {
+                    OrderId = order.Id,
+                    Note = errorStr,
+                    DisplayToCustomer = false,
+                    CreatedOnUtc = DateTime.UtcNow
+                });
+
+                return RedirectToAction("Index", "Home", new { area = string.Empty });
+            }
+
+            //Check Payment Status
+            if (!result.IsApproved)
+                return RedirectToRoute("CheckoutCompleted", new { orderId = order.Id });
+
+            if (!_orderProcessingService.CanMarkOrderAsPaid(order))
+                return RedirectToRoute("CheckoutCompleted", new { orderId = order.Id });
+
+            //mark order as paid
+            order.AuthorizationTransactionId = result.AuthorizeId;
+            await _orderService.UpdateOrderAsync(order);
+            await _orderProcessingService.MarkOrderAsPaidAsync(order);
+
             return RedirectToRoute("CheckoutCompleted", new { orderId = order.Id });
+
             //return RedirectToAction(nameof(Results));
         }
 
