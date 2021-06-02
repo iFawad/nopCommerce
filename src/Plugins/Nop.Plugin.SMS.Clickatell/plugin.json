@@ -1,0 +1,11 @@
+﻿{
+  "Group": "SMS providers",
+  "FriendlyName": "Clickatell SMS Provider",
+  "SystemName": "SMS.Clickatell",
+  "Version": "2.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Fawad A. Khan",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.SMS.Clickatell.dll",
+  "Description": "This plugin allows to integrate with Clickatell. A store owner can receive SMS messages when a customer places an order"
+}
