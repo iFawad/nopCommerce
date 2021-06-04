@@ -71,15 +71,26 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components
             if(existingProductCategories.Count < 1)
                 return Content("");
 
-            products = products.Where(product => 
-                existingProductCategories.All(productCategory => 
-                productCategory.ProductId == product.Id))
-                .ToList();
+            //var filteredProducts = products.Where(product =>
+            //    existingProductCategories.All(productCategory =>
+            //    productCategory.ProductId == product.Id))
+            //    .ToList();
 
-            if (!products.Any())
+            //var filteredProducts =
+            //    from product in products
+            //    where existingProductCategories.All(productCategory =>
+            //    productCategory.ProductId == product.Id)
+            //    select product;
+
+            var filteredProducts = products.Join(existingProductCategories, product => 
+            product.Id, existingProductCategory => 
+            existingProductCategory.ProductId, (product, existingProductCategory) => 
+            product);
+
+            if (!filteredProducts.Any())
                 return Content("");
 
-            viewModel.Products = (await _productModelFactory.PrepareProductOverviewModelsAsync(products, true, true)).ToList();
+            viewModel.Products = (await _productModelFactory.PrepareProductOverviewModelsAsync(filteredProducts, true, true)).ToList();
 
             //Get Settings
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
