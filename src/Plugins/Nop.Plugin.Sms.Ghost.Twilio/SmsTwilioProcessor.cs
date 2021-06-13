@@ -78,7 +78,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
             {
                 SystemName = "Sms.Ghost.Twilio",
                 Title = "Sms accounts",
-                ControllerName = "SmsTwilioController",
+                ControllerName = @"Admin/SmsTwilio",
                 ActionName = "ConfigureSmsAccounts",
                 Visible = true,
                 IconClass = "far fa-dot-circle",

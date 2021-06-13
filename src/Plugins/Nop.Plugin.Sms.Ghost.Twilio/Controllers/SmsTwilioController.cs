@@ -120,11 +120,8 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
             var smsTwilioSettings = await _settingService.LoadSettingAsync<SmsTwilioSettings>(storeScope);
 
-            var model = new ConfigurationModel
-            {
-                ActiveStoreScopeConfiguration = storeScope
-            };
-            return View("~/Plugins/Sms.Ghost.Twilio/Views/ConfigureSmsAccounts.cshtml", model);
+            var model = new SmsAccountSearchModel();
+            return View("~/Plugins/Sms.Ghost.Twilio/Views/List.cshtml", model);
         }
 
         #endregion
