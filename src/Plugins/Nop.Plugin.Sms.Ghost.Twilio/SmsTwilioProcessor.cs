@@ -77,7 +77,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
         {
             var menuItem = new SiteMapNode()
             {
-                SystemName = "Sms.Ghost.Twilio",
+                SystemName = "Sms aacounts",
                 Title = "Sms accounts",
                 ControllerName = @"SmsTwilio",
                 ActionName = "ConfigureSmsAccounts",

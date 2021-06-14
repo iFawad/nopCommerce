@@ -9,7 +9,7 @@ using Nop.Plugin.Sms.Ghost.Twilio.Domain.Messages;
 
 namespace Nop.Plugin.Sms.Ghost.Twilio.Services
 {
-    public class SmsAccountService : ISmsAccountService
+    public class SmsAccountService :  ISmsAccountService
     {
         #region Fields
 

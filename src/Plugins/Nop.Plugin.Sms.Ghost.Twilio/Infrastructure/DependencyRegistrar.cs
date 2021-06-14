@@ -8,6 +8,7 @@ using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
 using Nop.Plugin.Sms.Ghost.Twilio.Services;
+using Nop.Services.Messages;
 
 namespace Nop.Plugin.Sms.Ghost.Twilio.Infrastructure
 {
@@ -26,6 +27,12 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Infrastructure
         /// <param name="appSettings">App settings</param>
         public virtual void Register(IServiceCollection services, ITypeFinder typeFinder, AppSettings appSettings)
         {
+            //register custom services
+            services.AddScoped<TwilioSmsManager>();
+
+            //override service
+            services.AddScoped<IWorkflowMessageService, SmsService>();
+
             services.AddScoped<ISmsAccountService, SmsAccountService>();
         }
     }
