@@ -65,6 +65,9 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
 
             var model = new ConfigurationModel
             {
+                AccountSid = smsTwilioSettings.AccountSid,
+                AuthToken = smsTwilioSettings.AuthToken,
+                TwilioPhoneNumber = smsTwilioSettings.TwilioPhoneNumber,
                 ActiveStoreScopeConfiguration = storeScope
             };
 

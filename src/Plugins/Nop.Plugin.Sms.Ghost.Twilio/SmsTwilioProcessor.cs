@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Routing;
 using Nop.Core;
 using Nop.Core.Domain.Seo;
+using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Plugins;
@@ -13,7 +14,7 @@ using Nop.Web.Framework.Menu;
 
 namespace Nop.Plugin.Sms.Ghost.Twilio
 {
-    public class SmsTwilioProcessor : BasePlugin, IPlugin, IAdminMenuPlugin
+    public class SmsTwilioProcessor : BasePlugin, IPlugin, IAdminMenuPlugin, IMiscPlugin
     {
         private readonly ISettingService _settingService;
         private readonly IWebHelper _webHelper;
@@ -78,11 +79,11 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
             {
                 SystemName = "Sms.Ghost.Twilio",
                 Title = "Sms accounts",
-                ControllerName = @"Admin/SmsTwilio",
+                ControllerName = @"SmsTwilio",
                 ActionName = "ConfigureSmsAccounts",
                 Visible = true,
                 IconClass = "far fa-dot-circle",
-                RouteValues = new RouteValueDictionary() { { "area", null } },
+                RouteValues = new RouteValueDictionary() { { "area", "Admin" } },
             };
             var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Configuration");
             if (pluginNode != null)
@@ -106,7 +107,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
 
             //locales
 
-            await _localizationService.DeleteLocaleResourcesAsync("Plugins.Sms.Ghost.Twilio");
+            await _localizationService.DeleteLocaleResourcesAsync("Plugin.Sms.Ghost.Twilio");
             await base.UninstallAsync();
         }
     }
