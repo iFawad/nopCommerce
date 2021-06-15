@@ -139,6 +139,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
             if (messageTemplate == null)
                 throw new ArgumentNullException(nameof(messageTemplate));
 
+            var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
             var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.Body, languageId);
             var bodyReplaced = _tokenizer.Replace(body, tokens, true);
 
@@ -159,11 +160,20 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
             //get Customer
             var customer = await _customerService.GetCustomerByEmailAsync(customerEmail);
 
+            //get customer generic attributes for Phone number
+            var keyGroup = customer.GetType().Name;
+            var props = (await _genericAttributeService.GetAttributesForEntityAsync(customer.Id, keyGroup))
+                .Where(x => x.StoreId == storeScope)
+                .ToList();
+            //Get phone number
+            var phoneNumber = props.FirstOrDefault(prop =>
+            prop.Key.ToLower() == "Phone".ToLower()).Value;
+
             //get customer Address for Phone number
-            var address = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);
+            //var address = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);
 
             //try to send SMS
-            await _twilioSmsManager.SendSMSAsync(address.PhoneNumber, bodyReplaced);
+            await _twilioSmsManager.SendSMSAsync(phoneNumber, bodyReplaced);
 
             //send base notification
             return await base.SendNotificationAsync(messageTemplate, emailAccount, languageId, tokens,

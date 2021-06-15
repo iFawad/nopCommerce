@@ -23,6 +23,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
         private readonly IStoreContext _storeContext;
         private readonly IAddressService _addressService;
         private readonly ICustomerService _customerService;
+        private readonly IGenericAttributeService _genericAttributeService;
         private readonly TwilioSmsManager _twilioSmsManager;
 
         #endregion
@@ -34,6 +35,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             IStoreContext storeContext,
             IAddressService addressService,
             ICustomerService customerService,
+            IGenericAttributeService genericAttributeService,
             TwilioSmsManager twilioSmsManager)
         {
             _notificationService = notificationService;
@@ -41,6 +43,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             _storeContext = storeContext;
             _addressService = addressService;
             _customerService = customerService;
+            _genericAttributeService = genericAttributeService;
             _twilioSmsManager = twilioSmsManager;
         }
 
@@ -64,14 +67,24 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             if (HttpContext.Request.Headers["x-tawk-signature"].ToString() != smsTwilioSettings.Hmac)
                 return;
 
+            var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
+
             //get Admin
             var customer = await _customerService.GetCustomerByEmailAsync(smsTwilioSettings.AdminEmail);
 
-            //get customer Address for Phone number
-            var address = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);
+            //get customer generic attributes for Phone number
+            var keyGroup = customer.GetType().Name;
+            var props = (await _genericAttributeService.GetAttributesForEntityAsync(customer.Id, keyGroup))
+                .Where(x => x.StoreId == storeScope)
+                .ToList();
+            //Get phone number
+            var phoneNumber = props.FirstOrDefault(prop =>
+            prop.Key.ToLower() == "Phone".ToLower()).Value;
+
+            //var address = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);
 
             //try to send SMS
-            await _twilioSmsManager.SendSMSAsync(address.PhoneNumber, "Chat started on: Friends Smoke & Vapor.");
+            await _twilioSmsManager.SendSMSAsync(phoneNumber, "Chat started on: Friends Smoke & Vapor.");
         }
 
         #endregion
