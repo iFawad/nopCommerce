@@ -87,8 +87,18 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Controllers
                     Value = category.Id.ToString(),
                     Text = category.Name
                 };
+                if (category.Id == comingSoonProductsSettings.CategoryId)
+                    item.Selected = true;
                 model.AvailableCategories.Add(item);
             }
+
+            //model.AvailableCategories.Where(category =>
+            //category.Value == comingSoonProductsSettings.CategoryId.ToString())
+            //    .Select(c =>
+            //    {
+            //        c.Selected = true;
+            //        return c;
+            //    });
 
             if (storeScope > 0)
             {
