@@ -1,15 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Routing;
 using Nop.Core;
 using Nop.Core.Domain.Seo;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Plugins;
+using Nop.Web.Framework.Menu;
 
 namespace Nop.Plugin.Sms.Ghost.Twilio
 {
-    public class SmsTwilioProcessor : BasePlugin, IPlugin, IMiscPlugin//, IAdminMenuPlugin
+    public class SmsTwilioProcessor : BasePlugin, IPlugin, IMiscPlugin, IAdminMenuPlugin
     {
         private readonly ISettingService _settingService;
         private readonly IWebHelper _webHelper;
@@ -87,27 +90,26 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
             await base.UninstallAsync();
         }
 
-        //public Task ManageSiteMapAsync(SiteMapNode rootNode)
-        //{
-        //    var menuItem = new SiteMapNode()
-        //    {
-        //        SystemName = "Sms aacounts",
-        //        Title = "Sms accounts",
-        //        ControllerName = @"SmsTwilio",
-        //        ActionName = "ConfigureSmsAccounts",
-        //        Visible = true,
-        //        IconClass = "far fa-dot-circle",
-        //        RouteValues = new RouteValueDictionary() { { "area", "Admin" } },
-        //    };
-        //    var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Configuration");
-        //    if (pluginNode != null)
-        //        pluginNode.ChildNodes.Add(menuItem);
-        //    else
-        //        rootNode.ChildNodes.Add(menuItem);
+        public Task ManageSiteMapAsync(SiteMapNode rootNode)
+        {
+            var menuItem = new SiteMapNode()
+            {
+                SystemName = "Sms aacount",
+                Title = "Sms account",
+                ControllerName = "SmsTwilio",
+                ActionName = "Configure",
+                Visible = true,
+                IconClass = "far fa-dot-circle",
+                RouteValues = new RouteValueDictionary() { { "area", "Admin" } },
+            };
+            var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Configuration");
+            if (pluginNode != null)
+                pluginNode.ChildNodes.Add(menuItem);
+            else
+                rootNode.ChildNodes.Add(menuItem);
 
-        //    return Task.CompletedTask;
-        //}
-
+            return Task.CompletedTask;
+        }
 
     }
 }

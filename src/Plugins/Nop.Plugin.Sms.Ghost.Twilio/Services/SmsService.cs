@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Nop.Core;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Messages;
+using Nop.Core.Domain.Orders;
 using Nop.Core.Events;
 using Nop.Services.Affiliates;
 using Nop.Services.Catalog;
@@ -24,10 +26,13 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
         #region Fields
 
         private readonly IEmailAccountService _emailAccountService;
+        private readonly IEventPublisher _eventPublisher;
         private readonly IAddressService _addressService;
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IQueuedEmailService _queuedEmailService;
         private readonly ISettingService _settingService;
+        private readonly IStoreContext _storeContext;
+        private readonly IStoreService _storeService;
         private readonly ICustomerService _customerService;
         private readonly ITokenizer _tokenizer;
         private readonly IMessageTokenProvider _messageTokenProvider;
@@ -77,10 +82,13 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
                 tokenizer)
         {
             _emailAccountService = emailAccountService;
+            _eventPublisher = eventPublisher;
             _addressService = addressService;
             _genericAttributeService = genericAttributeService;
             _queuedEmailService = queuedEmailService;
             _settingService = settingService;
+            _storeContext = storeContext;
+            _storeService = storeService;
             _customerService = customerService;
             _tokenizer = tokenizer;
             _messageTokenProvider = messageTokenProvider;
@@ -133,6 +141,10 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
 
             var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.Body, languageId);
             var bodyReplaced = _tokenizer.Replace(body, tokens, true);
+
+            //Remove Html tags for Sms
+            Regex regex = new Regex("\\<[^\\>]*\\>");
+            bodyReplaced = regex.Replace(bodyReplaced, string.Empty);
 
             //extract Order.CustomerEmail token
             var customerEmailToken = tokens.Where(token =>
