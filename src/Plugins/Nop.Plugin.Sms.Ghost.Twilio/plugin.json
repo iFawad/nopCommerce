@@ -1,0 +1,11 @@
+{
+  "Group": "SMS providers",
+  "FriendlyName": "SMS Service for Twilio",
+  "SystemName": "Sms.Ghost.Twilio",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Sms.Ghost.Twilio.dll",
+  "Description": "SMS Integration using servies by Twilio"
+}
