@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Services.Configuration;
 using Nop.Services.Logging;
@@ -62,7 +63,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
                     from: new PhoneNumber(smsTwilioSettings.TwilioPhoneNumber), //  From number, must be an SMS-enabled Twilio number ( This will send sms from ur "To" numbers ).  
                     body: text);
                 
-                await _logger.InformationAsync($"Twilio SMS sent: {message.ToString()}");
+                await _logger.InformationAsync($"Twilio SMS sent: {JsonConvert.SerializeObject(message)}");
             }
             catch (Exception exception)
             {
