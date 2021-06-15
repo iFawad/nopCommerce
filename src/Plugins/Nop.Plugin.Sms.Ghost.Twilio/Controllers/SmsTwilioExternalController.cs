@@ -55,7 +55,9 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
         public async Task Notify()
         {
             var smsTwilioSettings = await _settingService.LoadSettingAsync<SmsTwilioSettings>();
-
+            //Check if service is enabled.
+            if (!smsTwilioSettings.Enabled)
+                return;
             //Verify HMAC
             if (!HttpContext.Request.Headers.ContainsKey("x-tawk-signature"))
                 return;
@@ -63,7 +65,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
                 return;
 
             //get Admin
-            var customer = await _customerService.GetCustomerByIdAsync(1);
+            var customer = await _customerService.GetCustomerByEmailAsync(smsTwilioSettings.AdminEmail);
 
             //get customer Address for Phone number
             var address = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);

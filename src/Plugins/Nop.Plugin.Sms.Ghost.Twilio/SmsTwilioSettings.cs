@@ -12,6 +12,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
         public string AccountSid { get; set; }
         public string AuthToken { get; set; }
         public string TwilioPhoneNumber { get; set; }
+        public string AdminEmail { get; set; }
         public string Hmac { get; set; }
         public bool Enabled { get; set; }
     }

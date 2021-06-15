@@ -24,6 +24,10 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Models
         public string TwilioPhoneNumber { get; set; }
         public bool TwilioPhoneNumber_OverrideForStore { get; set; }
 
+        [NopResourceDisplayName("Plugin.Sms.Ghost.Twilio.AdminEmail")]
+        public string AdminEmail { get; set; }
+        public bool AdminEmail_OverrideForStore { get; set; }
+
         [NopResourceDisplayName("Plugin.Sms.Ghost.Twilio.Hmac")]
         public string Hmac { get; set; }
         public bool Hmac_OverrideForStore { get; set; }
