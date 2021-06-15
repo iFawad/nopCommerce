@@ -1,0 +1,11 @@
+{
+  "Group": "Widgets",
+  "FriendlyName": "Confirmation Modal",
+  "SystemName": "Widgets.Ghost.ConfirmationModal",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.Ghost.ConfirmationModal.dll",
+  "Description": "Displays a confirmation modal on first visit."
+}

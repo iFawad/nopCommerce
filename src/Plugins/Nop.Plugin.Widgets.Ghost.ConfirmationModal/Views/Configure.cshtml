@@ -1,0 +1,70 @@
+﻿
+@model Nop.Plugin.Widgets.Ghost.ConfirmationModal.Models.ConfigurationModel
+@using Nop.Web.Framework;
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+
+
+<form asp-controller="ConfirmationModal" asp-action="Configure" method="post">
+    <div class="cards-group">
+         
+        <div class="card card-default">
+            <div class="card-body">
+
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="Topic_OverrideForStore" asp-input="Topic" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="Topic" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="Topic" />
+                        <span asp-validation-for="Topic"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="Title_OverrideForStore" asp-input="Title" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="Title" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="Title" />
+                        <span asp-validation-for="Title"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="YesText_OverrideForStore" asp-input="YesText" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="YesText" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="YesText" />
+                        <span asp-validation-for="YesText"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="NoText_OverrideForStore" asp-input="NoText" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="NoText" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="NoText" />
+                        <span asp-validation-for="NoText"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-9">
+                        &nbsp;
+                    </div>
+                    <div class="col-md-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

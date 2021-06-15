@@ -73,7 +73,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Widgets.Ghost.Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Payments.Ghost.Migs", "Plugins\Nop.Plugin.Payments.Migs\Nop.Plugin.Payments.Ghost.Migs.csproj", "{749877E9-1AA8-4790-BECC-3D023B70919C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Sms.Ghost.Twilio", "Plugins\Nop.Plugin.Sms.Ghost.Twilio\Nop.Plugin.Sms.Ghost.Twilio.csproj", "{F2415214-0109-4705-BCA9-B1614C16DF2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Sms.Ghost.Twilio", "Plugins\Nop.Plugin.Sms.Ghost.Twilio\Nop.Plugin.Sms.Ghost.Twilio.csproj", "{F2415214-0109-4705-BCA9-B1614C16DF2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Widgets.Ghost.ConfirmationModal", "Plugins\Nop.Plugin.Widgets.Ghost.ConfirmationModal\Nop.Plugin.Widgets.Ghost.ConfirmationModal.csproj", "{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -445,6 +447,18 @@ Global
 		{F2415214-0109-4705-BCA9-B1614C16DF2F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F2415214-0109-4705-BCA9-B1614C16DF2F}.Release|x86.ActiveCfg = Release|Any CPU
 		{F2415214-0109-4705-BCA9-B1614C16DF2F}.Release|x86.Build.0 = Release|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Debug|x86.Build.0 = Debug|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Release|x86.ActiveCfg = Release|Any CPU
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -482,6 +496,7 @@ Global
 		{C4095824-55CC-47B6-9816-37E9E4AC2ADE} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{749877E9-1AA8-4790-BECC-3D023B70919C} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 		{F2415214-0109-4705-BCA9-B1614C16DF2F} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
+		{467EE408-C12E-4AAF-85C3-80C3FE05F6FA} = {7881B112-7843-4542-B1F7-F99553FB9BB7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EE72A8B2-332A-4175-9319-6726D36E9D25}
