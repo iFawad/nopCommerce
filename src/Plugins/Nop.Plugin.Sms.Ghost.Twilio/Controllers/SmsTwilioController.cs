@@ -68,6 +68,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
                 AccountSid = smsTwilioSettings.AccountSid,
                 AuthToken = smsTwilioSettings.AuthToken,
                 TwilioPhoneNumber = smsTwilioSettings.TwilioPhoneNumber,
+                Enabled = smsTwilioSettings.Enabled,
                 ActiveStoreScopeConfiguration = storeScope
             };
 
@@ -76,6 +77,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
                 model.AccountSid_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.AccountSid, storeScope);
                 model.AuthToken_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.AuthToken, storeScope);
                 model.TwilioPhoneNumber_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.TwilioPhoneNumber, storeScope);
+                model.Enabled_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.Enabled, storeScope);
             }
 
             return View("~/Plugins/Sms.Ghost.Twilio/Views/Configure.cshtml", model);
@@ -98,6 +100,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             smsTwilioSettings.AccountSid = model.AccountSid;
             smsTwilioSettings.AuthToken = model.AuthToken;
             smsTwilioSettings.TwilioPhoneNumber = model.TwilioPhoneNumber;
+            smsTwilioSettings.Enabled = model.Enabled;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
@@ -105,6 +108,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.AccountSid, model.AccountSid_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.AuthToken, model.AuthToken_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.TwilioPhoneNumber, model.TwilioPhoneNumber_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
@@ -112,19 +116,6 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Plugins.Saved"));
 
             return await Configure();
-        }
-
-        public async Task<IActionResult> ConfigureSmsAccounts()
-        {
-            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageWidgets))
-                return AccessDeniedView();
-
-            //load settings for a chosen store scope
-            var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-            var smsTwilioSettings = await _settingService.LoadSettingAsync<SmsTwilioSettings>(storeScope);
-
-            var model = new SmsAccountSearchModel();
-            return View("~/Plugins/Sms.Ghost.Twilio/Views/List.cshtml", model);
         }
 
         #endregion

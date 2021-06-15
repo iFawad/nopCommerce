@@ -41,16 +41,12 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
         /// Send SMS 
         /// </summary>
         /// <param name="to">Phone number of the receiver</param>
-        /// <param name="from">Name of sender</param>
         /// <param name="text">Text</param>
         /// <returns>A task that represents the asynchronous operation</returns>
         public async Task SendSMSAsync(string to, string text)
         {
-            //whether SMS notifications enabled
             var smsTwilioSettings = await _settingService.LoadSettingAsync<SmsTwilioSettings>();
-            //if (!smsTwilioSettings.UseSmsNotifications)
-            //    return;
-
+            
             try
             {
                 //check number and text

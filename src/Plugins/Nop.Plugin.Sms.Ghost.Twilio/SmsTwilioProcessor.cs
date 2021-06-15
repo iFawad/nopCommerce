@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Routing;
 using Nop.Core;
 using Nop.Core.Domain.Seo;
 using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Plugins;
-using Nop.Web.Framework.Menu;
 
 namespace Nop.Plugin.Sms.Ghost.Twilio
 {
-    public class SmsTwilioProcessor : BasePlugin, IPlugin, IAdminMenuPlugin, IMiscPlugin
+    public class SmsTwilioProcessor : BasePlugin, IPlugin, IMiscPlugin//, IAdminMenuPlugin
     {
         private readonly ISettingService _settingService;
         private readonly IWebHelper _webHelper;
@@ -50,14 +45,12 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
         public override async Task InstallAsync()
         {
             // Adding Meta Tags.
-
             var customHeadTags = _seoSettings.CustomHeadTags;
             var finalCustomHeadTags = customHeadTags + "<meta name=\"referrer\"content=\"no-referrer-when-downgrade\">";
             _seoSettings.CustomHeadTags = finalCustomHeadTags;
 
             await _settingService.SaveSettingAsync(_seoSettings, x => x.CustomHeadTags);
             await _settingService.ClearCacheAsync();
-
 
             await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
@@ -66,32 +59,13 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
                 ["Plugin.Sms.Ghost.Twilio.AuthToken"] = "Auth Token:",
                 ["Plugin.Sms.Ghost.Twilio.AuthToken.Hint"] = "Auth Token provided by Twilio",
                 ["Plugin.Sms.Ghost.Twilio.TwilioPhoneNumber"] = "Twilio Phone Number:",
-                ["Plugin.Sms.Ghost.Twilio.TwilioPhoneNumber.Hint"] = "Phone number provided by Twilio to send SMS messages from."
+                ["Plugin.Sms.Ghost.Twilio.TwilioPhoneNumber.Hint"] = "Phone number provided by Twilio to send SMS messages from.",
+                ["Plugin.Sms.Ghost.Twilio.Enabled"] = "Enabled:",
+                ["Plugin.Sms.Ghost.Twilio.Enabled.Hint"] = "Identifies if SMS service is enabled."
             });
 
 
             await base.InstallAsync();
-        }
-
-        public Task ManageSiteMapAsync(SiteMapNode rootNode)
-        {
-            var menuItem = new SiteMapNode()
-            {
-                SystemName = "Sms aacounts",
-                Title = "Sms accounts",
-                ControllerName = @"SmsTwilio",
-                ActionName = "ConfigureSmsAccounts",
-                Visible = true,
-                IconClass = "far fa-dot-circle",
-                RouteValues = new RouteValueDictionary() { { "area", "Admin" } },
-            };
-            var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Configuration");
-            if (pluginNode != null)
-                pluginNode.ChildNodes.Add(menuItem);
-            else
-                rootNode.ChildNodes.Add(menuItem);
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -101,14 +75,35 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
         {
             // Deleting Meta Tags
 
-
             //settings
             await _settingService.DeleteSettingAsync<SmsTwilioSettings>();
 
             //locales
-
             await _localizationService.DeleteLocaleResourcesAsync("Plugin.Sms.Ghost.Twilio");
             await base.UninstallAsync();
         }
+
+        //public Task ManageSiteMapAsync(SiteMapNode rootNode)
+        //{
+        //    var menuItem = new SiteMapNode()
+        //    {
+        //        SystemName = "Sms aacounts",
+        //        Title = "Sms accounts",
+        //        ControllerName = @"SmsTwilio",
+        //        ActionName = "ConfigureSmsAccounts",
+        //        Visible = true,
+        //        IconClass = "far fa-dot-circle",
+        //        RouteValues = new RouteValueDictionary() { { "area", "Admin" } },
+        //    };
+        //    var pluginNode = rootNode.ChildNodes.FirstOrDefault(x => x.SystemName == "Configuration");
+        //    if (pluginNode != null)
+        //        pluginNode.ChildNodes.Add(menuItem);
+        //    else
+        //        rootNode.ChildNodes.Add(menuItem);
+
+        //    return Task.CompletedTask;
+        //}
+
+
     }
 }

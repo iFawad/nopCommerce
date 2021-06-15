@@ -24,6 +24,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
         #region Fields
 
         private readonly IEmailAccountService _emailAccountService;
+        private readonly IAddressService _addressService;
         private readonly IGenericAttributeService _genericAttributeService;
         private readonly IQueuedEmailService _queuedEmailService;
         private readonly ISettingService _settingService;
@@ -76,6 +77,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
                 tokenizer)
         {
             _emailAccountService = emailAccountService;
+            _addressService = addressService;
             _genericAttributeService = genericAttributeService;
             _queuedEmailService = queuedEmailService;
             _settingService = settingService;
@@ -115,52 +117,46 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
             string replyToEmailAddress = null, string replyToName = null, string fromEmail = null, string fromName = null,
             string subject = null)
         {
+            var smsTwilioSettings = await _settingService.LoadSettingAsync<SmsTwilioSettings>();
+
+            //Check if service is enabled.
+            if (!smsTwilioSettings.Enabled)
+            {
+                //send base notification
+                return await base.SendNotificationAsync(messageTemplate, emailAccount, languageId, tokens,
+                    toEmailAddress, toName, attachmentFilePath, attachmentFileName,
+                    replyToEmailAddress, replyToName, fromEmail, fromName, subject);
+            }
+
             if (messageTemplate == null)
                 throw new ArgumentNullException(nameof(messageTemplate));
 
             var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.Body, languageId);
             var bodyReplaced = _tokenizer.Replace(body, tokens, true);
 
-            //extract Customer email from token Order.CustomerEmail
-            var customerToken = tokens.Where(token =>
+            //extract Order.CustomerEmail token
+            var customerEmailToken = tokens.Where(token =>
             token.Key == "Order.CustomerEmail").FirstOrDefault();
 
-            if(customerToken == null)
-                throw new ArgumentNullException(nameof(customerToken));
+            if(customerEmailToken == null)
+                throw new ArgumentNullException(nameof(customerEmailToken));
 
-            string customerEmail = customerToken.Value.ToString();
+            //Customer email from CustomerEmail token
+            var customerEmail = customerEmailToken.Value.ToString();
 
             //get Customer
             var customer = await _customerService.GetCustomerByEmailAsync(customerEmail);
 
-            //get customer Phone number
+            //get customer Address for Phone number
+            var address = await _addressService.GetAddressByIdAsync((int)customer.ShippingAddressId);
 
-            //tokens
-            //var commonTokens = new List<Token>();
-            //await _messageTokenProvider.AddCustomerTokensAsync(commonTokens, customer);
-
-            //try to send SMS notification
-            await SendSmsNotificationAsync("+9234424973033", bodyReplaced , tokens);
-
+            //try to send SMS
+            await _twilioSmsManager.SendSMSAsync(address.PhoneNumber, bodyReplaced);
 
             //send base notification
             return await base.SendNotificationAsync(messageTemplate, emailAccount, languageId, tokens,
                 toEmailAddress, toName, attachmentFilePath, attachmentFileName,
                 replyToEmailAddress, replyToName, fromEmail, fromName, subject);
-        }
-
-        /// <summary>
-        /// Send SMS notification by message template
-        /// </summary>
-        /// <param name="messageTemplate">Message template</param>
-        /// <param name="tokens">Tokens</param>
-        /// <returns>A task that represents the asynchronous operation</returns>
-        private async Task SendSmsNotificationAsync(string toNumber, string messageText, IEnumerable<Token> tokens)
-        {
-            var text = messageText;
-
-            //try to send SMS
-            await _twilioSmsManager.SendSMSAsync(toNumber, text);
         }
 
         #endregion

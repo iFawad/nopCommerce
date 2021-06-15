@@ -23,5 +23,9 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Models
         [NopResourceDisplayName("Plugin.Sms.Ghost.Twilio.TwilioPhoneNumber")]
         public string TwilioPhoneNumber { get; set; }
         public bool TwilioPhoneNumber_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Plugin.Sms.Ghost.Twilio.Enabled")]
+        public bool Enabled { get; set; }
+        public bool Enabled_OverrideForStore { get; set; }
     }
 }
