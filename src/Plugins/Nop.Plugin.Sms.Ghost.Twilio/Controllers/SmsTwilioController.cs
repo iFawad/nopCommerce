@@ -68,6 +68,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
                 AccountSid = smsTwilioSettings.AccountSid,
                 AuthToken = smsTwilioSettings.AuthToken,
                 TwilioPhoneNumber = smsTwilioSettings.TwilioPhoneNumber,
+                Hmac = smsTwilioSettings.Hmac,
                 Enabled = smsTwilioSettings.Enabled,
                 ActiveStoreScopeConfiguration = storeScope
             };
@@ -77,6 +78,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
                 model.AccountSid_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.AccountSid, storeScope);
                 model.AuthToken_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.AuthToken, storeScope);
                 model.TwilioPhoneNumber_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.TwilioPhoneNumber, storeScope);
+                model.Hmac_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.Hmac, storeScope);
                 model.Enabled_OverrideForStore = await _settingService.SettingExistsAsync(smsTwilioSettings, x => x.Enabled, storeScope);
             }
 
@@ -100,6 +102,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             smsTwilioSettings.AccountSid = model.AccountSid;
             smsTwilioSettings.AuthToken = model.AuthToken;
             smsTwilioSettings.TwilioPhoneNumber = model.TwilioPhoneNumber;
+            smsTwilioSettings.Hmac = model.Hmac;
             smsTwilioSettings.Enabled = model.Enabled;
 
             /* We do not clear cache after each setting update.
@@ -108,6 +111,7 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Controllers
             await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.AccountSid, model.AccountSid_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.AuthToken, model.AuthToken_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.TwilioPhoneNumber, model.TwilioPhoneNumber_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.Hmac, model.Hmac_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(smsTwilioSettings, x => x.Enabled, model.Enabled_OverrideForStore, storeScope, false);
 
             //now clear settings cache

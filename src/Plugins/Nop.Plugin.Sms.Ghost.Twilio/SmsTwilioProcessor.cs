@@ -60,6 +60,8 @@ namespace Nop.Plugin.Sms.Ghost.Twilio
                 ["Plugin.Sms.Ghost.Twilio.AuthToken.Hint"] = "Auth Token provided by Twilio",
                 ["Plugin.Sms.Ghost.Twilio.TwilioPhoneNumber"] = "Twilio Phone Number:",
                 ["Plugin.Sms.Ghost.Twilio.TwilioPhoneNumber.Hint"] = "Phone number provided by Twilio to send SMS messages from.",
+                ["Plugin.Sms.Ghost.Twilio.Hmac"] = "HMAC:",
+                ["Plugin.Sms.Ghost.Twilio.Hmac.Hint"] = "Secret key provided by Tawk.to for Start chat event Web hook.",
                 ["Plugin.Sms.Ghost.Twilio.Enabled"] = "Enabled:",
                 ["Plugin.Sms.Ghost.Twilio.Enabled.Hint"] = "Identifies if SMS service is enabled."
             });
