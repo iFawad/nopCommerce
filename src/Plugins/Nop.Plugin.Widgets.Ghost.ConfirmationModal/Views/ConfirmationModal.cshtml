@@ -7,13 +7,13 @@
 <script asp-location="Footer">
     //Age verification popup.
     jQuery(document).ready(function ($) {
-        var settings = @Html.Raw(Json.Encode(Model));
+        var settings = JSON.parse('@Html.Raw(Json.Serialize(Model))');
         var topic = settings.Topic;
         var title = settings.Title;
         var yesText = settings.YesText;
         var noText = settings.NoText;
         if (localStorage.getItem('advertOnce') !== 'true') {
-            displayPopupContentFromUrlYesNoAgeVerification('@Url.RouteUrl("TopicPopup", new {SystemName = Model.Topic})', title, yesText, noText, true);
+            displayPopupContentFromUrlYesNoAgeVerification('@Url.RouteUrl("TopicPopup", new {SystemName = Model.Topic})', title, true, yesText, noText);
         }
     });
 </script>
