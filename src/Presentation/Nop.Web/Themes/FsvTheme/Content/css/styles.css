@@ -73,6 +73,7 @@ script {
 :root {
   --main: #525252;
   --main-shadow: #767676;
+  --main-shadow-light: #919191;
   --main-contrast-white: #fff;
   --main-contrast-black: #000;
   --accent: #8ffe0c;
@@ -270,7 +271,7 @@ label, label + * {
 .news-body p {
   margin: 10px 0;
   text-align: justify;
-  color: #fff;
+  color: var(--main-contrast-white);
 }
 
 .flyout-cart {
@@ -304,7 +305,7 @@ label, label + * {
 .form-fields {
   position: relative;
   border-top: 1px solid #e6e6e6;
-  background-color: #f9f9f9;
+  background-color: var(--main-shadow);
   padding: 30px 15px;
 }
 
@@ -328,7 +329,7 @@ label, label + * {
     margin: 0 0 10px;
     text-align: center;
     font-size: 14px; /*reset zeroing*/
-    color: #444;
+    color: var(--main-contrast-white);
   }
 
   .inputs input[type="text"],
@@ -967,7 +968,7 @@ label, label + * {
   .header-links a {
     display: inline-block;
     font-size: 12px; /*reset zeroing*/
-    color: #fff;
+    color: var(--main-contrast-white);
     line-height: 36px;
     text-transform: uppercase;
   }
@@ -1140,7 +1141,7 @@ label, label + * {
 
     .footer-block .title strong {
       font-weight: normal;
-      color: #fff;
+      color: var(--main-contrast-white);
     }
 
   .footer-block .list {
@@ -1535,6 +1536,7 @@ label, label + * {
     .breadcrumb li * {
       display: inline-block;
       margin: 0 5px;
+      color: var(--main-contrast-black);
       font-size: 14px; /*reset zeroing*/
       line-height: 32px;
       .overview .short-description
@@ -3569,7 +3571,7 @@ label, label + * {
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
-  color: #fff;
+  color: var(--main-contrast-black);
   text-transform: uppercase;
 }
 
@@ -3661,7 +3663,7 @@ label, label + * {
   .login-page .new-wrapper .text {
     margin: 0 0 30px;
     border-top: 1px solid #e6e6e6;
-    background-color: #f9f9f9;
+    background-color: var(--main-shadow);
     padding: 30px;
     line-height: 22px;
   }
@@ -3696,7 +3698,7 @@ label, label + * {
       width: auto;
       margin: 5px;
       font-size: 14px; /*reset zeroing*/
-      color: #444;
+      color: var(--main-contrast-white);
     }
 
     .login-page .returning-wrapper .inputs.reversed a:hover,
@@ -3709,7 +3711,7 @@ label, label + * {
 }
 
 .login-page .returning-wrapper .buttons {
-  background-color: #fff;
+  background-color: var(--main-shadow-light);
   padding: 30px 0;
 }
 
@@ -7843,7 +7845,7 @@ pre {
     z-index: 100;
     width: 300px;
     box-shadow: 0 0 2px rgba(0,0,0,0.25);
-    background-color: #fff;
+    background-color: var(--main-shadow);
   }
 
     .flyout-cart.active {
@@ -8040,7 +8042,7 @@ pre {
     position: absolute;
     width: 200px;
     box-shadow: 0 0 2px rgba(0,0,0,0.2);
-    background-color: #fff;
+    background-color: var(--main-shadow-light);
     padding: 10px 0;
     text-align: left;
   }
@@ -8054,7 +8056,7 @@ pre {
         position: relative;
         padding: 10px 20px 10px 30px;
         font-size: 14px;
-        color: #444;
+        color: var(--main-contrast-black);
       }
 
         .header-menu .sublist li a:before {
@@ -8069,7 +8071,7 @@ pre {
 
       .header-menu .sublist li:hover > a,
       .header-menu .sublist li:focus > a {
-        background-color: #f6f6f6;
+        background-color: var(--accent);
       }
 
   .header-menu ul li:hover > .sublist,
