@@ -74,13 +74,13 @@ script {
 body {
   max-width: 100%;
   overflow-x: hidden;
-  background-color: #ddd;
+  background-color: #525252;
   font: normal 14px Arial, Helvetica, sans-serif;
   color: #333;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #444;
+  color: #fff;
 }
 
 a {
@@ -257,6 +257,7 @@ label, label + * {
 .news-body p {
   margin: 10px 0;
   text-align: justify;
+  color: #fff;
 }
 
 .flyout-cart {
@@ -284,6 +285,7 @@ label, label + * {
     .fieldset .title strong,
     .section .title strong {
       font-weight: normal;
+      color: #fff;
     }
 
 .form-fields {
@@ -952,6 +954,7 @@ label, label + * {
   .header-links a {
     display: inline-block;
     font-size: 12px; /*reset zeroing*/
+    color: #fff;
     line-height: 36px;
     text-transform: uppercase;
   }
@@ -966,7 +969,7 @@ label, label + * {
   width: 70%;
   max-width: 400px;
   margin: 10px auto 0;
-  background-color: #f6f6f6;
+  background-color: #767676;
   padding: 0 20px;
 }
 
@@ -1019,10 +1022,10 @@ label, label + * {
   min-width: 86px;
   height: 36px;
   border: none;
-  background-color: #83df08;
+  background-color: #8ffe0c;
   padding: 0 15px;
   text-align: center;
-  color: #fff;
+  color: #000;
   text-transform: uppercase;
 }
 
@@ -1093,7 +1096,7 @@ label, label + * {
 
 
 .footer {
-  background-color: #eee;
+  background-color: #767676;
   text-align: center;
 }
 
@@ -1124,6 +1127,7 @@ label, label + * {
 
     .footer-block .title strong {
       font-weight: normal;
+      color: #fff;
     }
 
   .footer-block .list {
@@ -1131,6 +1135,7 @@ label, label + * {
     margin: 0 0 20px;
     background-color: #fff;
     padding: 10px 15px;
+    color: #fff;
   }
 
     .footer-block .list a {
@@ -1216,10 +1221,10 @@ label, label + * {
   float: left;
   height: 36px;
   border: none;
-  background-color: #83df08;
+  background-color: #8ffe0c;
   padding: 0 15px;
   text-align: center;
-  color: #fff;
+  color: #000;
   text-transform: uppercase;
 }
 
@@ -1325,7 +1330,7 @@ label, label + * {
     position: relative;
     padding: 5px 0;
     font-size: 16px;
-    color: #444;
+    color: #fff;
     -webkit-transition: all 0.1s ease;
     transition: all 0.1s ease;
   }
@@ -1502,7 +1507,7 @@ label, label + * {
 
 .breadcrumb {
   margin: 0 0 50px;
-  background-color: #f6f6f6;
+  background-color: #8ffe0c;
   padding: 5px 10px;
 }
 
@@ -1519,6 +1524,7 @@ label, label + * {
       margin: 0 5px;
       font-size: 14px; /*reset zeroing*/
       line-height: 32px;
+      .overview .short-description
     }
 
   .breadcrumb strong {
@@ -1580,6 +1586,7 @@ label, label + * {
   .product-selectors span {
     vertical-align: middle;
     font-size: 16px;
+    color: #fff;
   }
 
   .product-selectors select {
@@ -1791,7 +1798,7 @@ label, label + * {
   .item-box .actual-price {
     margin: 0 5px 0 0;
     font-size: 16px;
-    color: #666;
+    color: #fff;
   }
 
   .item-box .tax-shipping-info a {
@@ -1817,10 +1824,10 @@ label, label + * {
 
   .item-box .product-box-add-to-cart-button {
     width: 60%;
-    background-color: #83df08;
+    background-color: #8ffe0c;
     text-align: center;
     font-size: 15px;
-    color: #fff;
+    color: #000;
     text-transform: uppercase;
   }
 
@@ -1915,6 +1922,7 @@ label, label + * {
 
     .product-grid .title strong {
       font-weight: normal;
+      color: #fff;
     }
 
 .manufacturer-grid .title {
@@ -2114,7 +2122,7 @@ label, label + * {
   .overview .short-description {
     margin: 0 0 25px;
     line-height: 22px;
-    color: #666;
+    color: #fff;
   }
 
 .product-no-reviews,
@@ -2125,6 +2133,7 @@ label, label + * {
 
   .product-no-reviews a {
     text-decoration: underline;
+    color: #fff;
   }
 
 .product-review-box {
@@ -2154,7 +2163,7 @@ label, label + * {
 
 .overview .value,
 .variant-overview .value {
-  color: #444;
+  color: #fff;
 }
 
   .overview .value a,
@@ -2305,6 +2314,7 @@ label, label + * {
     .overview .prices > div > span,
     .variant-overview .prices > div > span {
       vertical-align: middle;
+      color: #fff;
     }
 
 .overview .old-product-price,
@@ -2423,10 +2433,10 @@ label, label + * {
 .variant-overview .add-to-cart-button {
   height: 43px;
   border: none;
-  background-color: #83df08;
+  background-color: #8ffe0c;
   padding: 0 24px;
   font-size: 15px;
-  color: #fff;
+  color: #000;
   text-transform: uppercase;
 }
 
@@ -3148,7 +3158,7 @@ label, label + * {
 
   .wishlist-content .update-wishlist-button,
   .wishlist-content .wishlist-add-to-cart-button {
-    background-color: #83df08;
+    background-color: #8ffe0c;
     text-transform: uppercase;
   }
 
@@ -3416,7 +3426,7 @@ label, label + * {
 .apply-vendor-page .button-1 {
   min-width: 140px;
   border: none;
-  background-color: #83df08;
+  background-color: #8ffe0c;
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
@@ -3542,7 +3552,7 @@ label, label + * {
 .return-request-page .button-1 {
   min-width: 140px;
   border: none;
-  background-color: #83df08;
+  background-color: #8ffe0c;
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
@@ -3628,6 +3638,7 @@ label, label + * {
 
   .login-page .title strong {
     font-weight: normal;
+    color: #fff;
   }
 
 .login-page .new-wrapper {
@@ -4104,7 +4115,7 @@ label, label + * {
     }
 
     .shopping-cart-page .common-buttons button:first-child {
-      background-color: #83df08;
+      background-color: #8ffe0c;
     }
 
       .shopping-cart-page .common-buttons button:first-child:hover,
@@ -4257,10 +4268,10 @@ label, label + * {
   display: inline-block;
   min-width: 160px;
   border: none;
-  background-color: #83df08;
+  background-color: #8ffe0c;
   padding: 10px 20px;
   font-size: 16px;
-  color: #fff;
+  color: #000;
   text-transform: uppercase;
 }
 
@@ -4308,6 +4319,7 @@ label, label + * {
 
     .cart-collaterals .title strong {
       font-weight: normal;
+      color: #fff;
     }
 
   .cart-collaterals .hint {
@@ -4634,6 +4646,7 @@ label, label + * {
     .product-estimate-shipping .shipping-title .shipping-price {
       margin-left: 5px;
       vertical-align: middle;
+      color: #fff;
     }
 
     .product-estimate-shipping .shipping-title .shipping-loading {
@@ -4687,7 +4700,7 @@ label, label + * {
   display: inline-block;
   min-width: 140px;
   border: none;
-  background-color: #83df08;
+  background-color: #8ffe0c;
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
@@ -4949,7 +4962,7 @@ label, label + * {
 }
 
 .opc .allow .step-title {
-  background-color: #83df08;
+  background-color: #8ffe0c;
   cursor: pointer;
 }
 
@@ -5081,7 +5094,7 @@ label, label + * {
     }
 
     .order-details-page .page-title a.print-order-button {
-      background-color: #83df08;
+      background-color: #8ffe0c;
     }
 
       .order-details-page .page-title a.print-order-button:hover,
@@ -5191,7 +5204,7 @@ label, label + * {
     }
 
     .order-details-page .actions button:first-child {
-      background-color: #83df08;
+      background-color: #8ffe0c;
     }
 
       .order-details-page .actions button:first-child:hover,
@@ -7276,6 +7289,7 @@ pre {
     .cart-footer .cart-collaterals div,
     .cart-footer .cart-collaterals label {
       text-align: left;
+      color: #fff;
     }
 
   .cart-footer .estimate-shipping label {
@@ -7918,10 +7932,10 @@ pre {
     .mini-shopping-cart button[type="button"] {
       display: inline-block;
       border: none;
-      background-color: #83df08;
+      background-color: #8ffe0c;
       padding: 10px 20px;
       font-size: 12px;
-      color: #fff;
+      color: #000;
       text-transform: uppercase;
     }
 
@@ -7998,7 +8012,7 @@ pre {
         padding: 5px 10px;
         line-height: 20px;
         font-size: 17px; /*reset zeroing*/
-        color: #555;
+        color: #fff;
         cursor: pointer;
       }
 
@@ -8125,12 +8139,14 @@ pre {
   .footer-info {
     float: right;
     line-height: 32px;
+    color: #fff;
   }
 
   .footer-powered-by {
     float: left;
     margin: 0;
     line-height: 32px;
+    color: #fff;
   }
 
   .theme-selector {
@@ -8157,6 +8173,7 @@ pre {
 
       .block .title strong {
         font-weight: bold;
+        color: #fff;
       }
 
     .block .listbox {
