@@ -78,6 +78,7 @@ script {
   --main-contrast-black: #000;
   --accent: #8ffe0c;
   --accent-shadow: #42ce24;
+  --border: var(--accent);
 }
 
 
@@ -206,7 +207,7 @@ label, label + * {
 .page-title {
   min-height: 50px;
   margin: 0 0 25px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border);
   padding: 6px 10px;
 }
 
@@ -900,7 +901,7 @@ label, label + * {
 .header-upper {
   position: relative;
   z-index: 1;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border);
 }
 
 .header-selectors-wrapper {
@@ -1117,7 +1118,7 @@ label, label + * {
 .footer-upper {
   width: 95%;
   margin: auto;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border);
   overflow: hidden;
   padding: 40px 0;
   font-size: 0;
@@ -1177,7 +1178,7 @@ label, label + * {
 
   .follow-us .social ul {
     margin: 0 0 30px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border);
     padding: 0 0 30px;
     font-size: 0;
   }
@@ -1578,8 +1579,8 @@ label, label + * {
 
 .product-selectors {
   margin: 0 0 20px;
-  border-top: 1px solid #333;
-  border-bottom: 1px solid #333;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   padding: 20px 0;
 }
 
@@ -1631,7 +1632,7 @@ label, label + * {
 
 .product-filter .filter-content {
   padding: 10px;
-  color: #444;
+  color: var(--main-contrast-white);
 }
 
 .product-filter .group {
@@ -1928,7 +1929,7 @@ label, label + * {
 
   .product-grid .title {
     margin: 0 0 30px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border);
     padding: 0 0 15px;
     font-size: 30px;
     font-weight: normal;
@@ -2046,7 +2047,7 @@ label, label + * {
 
 .product-essential {
   margin: 0 0 40px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border);
   padding: 0 0 10px;
 }
 
@@ -2125,7 +2126,7 @@ label, label + * {
 
   .overview .product-name {
     margin: 0 0 25px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--border);
     padding: 0 0 10px;
   }
 
@@ -3336,7 +3337,7 @@ label, label + * {
 .topic-block-title {
   min-height: 50px;
   margin: 0 0 25px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border);
   padding: 0 0 15px;
 }
 
@@ -3445,7 +3446,7 @@ label, label + * {
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
-  color: #fff;
+  color: var(--main-contrast-black);
   text-transform: uppercase;
 }
 
@@ -4195,7 +4196,7 @@ label, label + * {
 
 .cart-footer {
   margin: 0 0 50px;
-  border-top: 1px solid #333;
+  border-top: 1px solid var(--border);
 }
 
   .cart-footer:after {
@@ -4720,7 +4721,7 @@ label, label + * {
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
-  color: #fff;
+  color: var(--main-contrast-black);
   text-transform: uppercase;
 }
 
@@ -4780,7 +4781,7 @@ label, label + * {
   .checkout-page .pickup-in-store .selector {
     margin: 0 0 5px;
     font-weight: bold;
-    color: #444;
+    color: var(--main-contrast-white);
   }
 
 .select-pickup-point {
@@ -4825,7 +4826,7 @@ label, label + * {
     .payment-method .method-list li label {
       font-size: 13px;
       font-weight: bold;
-      color: #444;
+      color: var(--main-contrast-black);
     }
 
 .shipping-method .method-description {
@@ -4835,7 +4836,7 @@ label, label + * {
 .payment-method .use-reward-points {
   margin: 0 0 30px;
   text-align: center;
-  color: #444;
+  color: var(--main-contrast-white);
 }
 
 .payment-method .payment-logo {
@@ -4858,7 +4859,7 @@ label, label + * {
 
 .payment-info .info {
   padding: 30px 15px;
-  color: #444;
+  color: var(--main-contrast-white);
 }
 
   .payment-info .info tr {
@@ -4913,7 +4914,7 @@ label, label + * {
   width: 350px;
   max-width: 100%;
   margin: 0 auto 40px;
-  background-color: #f9f9f9;
+  background-color: var(--main-shadow-light);
   padding: 20px;
   color: #444;
 }
@@ -4974,7 +4975,7 @@ label, label + * {
 .opc .step-title {
   margin: 0 0 1px;
   overflow: hidden;
-  background-color: #f6f6f6;
+  background-color: var(--main-shadow);
 }
 
 .opc .allow .step-title {
@@ -4994,7 +4995,7 @@ label, label + * {
 
 .opc .allow .step-title .number,
 .opc .allow .step-title .title {
-  color: #fff;
+  color: var(--main-contrast-black);
   cursor: pointer;
 }
 
@@ -5045,7 +5046,7 @@ label, label + * {
     margin: 0 0 0 -15px;
     background: url('../images/back-button.png') left center no-repeat;
     padding: 0 0 0 18px;
-    color: #444;
+    color: var(--main-contrast-white);
   }
 
     .opc .back-link a:hover,
@@ -7992,8 +7993,8 @@ pre {
     z-index: 5;
     width: 980px;
     margin: 0 auto 30px;
-    border-top: 1px solid #333;
-    border-bottom: 1px solid #333;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     padding: 25px 0;
     text-align: center;
   }
@@ -8014,7 +8015,7 @@ pre {
 
     .header-menu > ul > li {
       display: inline-block;
-      border-left: 1px solid #ddd;
+      border-left: 1px solid var(--border);
       padding: 0 15px;
       vertical-align: middle;
     }
