@@ -15,6 +15,7 @@ using Nop.Services.Common;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Localization;
+using Nop.Services.Logging;
 using Nop.Services.Messages;
 using Nop.Services.Orders;
 using Nop.Services.Stores;
@@ -37,6 +38,8 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
         private readonly ITokenizer _tokenizer;
         private readonly IMessageTokenProvider _messageTokenProvider;
         private readonly ILocalizationService _localizationService;
+        private readonly ILogger _logger;
+        private readonly IWorkContext _workContext;
         private readonly TwilioSmsManager _twilioSmsManager;
 
         #endregion
@@ -53,6 +56,8 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
             IGenericAttributeService genericAttributeService,
             ILanguageService languageService,
             ILocalizationService localizationService,
+            ILogger logger,
+            IWorkContext workContext,
             IMessageTemplateService messageTemplateService,
             IMessageTokenProvider messageTokenProvider,
             IOrderService orderService,
@@ -93,6 +98,8 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
             _tokenizer = tokenizer;
             _messageTokenProvider = messageTokenProvider;
             _localizationService = localizationService;
+            _logger = logger;
+            _workContext = workContext;
             _twilioSmsManager = twilioSmsManager;
         }
 
@@ -149,15 +156,24 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
 
             //extract Order.CustomerEmail token
             var customerEmailToken = tokens.Where(token =>
-            token.Key == "Order.CustomerEmail").FirstOrDefault();
+            token.Key == "Order.CustomerEmail"
+            || token.Key == "Customer.Email").FirstOrDefault();
 
-            if(customerEmailToken == null)
-                throw new ArgumentNullException(nameof(customerEmailToken));
+            if (customerEmailToken == null)
+            {
+                await _logger.InformationAsync($"Twilio SMS not sent: Customer email not found from token.", null, await _workContext.GetCurrentCustomerAsync());
+                //send base notification
+                return await base.SendNotificationAsync(messageTemplate, emailAccount, languageId, tokens,
+                    toEmailAddress, toName, attachmentFilePath, attachmentFileName,
+                    replyToEmailAddress, replyToName, fromEmail, fromName, subject);
+            }
 
             //Customer email from CustomerEmail token
             var customerEmail = customerEmailToken.Value.ToString();
+            //var customerEmailAccount = await GetEmailAccountOfMessageTemplateAsync(messageTemplate, languageId);
 
             //get Customer
+            //var customer = await _workContext.GetCurrentCustomerAsync();
             var customer = await _customerService.GetCustomerByEmailAsync(customerEmail);
 
             //get customer generic attributes for Phone number
