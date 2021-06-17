@@ -3446,7 +3446,7 @@ label, label + * {
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
-  color: #fff;
+  color: var(--main-contrast-black);
   text-transform: uppercase;
 }
 
