@@ -1,0 +1,8 @@
+﻿
+@model Nop.Plugin.Widgets.Ghost.WholeSeller.WholeSellerSettings
+@using Nop.Web.Framework;
+@using Nop.Core.Domain.Customers
+@inject Nop.Core.IWebHelper webHelper
+@{
+    <li><a href="@Url.RouteUrl(Model.Url)" class="ico-account">@T(Model.Title)</a></li>
+}

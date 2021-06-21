@@ -1,0 +1,50 @@
+﻿
+@model Nop.Plugin.Widgets.Ghost.WholeSeller.Models.ConfigurationModel
+@using Nop.Web.Framework;
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+
+
+<form asp-controller="WholeSeller" asp-action="Configure" method="post">
+    <div class="cards-group">
+         
+        <div class="card card-default">
+            <div class="card-body">
+
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="Title_OverrideForStore" asp-input="Title" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="Title" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="Title" />
+                        <span asp-validation-for="Title"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="Url_OverrideForStore" asp-input="Url" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="Url" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="Url" />
+                        <span asp-validation-for="Url"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-9">
+                        &nbsp;
+                    </div>
+                    <div class="col-md-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
