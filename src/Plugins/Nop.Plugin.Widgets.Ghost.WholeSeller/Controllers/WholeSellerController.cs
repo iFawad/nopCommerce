@@ -63,7 +63,7 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller.Controllers
             var model = new ConfigurationModel
             {
                 Title = wholeSellerSettings.Title,
-                Url = wholeSellerSettings.Url,
+                RouteUrl = wholeSellerSettings.RouteUrl,
                 ActiveStoreScopeConfiguration = storeScope
             };
 
@@ -71,7 +71,7 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller.Controllers
             if (storeScope > 0)
             {
                 model.Title_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.Title, storeScope);
-                model.Url_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.Url, storeScope);
+                model.RouteUrl_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.RouteUrl, storeScope);
             }
 
             return View("~/Plugins/Widgets.Ghost.WholeSeller/Views/Configure.cshtml", model);
@@ -92,13 +92,13 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller.Controllers
 
             //save settings
             wholeSellerSettings.Title = model.Title;
-            wholeSellerSettings.Url = model.Url;
+            wholeSellerSettings.RouteUrl = model.RouteUrl;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
              * and loaded from database after each update */
             await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.Title, model.Title_OverrideForStore, storeScope, false);
-            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.Url, model.Url_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.RouteUrl, model.RouteUrl_OverrideForStore, storeScope, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();

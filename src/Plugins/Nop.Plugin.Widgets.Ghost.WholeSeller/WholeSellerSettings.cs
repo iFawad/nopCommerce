@@ -10,6 +10,6 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller
     public class WholeSellerSettings : ISettings
     {
         public string Title { get; set; }
-        public string Url { get; set; }
+        public string RouteUrl { get; set; }
     }
 }

@@ -4,5 +4,5 @@
 @using Nop.Core.Domain.Customers
 @inject Nop.Core.IWebHelper webHelper
 @{
-    <li><a href="@Url.RouteUrl(Model.Url)" class="ico-account">@T(Model.Title)</a></li>
+    <li><a href="@Url.RouteUrl(Model.RouteUrl)" class="ico-account">@Model.Title</a></li>
 }

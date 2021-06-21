@@ -16,8 +16,8 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller.Models
         public string Title { get; set; }
         public bool Title_OverrideForStore { get; set; }
 
-        [NopResourceDisplayName("Plugin.Widgets.Ghost.WholeSeller.Url")]
-        public string Url { get; set; }
-        public bool Url_OverrideForStore { get; set; }
+        [NopResourceDisplayName("Plugin.Widgets.Ghost.WholeSeller.RouteUrl")]
+        public string RouteUrl { get; set; }
+        public bool RouteUrl_OverrideForStore { get; set; }
     }
 }

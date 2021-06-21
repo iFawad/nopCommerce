@@ -74,8 +74,8 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller
             {
                 ["Plugin.Widgets.Ghost.WholeSeller.Title"] = "Title:",
                 ["Plugin.Widgets.Ghost.WholeSeller.Title.Hint"] = "Name to be displayed in header menu.",
-                ["Plugin.Widgets.Ghost.WholeSeller.Url"] = "URL:",
-                ["Plugin.Widgets.Ghost.WholeSeller.Url.Hint"] = "URL link to the whole seller page."
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrl"] = "RouteUrl:",
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrl.Hint"] = "RouteUrl link to the whole seller page."
             });
 
 
