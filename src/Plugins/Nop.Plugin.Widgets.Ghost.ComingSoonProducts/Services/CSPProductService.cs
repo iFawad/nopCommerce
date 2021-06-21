@@ -43,7 +43,7 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Services
                        where p.Published &&
                              !p.Deleted
                        select p;
-            }, cache => cache.PrepareKeyForDefaultCache(NopCatalogDefaults.ProductsHomepageCacheKey));
+            });//, cache => cache.PrepareKeyForDefaultCache(NopCatalogDefaults.ProductsHomepageCacheKey));
 
             return products;
         }
