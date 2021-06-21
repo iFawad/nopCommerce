@@ -71,6 +71,7 @@ script {
 
 
 :root {
+  --accent1: #ff0;
   --main: #525252;
   --main-shadow: #767676;
   --main-shadow-light: #919191;
@@ -78,7 +79,23 @@ script {
   --main-contrast-black: #000;
   --accent: #8ffe0c;
   --accent-shadow: #42ce24;
+  --bar: var(--accent);
+  --bar-off: var(--main-shadow);
+  --bar-shadow: var(--accent-shadow);
   --border: var(--accent);
+  --button: var(--accent);
+  --button-hover: var(--accent-shadow);
+  --button-text: var(--main-contrast-black);
+  --button-text-hover: var(--main-contrast-black);
+  --link: var(--accent);
+  --link-text: var(--accent);
+  --link-text-hover: var(--accent-shadow);
+  --text: var(--main-contrast-white);
+  --text-black: var(--main-contrast-black);
+  --text-accent: var(--accent);
+  --menu-link-text: var(--main-contrast-white);
+  --menu-link-text-hover: var(--accent);
+  --label-error: var(--accent);
 }
 
 
@@ -164,7 +181,7 @@ label, label + * {
 }
 
 .label {
-  color: var(--main-contrast-white);
+  color: var(--text-accent);
 }
 
 .master-wrapper-content {
@@ -300,7 +317,7 @@ label, label + * {
     .fieldset .title strong,
     .section .title strong {
       font-weight: normal;
-      color: #fff;
+      color: var(--text-accent);
     }
 
 .form-fields {
@@ -377,7 +394,7 @@ label, label + * {
   vertical-align: top;
   font-size: 20px;
   font-weight: normal;
-  color: #e4434b;
+  color: var(--label-error);
 }
 
 .message-error,
@@ -387,7 +404,7 @@ label, label + * {
   display: block;
   text-align: center;
   font-size: 13px;
-  color: #e4434b;
+  color: var(--label-error);
   margin-top: 5px;
 }
 
@@ -446,7 +463,7 @@ label, label + * {
   border-width: 1px 1px 0;
   border-style: solid;
   border-color: #ddd;
-  background-color: #f6f6f6;
+  background-color: var(--bar-off);
   padding: 10px;
   white-space: nowrap;
   font-weight: normal;
@@ -531,7 +548,7 @@ label, label + * {
   .data-table .product a:focus,
   .data-table .info a:hover,
   .data-table .info a:focus {
-    color: var(--accent-shadow);
+    color: var(--link-text-hover);
     text-decoration: none;
   }
 
@@ -969,14 +986,14 @@ label, label + * {
   .header-links a {
     display: inline-block;
     font-size: 12px; /*reset zeroing*/
-    color: var(--main-contrast-white);
+    color: var(--text);
     line-height: 36px;
     text-transform: uppercase;
   }
 
     .header-links a:hover,
     .header-links a:focus {
-      color: var(--accent);
+      color: var(--link-text);
     }
 
 #topcartlink {
@@ -1037,16 +1054,16 @@ label, label + * {
   min-width: 86px;
   height: 36px;
   border: none;
-  background-color: var(--accent);
+  background-color: var(--button);
   padding: 0 15px;
   text-align: center;
-  color: #000;
+  color: var(--button-text);
   text-transform: uppercase;
 }
 
   .search-box .search-box-button:hover,
   .search-box .search-box-button:focus {
-    background-color: var(--accent-shadow);
+    background-color: var(--button-hover);
   }
 
 .search-box .ui-autocomplete-loading {
@@ -1161,7 +1178,7 @@ label, label + * {
 
       .footer-block .list a:hover,
       .footer-block .list a:focus {
-        color: var(--accent);
+        color: var(--link);
       }
 
 .follow-us {
@@ -1236,16 +1253,16 @@ label, label + * {
   float: left;
   height: 36px;
   border: none;
-  background-color: var(--accent);
+  background-color: var(--button);
   padding: 0 15px;
   text-align: center;
-  color: #000;
+  color: var(--button-text);
   text-transform: uppercase;
 }
 
   .newsletter-subscribe-button:hover,
   .newsletter-subscribe-button:focus {
-    background-color: var(--accent-shadow);
+    background-color: var(--button-hover);
   }
 
 .newsletter-email .options {
@@ -1361,12 +1378,12 @@ label, label + * {
     }
 
   .block .list .active > a {
-    color: var(--accent);
+    color: var(--link);
   }
 
   .block .list a:hover,
   .block .list a:focus {
-    color: var(--accent);
+    color: var(--link);
   }
 
   .block a.product-picture {
@@ -1522,7 +1539,7 @@ label, label + * {
 
 .breadcrumb {
   margin: 0 0 50px;
-  background-color: var(--accent);
+  background-color: var(--bar);
   padding: 5px 10px;
 }
 
@@ -1758,7 +1775,7 @@ label, label + * {
     font-size: 17px;
     line-height: 1.2;
     font-weight: normal;
-    color: var(--accent);
+    color: var(--link-text);
   }
 
     .item-box .product-title a {
@@ -1767,7 +1784,7 @@ label, label + * {
 
       .item-box .product-title a:hover,
       .item-box .product-title a:focus {
-        color: var(--accent-shadow);
+        color: var(--link-text-hover);
       }
 
   .item-box .sku {
@@ -1840,7 +1857,7 @@ label, label + * {
 
   .item-box .product-box-add-to-cart-button {
     width: 60%;
-    background-color: var(--accent);
+    background-color: var(--button);
     text-align: center;
     font-size: 15px;
     color: #000;
@@ -1849,7 +1866,7 @@ label, label + * {
 
     .item-box .product-box-add-to-cart-button:hover,
     .item-box .product-box-add-to-cart-button:focus {
-      background-color: var(--accent-shadow);
+      background-color: var(--button-hover);
     }
 
   .item-box .add-to-compare-list-button,
@@ -2449,7 +2466,7 @@ label, label + * {
 .variant-overview .add-to-cart-button {
   height: 43px;
   border: none;
-  background-color: var(--accent);
+  background-color: var(--button);
   padding: 0 24px;
   font-size: 15px;
   color: #000;
@@ -2460,7 +2477,7 @@ label, label + * {
   .overview .add-to-cart-button:focus,
   .variant-overview .add-to-cart-button:hover,
   .variant-overview .add-to-cart-button:focus {
-    background-color: var(--accent-shadow);
+    background-color: var(--button-hover);
   }
 
 .product-share-button {
@@ -3442,11 +3459,11 @@ label, label + * {
 .apply-vendor-page .button-1 {
   min-width: 140px;
   border: none;
-  background-color: var(--accent);
+  background-color: var(--button);
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
-  color: var(--main-contrast-black);
+  color: var(--button-text);
   text-transform: uppercase;
 }
 
@@ -3456,7 +3473,7 @@ label, label + * {
   .email-a-friend-page .button-1:focus,
   .apply-vendor-page .button-1:hover,
   .apply-vendor-page .button-1:focus {
-    background-color: #248ece;
+    background-color: var(--button-hover);
   }
 
 .contact-page .topic-block,
@@ -4131,13 +4148,13 @@ label, label + * {
     }
 
     .shopping-cart-page .common-buttons button:first-child {
-      background-color: var(--accent);
-      color: var(--main-contrast-black);
+      background-color: var(--button);
+      color: var(--button-text);
     }
 
       .shopping-cart-page .common-buttons button:first-child:hover,
       .shopping-cart-page .common-buttons button:first-child:focus {
-        background-color: var(--accent-shadow);
+        background-color: var(--button-hover);
       }
 
 .checkout-attributes {
@@ -4209,9 +4226,9 @@ label, label + * {
     width: 350px;
     max-width: 100%;
     margin: 0 auto 50px;
-    background-color: #f9f9f9;
+    background-color: var(--main-shadow-light);
     padding: 10px;
-    color: #444;
+    color: var(--text);
   }
 
   .cart-footer .total-info {
@@ -4237,7 +4254,7 @@ label, label + * {
 
 .cart-total .order-total {
   font-size: 20px;
-  color: var(--accent);
+  color: var(--text-accent);
 }
 
   .cart-total .order-total strong {
@@ -4265,7 +4282,7 @@ label, label + * {
 
   .terms-of-service a {
     margin: 0 0 0 3px;
-    color: var(--accent);
+    color: var(--text-accent);
   }
 
 .cart-footer .checkout-buttons {
@@ -4285,16 +4302,16 @@ label, label + * {
   display: inline-block;
   min-width: 160px;
   border: none;
-  background-color: var(--accent);
+  background-color: var(--button);
   padding: 10px 20px;
   font-size: 16px;
-  color: #000;
+  color: var(--button-text);
   text-transform: uppercase;
 }
 
   .cart-footer .checkout-button:hover,
   .cart-footer .checkout-button:focus {
-    background-color: var(--accent-shadow);
+    background-color: var(--button-hover);
   }
 
 .cart-footer .addon-buttons {
@@ -4717,17 +4734,17 @@ label, label + * {
   display: inline-block;
   min-width: 140px;
   border: none;
-  background-color: var(--accent);
+  background-color: var(--button);
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
-  color: var(--main-contrast-black);
+  color: var(--button-text);
   text-transform: uppercase;
 }
 
   .checkout-page .button-1:hover,
   .checkout-page .button-1:focus {
-    background-color: var(--accent-shadow);
+    background-color: var(--button-hover);
   }
 
 .checkout-page .address-item {
@@ -4916,7 +4933,7 @@ label, label + * {
   margin: 0 auto 40px;
   background-color: var(--main-shadow-light);
   padding: 20px;
-  color: #444;
+  color: var(--text);
 }
 
 .order-review-data li,
@@ -4951,7 +4968,7 @@ label, label + * {
   margin: 0 0 30px;
   padding: 30px 15px;
   text-align: center;
-  color: #444;
+  color: var(--text);
 }
 
   .order-completed .details div {
@@ -4975,11 +4992,11 @@ label, label + * {
 .opc .step-title {
   margin: 0 0 1px;
   overflow: hidden;
-  background-color: var(--main-shadow);
+  background-color: var(--bar-off);
 }
 
 .opc .allow .step-title {
-  background-color: var(--accent);
+  background-color: var(--bar);
   cursor: pointer;
 }
 
@@ -4995,7 +5012,7 @@ label, label + * {
 
 .opc .allow .step-title .number,
 .opc .allow .step-title .title {
-  color: var(--main-contrast-black);
+  color: var(--text-black);
   cursor: pointer;
 }
 
@@ -5006,7 +5023,7 @@ label, label + * {
 }
 
 .opc .allow .step-title .number {
-  background-color: var(--accent-shadow);
+  background-color: var(--bar-shadow);
 }
 
 .opc .step {
@@ -5111,12 +5128,13 @@ label, label + * {
     }
 
     .order-details-page .page-title a.print-order-button {
-      background-color: var(--accent);
+      background-color: var(--button);
+      color: var(--button-text);
     }
 
       .order-details-page .page-title a.print-order-button:hover,
       .order-details-page .page-title a.print-order-button:focus {
-        background-color: var(--accent-shadow);
+        background-color: var(--button-hover);
       }
 
 .order-details-page .order-overview {
@@ -5124,7 +5142,7 @@ label, label + * {
   line-height: 26px;
   text-align: center;
   font-size: 16px;
-  color: #444;
+  color: var(--text);
 }
 
   .order-details-page .order-overview .order-number {
@@ -5134,7 +5152,7 @@ label, label + * {
 
   .order-details-page .order-overview .order-total strong {
     font-weight: normal;
-    color: var(--accent);
+    color: var(--text-accent);
   }
 
 .order-details-page .repost .button-2 {
@@ -5221,12 +5239,13 @@ label, label + * {
     }
 
     .order-details-page .actions button:first-child {
-      background-color: var(--accent);
+      background-color: var(--button);
+      color: var(--button-text);
     }
 
       .order-details-page .actions button:first-child:hover,
       .order-details-page .actions button:first-child:focus {
-        background-color: var(--accent-shadow);
+        background-color: var(--button-hover);
       }
 
 .order-details-page .totals.section {
@@ -5284,17 +5303,17 @@ label, label + * {
 .search-input .button-1 {
   min-width: 140px;
   border: none;
-  background-color: #4ab2f1;
+  background-color: var(--button);
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
-  color: #fff;
+  color: var(--button-text);
   text-transform: uppercase;
 }
 
   .search-input .button-1:hover,
   .search-input .button-1:focus {
-    background-color: #248ece;
+    background-color: var(--button-hover);
   }
 
 .search-results {
@@ -5303,7 +5322,7 @@ label, label + * {
 
   .search-results .warning {
     margin: 10px 0;
-    color: #e4434b;
+    color: var(--label-error);
   }
 
 .sitemap-page .description {
@@ -7861,13 +7880,13 @@ pre {
 
     .mini-shopping-cart .count {
       padding: 5px 0 15px;
-      color: #444;
+      color: var(--text);
     }
 
       .mini-shopping-cart .count a {
         margin: 0 2px;
         font-weight: bold;
-        color: #444;
+        color: var(--text);
       }
 
     .mini-shopping-cart .items {
@@ -7919,12 +7938,12 @@ pre {
     }
 
       .mini-shopping-cart .name a {
-        color: var(--accent);
+        color: var(--link-text);
       }
 
         .mini-shopping-cart .name a:hover,
         .mini-shopping-cart .name a:focus {
-          color: var(--accent-shadow);
+          color: var(--link-text-hover);
         }
 
     .mini-shopping-cart .attributes {
@@ -7939,7 +7958,7 @@ pre {
 
       .mini-shopping-cart .totals strong {
         font-size: 16px;
-        color: #444;
+        color: var(--text-accent);
       }
 
     .mini-shopping-cart .buttons {
@@ -7949,16 +7968,16 @@ pre {
     .mini-shopping-cart button[type="button"] {
       display: inline-block;
       border: none;
-      background-color: var(--accent);
+      background-color: var(--button);
       padding: 10px 20px;
       font-size: 12px;
-      color: #000;
+      color: var(--button-text);
       text-transform: uppercase;
     }
 
       .mini-shopping-cart button[type="button"]:hover,
       .mini-shopping-cart button[type="button"]:focus {
-        background-color: var(--accent-shadow);
+        background-color: var(--button-hover);
       }
 
   .header-lower {
@@ -8029,13 +8048,13 @@ pre {
         padding: 5px 10px;
         line-height: 20px;
         font-size: 17px; /*reset zeroing*/
-        color: var(--main-contrast-white);
+        color: var(--menu-link-text);
         cursor: pointer;
       }
 
         .header-menu > ul > li > a:hover,
         .header-menu > ul > li > a:focus {
-          color: var(--accent);
+          color: var(--menu-link-text-hover);
         }
 
   .header-menu .sublist {
