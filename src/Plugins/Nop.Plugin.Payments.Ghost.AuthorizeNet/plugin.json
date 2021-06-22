@@ -1,0 +1,11 @@
+{
+  "Group": "Payment methods",
+  "FriendlyName": "Authorize.Net Payment",
+  "SystemName": "Payments.Ghost.AuthorizeNet",
+  "Version": "1.0",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.Ghost.AuthorizeNet.dll",
+  "Description": "This plugin enables Authorize.net payments."
+}
