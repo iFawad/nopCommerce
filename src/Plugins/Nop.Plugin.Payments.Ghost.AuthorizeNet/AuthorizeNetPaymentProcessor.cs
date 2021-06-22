@@ -216,7 +216,15 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// <returns>Payment info holder</returns>
         public Task<ProcessPaymentRequest> GetPaymentInfoAsync(IFormCollection form)
         {
-            return Task.FromResult(new ProcessPaymentRequest());
+            return Task.FromResult(new ProcessPaymentRequest
+            {
+                CreditCardType = form["CreditCardType"],
+                CreditCardName = form["CardholderName"],
+                CreditCardNumber = form["CardNumber"],
+                CreditCardExpireMonth = int.Parse(form["ExpireMonth"]),
+                CreditCardExpireYear = int.Parse(form["ExpireYear"]),
+                CreditCardCvv2 = form["CardCode"]
+            });
         }
 
         /// <summary>
@@ -241,7 +249,9 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
             var settings = new AuthorizeNetPaymentSettings
             {
                 DescriptionText = "<p>Your security is important to us. <br /> We do not store your credit card information. <br /> Online payments are passed via a secure socket layer to a payment processor</p>",
-                SkipPaymentInfo = false
+                SkipPaymentInfo = false,
+                TransactMode = TransactMode.AuthorizeAndCapture,
+                Environment = "SANDBOX"
             };
             await _settingService.SaveSettingAsync(settings);
 
@@ -303,7 +313,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// <summary>
         /// Gets a value indicating whether capture is supported
         /// </summary>
-        public bool SupportCapture => false;
+        public bool SupportCapture => true;
 
         /// <summary>
         /// Gets a value indicating whether partial refund is supported
@@ -313,12 +323,12 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// <summary>
         /// Gets a value indicating whether refund is supported
         /// </summary>
-        public bool SupportRefund => false;
+        public bool SupportRefund => true;
 
         /// <summary>
         /// Gets a value indicating whether void is supported
         /// </summary>
-        public bool SupportVoid => false;
+        public bool SupportVoid => true;
 
         /// <summary>
         /// Gets a recurring payment type of payment method
