@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AuthorizeNet.Api.Contracts.V1;
 using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
 using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Models;
+using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Services;
 using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Validators;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
@@ -21,6 +23,7 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet
         #region Fields
 
         private readonly PaymentAuthorizeNetPaymentSettings _paymentAuthorizeNetPaymentSettings;
+        private readonly IPaymentAuthorizeNetService _paymentAuthorizeNetService;
         private readonly ILocalizationService _localizationService;
         private readonly IPaymentService _paymentService;
         private readonly ISettingService _settingService;
@@ -32,6 +35,7 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet
         #region Ctor
 
         public PaymentAuthorizeNetPaymentProcessor(PaymentAuthorizeNetPaymentSettings paymentAuthorizeNetPaymentSettings,
+            PaymentAuthorizeNetService paymentAuthorizeNetService,
             ILocalizationService localizationService,
             IPaymentService paymentService,
             ISettingService settingService,
@@ -39,6 +43,7 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet
             IWebHelper webHelper)
         {
             _paymentAuthorizeNetPaymentSettings = paymentAuthorizeNetPaymentSettings;
+            _paymentAuthorizeNetService = paymentAuthorizeNetService;
             _localizationService = localizationService;
             _paymentService = paymentService;
             _settingService = settingService;
@@ -56,11 +61,11 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet
         /// </summary>
         /// <param name="processPaymentRequest">Payment info required for an order processing</param>
         /// <returns>Process payment result</returns>
-        public Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
+        public async Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
             var result = new ProcessPaymentResult
             {
-                AllowStoringCreditCardNumber = true
+                AllowStoringCreditCardNumber = false
             };
             switch (_paymentAuthorizeNetPaymentSettings.TransactMode)
             {
@@ -71,14 +76,32 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet
                     result.NewPaymentStatus = PaymentStatus.Authorized;
                     break;
                 case TransactMode.AuthorizeAndCapture:
-                    result.NewPaymentStatus = PaymentStatus.Paid;
+                    var response = await _paymentAuthorizeNetService.AuthorizeAndCaptureAsync(processPaymentRequest);
+                    if(response != null)
+                    {
+                        if(response.messages.resultCode == messageTypeEnum.Ok)
+                        {
+                            //Payment successfull. Save order and mark as paid.
+                            result.NewPaymentStatus = PaymentStatus.Paid;
+                        }
+                        else
+                        {
+                            //Payment failed. Cancel order.
+                            result.NewPaymentStatus = PaymentStatus.Pending;
+                        }
+                    }
+                    else
+                    {
+                        //Error in payment. Cancel order.
+                        result.NewPaymentStatus = PaymentStatus.Pending;
+                    }
                     break;
                 default:
                     result.AddError("Not supported transaction type");
                     break;
             }
 
-            return Task.FromResult(result);
+            return await Task.FromResult(result);
         }
 
         /// <summary>

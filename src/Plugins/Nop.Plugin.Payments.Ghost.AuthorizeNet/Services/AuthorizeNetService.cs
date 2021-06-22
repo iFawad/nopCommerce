@@ -34,7 +34,7 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Services
 
 
         #region Methods
-        public async Task<ANetApiResponse> AuthorizeAndCaptureAsync(ProcessPaymentRequest paymentInfo, decimal amount)
+        public async Task<ANetApiResponse> AuthorizeAndCaptureAsync(ProcessPaymentRequest paymentInfo)
         {
             //Console.WriteLine("Charge Credit Card Sample");
 
@@ -81,7 +81,7 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Services
             {
                 transactionType = transactionTypeEnum.authCaptureTransaction.ToString(),    // charge the card
 
-                amount = amount,
+                amount = paymentInfo.OrderTotal,
                 payment = paymentType,
                 billTo = billingAddress,
                 lineItems = lineItems
@@ -97,47 +97,47 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Services
             var response = controller.GetApiResponse();
 
             // validate response
-            if (response != null)
-            {
-                if (response.messages.resultCode == messageTypeEnum.Ok)
-                {
-                    if (response.transactionResponse.messages != null)
-                    {
-                        Console.WriteLine("Successfully created transaction with Transaction ID: " + response.transactionResponse.transId);
-                        Console.WriteLine("Response Code: " + response.transactionResponse.responseCode);
-                        Console.WriteLine("Message Code: " + response.transactionResponse.messages[0].code);
-                        Console.WriteLine("Description: " + response.transactionResponse.messages[0].description);
-                        Console.WriteLine("Success, Auth Code : " + response.transactionResponse.authCode);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Failed Transaction.");
-                        if (response.transactionResponse.errors != null)
-                        {
-                            Console.WriteLine("Error Code: " + response.transactionResponse.errors[0].errorCode);
-                            Console.WriteLine("Error message: " + response.transactionResponse.errors[0].errorText);
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Failed Transaction.");
-                    if (response.transactionResponse != null && response.transactionResponse.errors != null)
-                    {
-                        Console.WriteLine("Error Code: " + response.transactionResponse.errors[0].errorCode);
-                        Console.WriteLine("Error message: " + response.transactionResponse.errors[0].errorText);
-                    }
-                    else
-                    {
-                        Console.WriteLine("Error Code: " + response.messages.message[0].code);
-                        Console.WriteLine("Error message: " + response.messages.message[0].text);
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine("Null Response.");
-            }
+            //if (response != null)
+            //{
+            //    if (response.messages.resultCode == messageTypeEnum.Ok)
+            //    {
+            //        if (response.transactionResponse.messages != null)
+            //        {
+            //            Console.WriteLine("Successfully created transaction with Transaction ID: " + response.transactionResponse.transId);
+            //            Console.WriteLine("Response Code: " + response.transactionResponse.responseCode);
+            //            Console.WriteLine("Message Code: " + response.transactionResponse.messages[0].code);
+            //            Console.WriteLine("Description: " + response.transactionResponse.messages[0].description);
+            //            Console.WriteLine("Success, Auth Code : " + response.transactionResponse.authCode);
+            //        }
+            //        else
+            //        {
+            //            Console.WriteLine("Failed Transaction.");
+            //            if (response.transactionResponse.errors != null)
+            //            {
+            //                Console.WriteLine("Error Code: " + response.transactionResponse.errors[0].errorCode);
+            //                Console.WriteLine("Error message: " + response.transactionResponse.errors[0].errorText);
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine("Failed Transaction.");
+            //        if (response.transactionResponse != null && response.transactionResponse.errors != null)
+            //        {
+            //            Console.WriteLine("Error Code: " + response.transactionResponse.errors[0].errorCode);
+            //            Console.WriteLine("Error message: " + response.transactionResponse.errors[0].errorText);
+            //        }
+            //        else
+            //        {
+            //            Console.WriteLine("Error Code: " + response.messages.message[0].code);
+            //            Console.WriteLine("Error message: " + response.messages.message[0].text);
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    Console.WriteLine("Null Response.");
+            //}
 
             return response;
         }

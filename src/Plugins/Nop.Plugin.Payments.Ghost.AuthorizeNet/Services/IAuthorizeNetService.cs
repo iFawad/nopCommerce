@@ -10,6 +10,6 @@ namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Services
 {
     public interface IPaymentAuthorizeNetService
     {
-        Task<ANetApiResponse> AuthorizeAndCaptureAsync(ProcessPaymentRequest paymentInfo, decimal amount);
+        Task<ANetApiResponse> AuthorizeAndCaptureAsync(ProcessPaymentRequest paymentInfo);
     }
 }
