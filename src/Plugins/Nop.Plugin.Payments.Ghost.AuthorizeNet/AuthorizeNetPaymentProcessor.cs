@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
+using Nop.Core.Domain.Payments;
+using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
+using Nop.Plugin.Payments.Ghost.AuthorizeNet.Validators;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Orders;
@@ -54,7 +58,27 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// <returns>Process payment result</returns>
         public Task<ProcessPaymentResult> ProcessPaymentAsync(ProcessPaymentRequest processPaymentRequest)
         {
-            return Task.FromResult(new ProcessPaymentResult());
+            var result = new ProcessPaymentResult
+            {
+                AllowStoringCreditCardNumber = true
+            };
+            switch (_authorizeNetPaymentSettings.TransactMode)
+            {
+                case TransactMode.Pending:
+                    result.NewPaymentStatus = PaymentStatus.Pending;
+                    break;
+                case TransactMode.Authorize:
+                    result.NewPaymentStatus = PaymentStatus.Authorized;
+                    break;
+                case TransactMode.AuthorizeAndCapture:
+                    result.NewPaymentStatus = PaymentStatus.Paid;
+                    break;
+                default:
+                    result.AddError("Not supported transaction type");
+                    break;
+            }
+
+            return Task.FromResult(result);
         }
 
         /// <summary>
@@ -166,7 +190,23 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// <returns>List of validating errors</returns>
         public Task<IList<string>> ValidatePaymentFormAsync(IFormCollection form)
         {
-            return Task.FromResult<IList<string>>(new List<string>());
+            var warnings = new List<string>();
+
+            //validate
+            var validator = new PaymentInfoValidator(_localizationService);
+            var model = new PaymentInfoModel
+            {
+                CardholderName = form["CardholderName"],
+                CardNumber = form["CardNumber"],
+                CardCode = form["CardCode"],
+                ExpireMonth = form["ExpireMonth"],
+                ExpireYear = form["ExpireYear"]
+            };
+            var validationResult = validator.Validate(model);
+            if (!validationResult.IsValid)
+                warnings.AddRange(validationResult.Errors.Select(error => error.ErrorMessage));
+
+            return Task.FromResult<IList<string>>(warnings);
         }
 
         /// <summary>
@@ -222,6 +262,8 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
                 ["Plugin.Payments.Ghost.AuthorizeNet.AdditionalFeePercentage.Hint"] = "Determines whether to apply a percentage additional fee to the order total. If not enabled, a fixed value is used.",
                 ["Plugin.Payments.Ghost.AuthorizeNet.ShippableProductRequired"] = "Shippable product required",
                 ["Plugin.Payments.Ghost.AuthorizeNet.ShippableProductRequired.Hint"] = "An option indicating whether shippable products are required in order to display this payment method during checkout.",
+                ["Plugin.Payments.Ghost.AuthorizeNet.TransactMode"] = "After checkout mark payment as",
+                ["Plugin.Payments.Ghost.AuthorizeNet.TransactMode.Hint"] = "Specify transaction mode.",
                 ["Plugin.Payments.Ghost.AuthorizeNet.PaymentMethodDescription"] = "Pay by \"Credit Card\"",
                 ["Plugin.Payments.Ghost.AuthorizeNet.SkipPaymentInfo"] = "Skip payment information page",
                 ["Plugin.Payments.Ghost.AuthorizeNet.SkipPaymentInfo.Hint"] = "An option indicating whether we should display a payment information page for this plugin."

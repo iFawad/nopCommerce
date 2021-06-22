@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
+using Nop.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Messages;
@@ -64,7 +65,9 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
 
             var model = new ConfigurationModel
             {
-                DescriptionText = authorizeNetPaymentSettings.DescriptionText
+                TransactModeId = Convert.ToInt32(authorizeNetPaymentSettings.TransactMode),
+                DescriptionText = authorizeNetPaymentSettings.DescriptionText,
+                TransactModeValues = await authorizeNetPaymentSettings.TransactMode.ToSelectListAsync(),
             };
 
             //locales
@@ -86,6 +89,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
                 model.ApiLoginId_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.ApiLoginId, storeScope);
                 model.TransactionKey_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.TransactionKey, storeScope);
                 model.Environment_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.Environment, storeScope);
+                model.TransactModeId_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.TransactMode, storeScope);
                 model.DescriptionText_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.DescriptionText, storeScope);
                 model.AdditionalFee_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.AdditionalFee, storeScope);
                 model.AdditionalFeePercentage_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.AdditionalFeePercentage, storeScope);
@@ -114,6 +118,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
             authorizeNetPaymentSettings.TransactionKey = model.TransactionKey;
             authorizeNetPaymentSettings.Environment = model.Environment;
             authorizeNetPaymentSettings.DescriptionText = model.DescriptionText;
+            authorizeNetPaymentSettings.TransactMode = (TransactMode)model.TransactModeId;
             authorizeNetPaymentSettings.AdditionalFee = model.AdditionalFee;
             authorizeNetPaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
             authorizeNetPaymentSettings.ShippableProductRequired = model.ShippableProductRequired;
@@ -126,6 +131,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.TransactionKey, model.TransactionKey_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.Environment, model.Environment_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.DescriptionText, model.DescriptionText_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.TransactMode, model.TransactModeId_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.AdditionalFee, model.AdditionalFee_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.ShippableProductRequired, model.ShippableProductRequired_OverrideForStore, storeScope, false);

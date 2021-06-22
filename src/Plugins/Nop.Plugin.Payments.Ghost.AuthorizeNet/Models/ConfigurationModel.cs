@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Web.Framework.Models;
 using Nop.Web.Framework.Mvc.ModelBinding;
 
@@ -32,6 +33,11 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Models
         [NopResourceDisplayName("Plugin.Payments.Ghost.AuthorizeNet.DescriptionText")]
         public string DescriptionText { get; set; }
         public bool DescriptionText_OverrideForStore { get; set; }
+
+        public int TransactModeId { get; set; }
+        [NopResourceDisplayName("Plugin.Payments.Ghost.AuthorizeNet.TransactMode")]
+        public SelectList TransactModeValues { get; set; }
+        public bool TransactModeId_OverrideForStore { get; set; }
 
         [NopResourceDisplayName("Plugin.Payments.Ghost.AuthorizeNet.AdditionalFee")]
         public decimal AdditionalFee { get; set; }

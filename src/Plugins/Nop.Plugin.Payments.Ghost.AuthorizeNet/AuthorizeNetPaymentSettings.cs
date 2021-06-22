@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nop.Core.Configuration;
+using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
 
 namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
 {
@@ -22,6 +23,10 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// Possible values; "SANDBOX", "PRODUCTION", "LOCAL_VM", "HOSTED_VM" and "CUSTOM"
         /// </summary>
         public string Environment { get; set; }
+        /// <summary>
+        /// Gets or sets payment transaction mode
+        /// </summary>
+        public TransactMode TransactMode { get; set; }
         /// <summary>
         /// Gets or sets a additional fee
         /// </summary>
