@@ -6,21 +6,21 @@ using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
-using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
-using Nop.Plugin.Payments.Ghost.AuthorizeNet.Validators;
+using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Models;
+using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Validators;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
 using Nop.Services.Orders;
 using Nop.Services.Payments;
 using Nop.Services.Plugins;
 
-namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
+namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet
 {
-    public class AuthorizeNetPaymentProcessor : BasePlugin, IPaymentMethod
+    public class PaymentAuthorizeNetPaymentProcessor : BasePlugin, IPaymentMethod
     {
         #region Fields
 
-        private readonly AuthorizeNetPaymentSettings _authorizeNetPaymentSettings;
+        private readonly PaymentAuthorizeNetPaymentSettings _paymentAuthorizeNetPaymentSettings;
         private readonly ILocalizationService _localizationService;
         private readonly IPaymentService _paymentService;
         private readonly ISettingService _settingService;
@@ -31,14 +31,14 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
 
         #region Ctor
 
-        public AuthorizeNetPaymentProcessor(AuthorizeNetPaymentSettings authorizeNetPaymentSettings,
+        public PaymentAuthorizeNetPaymentProcessor(PaymentAuthorizeNetPaymentSettings paymentAuthorizeNetPaymentSettings,
             ILocalizationService localizationService,
             IPaymentService paymentService,
             ISettingService settingService,
             IShoppingCartService shoppingCartService,
             IWebHelper webHelper)
         {
-            _authorizeNetPaymentSettings = authorizeNetPaymentSettings;
+            _paymentAuthorizeNetPaymentSettings = paymentAuthorizeNetPaymentSettings;
             _localizationService = localizationService;
             _paymentService = paymentService;
             _settingService = settingService;
@@ -62,7 +62,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
             {
                 AllowStoringCreditCardNumber = true
             };
-            switch (_authorizeNetPaymentSettings.TransactMode)
+            switch (_paymentAuthorizeNetPaymentSettings.TransactMode)
             {
                 case TransactMode.Pending:
                     result.NewPaymentStatus = PaymentStatus.Pending;
@@ -102,7 +102,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
             //for example, hide this payment method if all products in the cart are downloadable
             //or hide this payment method if current customer is from certain country
 
-            if (_authorizeNetPaymentSettings.ShippableProductRequired && !await _shoppingCartService.ShoppingCartRequiresShippingAsync(cart))
+            if (_paymentAuthorizeNetPaymentSettings.ShippableProductRequired && !await _shoppingCartService.ShoppingCartRequiresShippingAsync(cart))
                 return true;
 
             return false;
@@ -116,7 +116,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         public async Task<decimal> GetAdditionalHandlingFeeAsync(IList<ShoppingCartItem> cart)
         {
             return await _paymentService.CalculateAdditionalFeeAsync(cart,
-                _authorizeNetPaymentSettings.AdditionalFee, _authorizeNetPaymentSettings.AdditionalFeePercentage);
+                _paymentAuthorizeNetPaymentSettings.AdditionalFee, _paymentAuthorizeNetPaymentSettings.AdditionalFeePercentage);
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// </summary>
         public override string GetConfigurationPageUrl()
         {
-            return $"{_webHelper.GetStoreLocation()}Admin/AuthorizeNet/Configure";
+            return $"{_webHelper.GetStoreLocation()}Admin/PaymentAuthorizeNet/Configure";
         }
 
         /// <summary>
@@ -241,12 +241,12 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// <returns>View component name</returns>
         public string GetPublicViewComponentName()
         {
-            return "AuthorizeNet";
+            return "PaymentAuthorizeNet";
         }
 
         public override async Task InstallAsync()
         {
-            var settings = new AuthorizeNetPaymentSettings
+            var settings = new PaymentAuthorizeNetPaymentSettings
             {
                 DescriptionText = "<p>Your security is important to us. <br /> We do not store your credit card information. <br /> Online payments are passed via a secure socket layer to a payment processor</p>",
                 SkipPaymentInfo = false,
@@ -258,25 +258,25 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
             //locales
             await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
-                ["Plugin.Payments.Ghost.AuthorizeNet.ApiLoginId"] = "API Login Id",
-                ["Plugin.Payments.Ghost.AuthorizeNet.ApiLoginId.Hint"] = "Api Login Id provided by Authorize.net",
-                ["Plugin.Payments.Ghost.AuthorizeNet.TransactionKey"] = "Transaction Key",
-                ["Plugin.Payments.Ghost.AuthorizeNet.TransactionKey.Hint"] = "Transaction Key provided by Authorize.net",
-                ["Plugin.Payments.Ghost.AuthorizeNet.Environment"] = "Environment",
-                ["Plugin.Payments.Ghost.AuthorizeNet.Environment.Hint"] = "Authorize.net environment to use. (\"SANDBOX\", \"PRODUCTION\", \"LOCAL_VM\", \"HOSTED_VM\" or \"CUSTOM\") ",
-                ["Plugin.Payments.Ghost.AuthorizeNet.DescriptionText"] = "Description",
-                ["Plugin.Payments.Ghost.AuthorizeNet.DescriptionText.Hint"] = "Enter info that will be shown to customers during checkout",
-                ["Plugin.Payments.Ghost.AuthorizeNet.AdditionalFee"] = "Additional fee",
-                ["Plugin.Payments.Ghost.AuthorizeNet.AdditionalFee.Hint"] = "The additional fee.",
-                ["Plugin.Payments.Ghost.AuthorizeNet.AdditionalFeePercentage"] = "Additional fee. Use percentage",
-                ["Plugin.Payments.Ghost.AuthorizeNet.AdditionalFeePercentage.Hint"] = "Determines whether to apply a percentage additional fee to the order total. If not enabled, a fixed value is used.",
-                ["Plugin.Payments.Ghost.AuthorizeNet.ShippableProductRequired"] = "Shippable product required",
-                ["Plugin.Payments.Ghost.AuthorizeNet.ShippableProductRequired.Hint"] = "An option indicating whether shippable products are required in order to display this payment method during checkout.",
-                ["Plugin.Payments.Ghost.AuthorizeNet.TransactMode"] = "After checkout mark payment as",
-                ["Plugin.Payments.Ghost.AuthorizeNet.TransactMode.Hint"] = "Specify transaction mode.",
-                ["Plugin.Payments.Ghost.AuthorizeNet.PaymentMethodDescription"] = "Pay by \"Credit Card\"",
-                ["Plugin.Payments.Ghost.AuthorizeNet.SkipPaymentInfo"] = "Skip payment information page",
-                ["Plugin.Payments.Ghost.AuthorizeNet.SkipPaymentInfo.Hint"] = "An option indicating whether we should display a payment information page for this plugin."
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.ApiLoginId"] = "API Login Id",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.ApiLoginId.Hint"] = "Api Login Id provided by Authorize.net",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.TransactionKey"] = "Transaction Key",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.TransactionKey.Hint"] = "Transaction Key provided by Authorize.net",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.Environment"] = "Environment",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.Environment.Hint"] = "Authorize.net environment to use. (\"SANDBOX\", \"PRODUCTION\", \"LOCAL_VM\", \"HOSTED_VM\" or \"CUSTOM\") ",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.DescriptionText"] = "Description",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.DescriptionText.Hint"] = "Enter info that will be shown to customers during checkout",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.AdditionalFee"] = "Additional fee",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.AdditionalFee.Hint"] = "The additional fee.",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.AdditionalFeePercentage"] = "Additional fee. Use percentage",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.AdditionalFeePercentage.Hint"] = "Determines whether to apply a percentage additional fee to the order total. If not enabled, a fixed value is used.",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.ShippableProductRequired"] = "Shippable product required",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.ShippableProductRequired.Hint"] = "An option indicating whether shippable products are required in order to display this payment method during checkout.",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.TransactMode"] = "After checkout mark payment as",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.TransactMode.Hint"] = "Specify transaction mode.",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.PaymentMethodDescription"] = "Pay by \"Credit Card\"",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.SkipPaymentInfo"] = "Skip payment information page",
+                ["Plugin.Payments.Ghost.PaymentAuthorizeNet.SkipPaymentInfo.Hint"] = "An option indicating whether we should display a payment information page for this plugin."
             });
 
             await base.InstallAsync();
@@ -285,10 +285,10 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         public override async Task UninstallAsync()
         {
             //settings
-            await _settingService.DeleteSettingAsync<AuthorizeNetPaymentSettings>();
+            await _settingService.DeleteSettingAsync<PaymentAuthorizeNetPaymentSettings>();
 
             //locales
-            await _localizationService.DeleteLocaleResourcesAsync("Plugin.Payments.Ghost.AuthorizeNet");
+            await _localizationService.DeleteLocaleResourcesAsync("Plugin.Payments.Ghost.PaymentAuthorizeNet");
 
             await base.UninstallAsync();
         }
@@ -302,7 +302,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// </remarks>
         public async Task<string> GetPaymentMethodDescriptionAsync()
         {
-            return await _localizationService.GetResourceAsync("Plugin.Payments.Ghost.AuthorizeNet.PaymentMethodDescription");
+            return await _localizationService.GetResourceAsync("Plugin.Payments.Ghost.PaymentAuthorizeNet.PaymentMethodDescription");
         }
 
         #endregion
@@ -343,7 +343,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// <summary>
         /// Gets a value indicating whether we should display a payment information page for this plugin
         /// </summary>
-        public bool SkipPaymentInfo => _authorizeNetPaymentSettings.SkipPaymentInfo;
+        public bool SkipPaymentInfo => _paymentAuthorizeNetPaymentSettings.SkipPaymentInfo;
 
         /// <summary>
         /// Gets a payment method description that will be displayed on checkout pages in the public store
@@ -352,7 +352,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
         /// return description of this payment method to be display on "payment method" checkout step. good practice is to make it localizable
         /// for example, for a redirection payment method, description may be like this: "You will be redirected to PayPal site to complete the payment"
         /// </remarks>
-        public Task<string> PaymentMethodDescription => _localizationService.GetResourceAsync("Plugin.Payments.Ghost.AuthorizeNet.PaymentMethodDescription");
+        public Task<string> PaymentMethodDescription => _localizationService.GetResourceAsync("Plugin.Payments.Ghost.PaymentAuthorizeNet.PaymentMethodDescription");
 
         #endregion
     }

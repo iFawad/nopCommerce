@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Nop.Core.Configuration;
-using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
+using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Models;
 
-namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
+namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet
 {
-    public class AuthorizeNetPaymentSettings : ISettings
+    public class PaymentAuthorizeNetPaymentSettings : ISettings
     {
         /// <summary>
         /// Get or sets Authorize.net Api Login Id

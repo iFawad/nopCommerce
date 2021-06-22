@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
-using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
+using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Models;
 using Nop.Services.Localization;
 using Nop.Web.Framework.Components;
 
-namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Components
+namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Components
 {
-    [ViewComponent(Name = "AuthorizeNet")]
-    public class PaymentAuthorizeNetViewComponent : NopViewComponent
+    [ViewComponent(Name = "PaymentAuthorizeNet")]
+    public class PaymentPaymentAuthorizeNetViewComponent : NopViewComponent
     {
         #region Fields
 
-        private readonly AuthorizeNetPaymentSettings _authorizeNetPaymentSettings;
+        private readonly PaymentAuthorizeNetPaymentSettings _PaymentAuthorizeNetPaymentSettings;
         private readonly ILocalizationService _localizationService;
         private readonly IStoreContext _storeContext;
         private readonly IWorkContext _workContext;
@@ -27,12 +27,12 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Components
 
         #region Ctor
 
-        public PaymentAuthorizeNetViewComponent(AuthorizeNetPaymentSettings authorizeNetPaymentSettings,
+        public PaymentPaymentAuthorizeNetViewComponent(PaymentAuthorizeNetPaymentSettings PaymentAuthorizeNetPaymentSettings,
             ILocalizationService localizationService,
             IStoreContext storeContext,
             IWorkContext workContext)
         {
-            _authorizeNetPaymentSettings = authorizeNetPaymentSettings;
+            _PaymentAuthorizeNetPaymentSettings = PaymentAuthorizeNetPaymentSettings;
             _localizationService = localizationService;
             _storeContext = storeContext;
             _workContext = workContext;
@@ -46,7 +46,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Components
         {
             var model = new PaymentInfoModel
             {
-                DescriptionText = await _localizationService.GetLocalizedSettingAsync(_authorizeNetPaymentSettings,
+                DescriptionText = await _localizationService.GetLocalizedSettingAsync(_PaymentAuthorizeNetPaymentSettings,
                     x => x.DescriptionText, (await _workContext.GetWorkingLanguageAsync()).Id, (await _storeContext.GetCurrentStoreAsync()).Id),
                 CreditCardTypes = new List<SelectListItem>
                 {
@@ -88,7 +88,7 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Components
                     selectedYear.Selected = true;
             }
 
-            return View("~/Plugins/Payments.Ghost.AuthorizeNet/Views/PaymentInfo.cshtml", model);
+            return View("~/Plugins/Payments.Ghost.PaymentAuthorizeNet/Views/PaymentInfo.cshtml", model);
         }
 
         #endregion

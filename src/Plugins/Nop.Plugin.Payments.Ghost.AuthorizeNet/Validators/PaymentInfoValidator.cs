@@ -1,10 +1,10 @@
 ﻿using System;
 using FluentValidation;
-using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
+using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Models;
 using Nop.Services.Localization;
 using Nop.Web.Framework.Validators;
 
-namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Validators
+namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Validators
 {
     public partial class PaymentInfoValidator : BaseNopValidator<PaymentInfoModel>
     {

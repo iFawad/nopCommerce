@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Models
+namespace Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Models
 {
     public enum TransactMode
     {

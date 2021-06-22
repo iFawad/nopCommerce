@@ -6,7 +6,7 @@
     <Company>Ghost Product</Company>
     <Authors>Fawad A. Khan</Authors>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Payments.Ghost.AuthorizeNet</OutputPath>
+    <OutputPath>..\..\Presentation\Nop.Web\Plugins\Payments.Ghost.PaymentAuthorizeNet</OutputPath>
     <OutDir>$(OutputPath)</OutDir>
     <!--Set this parameter to true to get the dlls copied from the NuGet cache to the output of your project.
     You need to set this parameter to true if your plugin has a nuget package 
@@ -38,6 +38,11 @@
     <Content Include="Views\_ViewImports.cshtml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AuthorizeNet" Version="2.0.2" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

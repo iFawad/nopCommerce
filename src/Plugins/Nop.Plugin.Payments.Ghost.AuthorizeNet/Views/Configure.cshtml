@@ -1,6 +1,6 @@
 ﻿@model ConfigurationModel
 
-@using Nop.Plugin.Payments.Ghost.AuthorizeNet.Models;
+@using Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.Models;
 @using Nop.Web.Framework.Extensions
 
 @{
@@ -9,7 +9,7 @@
 
 @await Component.InvokeAsync("StoreScopeConfiguration")
 
-<form asp-controller="AuthorizeNet" asp-action="Configure" method="post">
+<form asp-controller="PaymentAuthorizeNet" asp-action="Configure" method="post">
     <div class="cards-group">
         <div class="card card-default">
             <div class="card-body">

@@ -79,7 +79,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Widgets.Ghost.Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Widgets.Ghost.WholeSeller", "Plugins\Nop.Plugin.Widgets.Ghost.WholeSeller\Nop.Plugin.Widgets.Ghost.WholeSeller.csproj", "{8C6CE124-F055-4EA1-9116-66F0B3D08A3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nop.Plugin.Payments.Ghost.AuthorizeNet", "Plugins\Nop.Plugin.Payments.Ghost.AuthorizeNet\Nop.Plugin.Payments.Ghost.AuthorizeNet.csproj", "{1790D084-D1B0-4C21-8521-883A08A2BE33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet", "Plugins\Nop.Plugin.Payments.Ghost.AuthorizeNet\Nop.Plugin.Payments.Ghost.PaymentAuthorizeNet.csproj", "{1790D084-D1B0-4C21-8521-883A08A2BE33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
