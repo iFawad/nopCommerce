@@ -13,6 +13,36 @@
     <div class="cards-group">
         <div class="card card-default">
             <div class="card-body">
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="ApiLoginId_OverrideForStore" asp-input="ApiLoginId" asp-store-scope="Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="ApiLoginId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ApiLoginId" />
+                        <span asp-validation-for="ApiLoginId"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="TransactionKey_OverrideForStore" asp-input="TransactionKey" asp-store-scope="Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="TransactionKey" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="TransactionKey" />
+                        <span asp-validation-for="TransactionKey"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="Environment_OverrideForStore" asp-input="Environment" asp-store-scope="Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="Environment" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="Environment" />
+                        <span asp-validation-for="Environment"></span>
+                    </div>
+                </div>
                 @(await Html.LocalizedEditorAsync<ConfigurationModel, ConfigurationModel.ConfigurationLocalizedModel>("plugin-settings-localized",
                     @<div>
                         <div class="form-group row">
@@ -23,7 +53,7 @@
                             <div class="col-md-9">
                                 <nop-textarea asp-for="@Model.Locales[item].DescriptionText" />
                                 <span asp-validation-for="@Model.Locales[item].DescriptionText"></span>
-                            
+
                             </div>
                         </div>
                         <input type="hidden" asp-for="@Model.Locales[item].LanguageId" />

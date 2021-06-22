@@ -208,6 +208,12 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
             //locales
             await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
+                ["Plugin.Payments.Ghost.AuthorizeNet.ApiLoginId"] = "API Login Id",
+                ["Plugin.Payments.Ghost.AuthorizeNet.ApiLoginId.Hint"] = "Api Login Id provided by Authorize.net",
+                ["Plugin.Payments.Ghost.AuthorizeNet.TransactionKey"] = "Transaction Key",
+                ["Plugin.Payments.Ghost.AuthorizeNet.TransactionKey.Hint"] = "Transaction Key provided by Authorize.net",
+                ["Plugin.Payments.Ghost.AuthorizeNet.Environment"] = "Environment",
+                ["Plugin.Payments.Ghost.AuthorizeNet.Environment.Hint"] = "Authorize.net environment to use. (\"SANDBOX\", \"PRODUCTION\", \"LOCAL_VM\", \"HOSTED_VM\" or \"CUSTOM\") ",
                 ["Plugin.Payments.Ghost.AuthorizeNet.DescriptionText"] = "Description",
                 ["Plugin.Payments.Ghost.AuthorizeNet.DescriptionText.Hint"] = "Enter info that will be shown to customers during checkout",
                 ["Plugin.Payments.Ghost.AuthorizeNet.AdditionalFee"] = "Additional fee",

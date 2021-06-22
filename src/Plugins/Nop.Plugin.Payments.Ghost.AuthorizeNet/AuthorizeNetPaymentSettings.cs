@@ -10,6 +10,19 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet
     public class AuthorizeNetPaymentSettings : ISettings
     {
         /// <summary>
+        /// Get or sets Authorize.net Api Login Id
+        /// </summary>
+        public string ApiLoginId { get; set; }
+        /// <summary>
+        /// Get or sets Authorize.net Transaction Key
+        /// </summary>
+        public string TransactionKey { get; set; }
+        /// <summary>
+        /// Get or sets Authorize.net Environment.
+        /// Possible values; "SANDBOX", "PRODUCTION", "LOCAL_VM", "HOSTED_VM" and "CUSTOM"
+        /// </summary>
+        public string Environment { get; set; }
+        /// <summary>
         /// Gets or sets a additional fee
         /// </summary>
         public decimal AdditionalFee { get; set; }

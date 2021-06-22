@@ -17,6 +17,18 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Models
 
         public int ActiveStoreScopeConfiguration { get; set; }
 
+        [NopResourceDisplayName("Plugin.Payments.Ghost.AuthorizeNet.ApiLoginId")]
+        public string ApiLoginId { get; set; }
+        public bool ApiLoginId_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Plugin.Payments.Ghost.AuthorizeNet.TransactionKey")]
+        public string TransactionKey { get; set; }
+        public bool TransactionKey_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Plugin.Payments.Ghost.AuthorizeNet.Environment")]
+        public string Environment { get; set; }
+        public bool Environment_OverrideForStore { get; set; }
+
         [NopResourceDisplayName("Plugin.Payments.Ghost.AuthorizeNet.DescriptionText")]
         public string DescriptionText { get; set; }
         public bool DescriptionText_OverrideForStore { get; set; }

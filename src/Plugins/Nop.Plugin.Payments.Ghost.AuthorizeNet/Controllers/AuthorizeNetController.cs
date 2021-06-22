@@ -73,6 +73,9 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
                 locale.DescriptionText = await _localizationService
                     .GetLocalizedSettingAsync(authorizeNetPaymentSettings, x => x.DescriptionText, languageId, 0, false, false);
             });
+            model.ApiLoginId = authorizeNetPaymentSettings.ApiLoginId;
+            model.TransactionKey = authorizeNetPaymentSettings.TransactionKey;
+            model.Environment = authorizeNetPaymentSettings.Environment;
             model.AdditionalFee = authorizeNetPaymentSettings.AdditionalFee;
             model.AdditionalFeePercentage = authorizeNetPaymentSettings.AdditionalFeePercentage;
             model.ShippableProductRequired = authorizeNetPaymentSettings.ShippableProductRequired;
@@ -80,6 +83,9 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
             model.ActiveStoreScopeConfiguration = storeScope;
             if (storeScope > 0)
             {
+                model.ApiLoginId_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.ApiLoginId, storeScope);
+                model.TransactionKey_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.TransactionKey, storeScope);
+                model.Environment_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.Environment, storeScope);
                 model.DescriptionText_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.DescriptionText, storeScope);
                 model.AdditionalFee_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.AdditionalFee, storeScope);
                 model.AdditionalFeePercentage_OverrideForStore = await _settingService.SettingExistsAsync(authorizeNetPaymentSettings, x => x.AdditionalFeePercentage, storeScope);
@@ -104,6 +110,9 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
             var authorizeNetPaymentSettings = await _settingService.LoadSettingAsync<AuthorizeNetPaymentSettings>(storeScope);
 
             //save settings
+            authorizeNetPaymentSettings.ApiLoginId = model.ApiLoginId;
+            authorizeNetPaymentSettings.TransactionKey = model.TransactionKey;
+            authorizeNetPaymentSettings.Environment = model.Environment;
             authorizeNetPaymentSettings.DescriptionText = model.DescriptionText;
             authorizeNetPaymentSettings.AdditionalFee = model.AdditionalFee;
             authorizeNetPaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
@@ -113,6 +122,9 @@ namespace Nop.Plugin.Payments.Ghost.AuthorizeNet.Controllers
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
              * and loaded from database after each update */
+            await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.ApiLoginId, model.ApiLoginId_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.TransactionKey, model.TransactionKey_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.Environment, model.Environment_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.DescriptionText, model.DescriptionText_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.AdditionalFee, model.AdditionalFee_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(authorizeNetPaymentSettings, x => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, storeScope, false);
