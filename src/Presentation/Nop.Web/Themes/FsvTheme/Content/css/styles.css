@@ -99,7 +99,7 @@ script {
   --text-accent: var(--accent2);
   --text-footer: var(--main-contrast-black);
   --breadcrumb: var(--link-text-hover);
-  --menu-link-text: var(--main-contrast-black);
+  --menu-link-text: var(--text);
   --menu-link-text-hover: var(--accent2);
   --label-error: var(--accent2);
 }
@@ -8083,7 +8083,7 @@ pre {
         position: relative;
         padding: 10px 20px 10px 30px;
         font-size: 14px;
-        color: var(--main-contrast-black);
+        color: var(--menu-link-text);
       }
 
         .header-menu .sublist li a:before {
