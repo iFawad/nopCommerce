@@ -1157,7 +1157,7 @@ label, label + * {
 
   .footer-block .title {
     margin: 0 0 1px;
-    background: #4ab2f1 url('../images/toggle-white.png') right center no-repeat;
+    background: var(--bar) url('../images/toggle-white.png') right center no-repeat;
     padding: 10px 15px;
     font-size: 20px;
     color: #fff;
@@ -6730,7 +6730,7 @@ pre {
   }
 
   .menu-toggle {
-    background: #4ab2f1 url('../images/menu-icon.png') right center no-repeat;
+    background: var(--bar) url('../images/menu-icon.png') right center no-repeat;
     padding: 15px;
     font-size: 15px;
     font-weight: bold;
