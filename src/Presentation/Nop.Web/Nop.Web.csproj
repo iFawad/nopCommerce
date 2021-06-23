@@ -37,6 +37,8 @@
     <None Remove="Plugins\**;Themes\**" />
 
     <Content Include="Plugins\bin\placeholder.txt" CopyToPublishDirectory="PreserveNewest" />
+
+    <Content Include="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
     <None Include="Plugins\**" CopyToPublishDirectory="PreserveNewest" Exclude="Plugins\**\runtimes\**;Plugins\**\ref\**;Plugins\**\*.pdb" />
 
     <Content Include="Themes\**" CopyToPublishDirectory="PreserveNewest" Exclude="Themes\**\*.config;Themes\**\*.cshtml;Themes\**\*.json" />
@@ -98,6 +100,7 @@
     <None Remove="Themes\FsvTheme\Content\images\watch.png" />
     <None Remove="Themes\FsvTheme\Content\images\wishlist-button.png" />
     <None Remove="Themes\FsvTheme\preview.jpg" />
+    <None Remove="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
 
     <None Update="Areas\Admin\sitemap.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -115,6 +118,13 @@
 
   <ItemGroup>
     <Folder Include="Plugins\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <!-- This target execute after "Build" target.
