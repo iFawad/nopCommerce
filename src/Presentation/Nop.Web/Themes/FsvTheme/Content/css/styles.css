@@ -83,6 +83,7 @@ script {
   --accent-shadow: #42ce24;
   --accent2: #9acb31;
   --accent2-shadow: #75922f;
+  --error: #f00;
   --bar: var(--accent2);
   --bar-off: var(--main-shadow);
   --bar-shadow: var(--accent2-shadow);
@@ -101,7 +102,7 @@ script {
   --breadcrumb: var(--link-text-hover);
   --menu-link-text: var(--text);
   --menu-link-text-hover: var(--accent2);
-  --label-error: var(--accent2);
+  --label-error: var(--error);
 }
 
 
