@@ -72,30 +72,36 @@ script {
 
 :root {
   --accent1: #ff0;
-  --main: #525252;
-  --main-shadow: #767676;
-  --main-shadow-light: #919191;
+  --main: #fff;
+  --main-shadow: #ddd;
+  --main-shadow-dark: #ccc;
+  --main-shadow-light: #f6f6f6;
   --main-contrast-white: #fff;
   --main-contrast-black: #000;
+  --text-color: #777;
   --accent: #8ffe0c;
   --accent-shadow: #42ce24;
-  --bar: var(--accent);
+  --accent2: #9acb31;
+  --accent2-shadow: #75922f;
+  --bar: var(--accent2);
   --bar-off: var(--main-shadow);
-  --bar-shadow: var(--accent-shadow);
-  --border: var(--accent);
-  --button: var(--accent);
-  --button-hover: var(--accent-shadow);
+  --bar-shadow: var(--accent2-shadow);
+  --border: var(--main-shadow-dark);
+  --button: var(--accent2);
+  --button-hover: var(--accent2-shadow);
   --button-text: var(--main-contrast-black);
   --button-text-hover: var(--main-contrast-black);
-  --link: var(--accent);
-  --link-text: var(--accent);
-  --link-text-hover: var(--accent-shadow);
-  --text: var(--main-contrast-white);
+  --link: var(--accent2);
+  --link-text: var(--accent2);
+  --link-text-hover: var(--accent2-shadow);
+  --text: var(--text-color);
   --text-black: var(--main-contrast-black);
-  --text-accent: var(--accent);
-  --menu-link-text: var(--main-contrast-white);
-  --menu-link-text-hover: var(--accent);
-  --label-error: var(--accent);
+  --text-accent: var(--accent2);
+  --text-footer: var(--main-contrast-black);
+  --breadcrumb: var(--link-text-hover);
+  --menu-link-text: var(--main-contrast-black);
+  --menu-link-text-hover: var(--accent2);
+  --label-error: var(--accent2);
 }
 
 
@@ -104,11 +110,11 @@ body {
   overflow-x: hidden;
   background-color: var(--main);
   font: normal 14px Arial, Helvetica, sans-serif;
-  color: var(--main-contrast-white);
+  color: var(--text);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: var(--main-contrast-white);
+  color: var(--text);
 }
 
 a {
@@ -289,7 +295,7 @@ label, label + * {
 .news-body p {
   margin: 10px 0;
   text-align: justify;
-  color: var(--main-contrast-white);
+  color: var(--text);
 }
 
 .flyout-cart {
@@ -347,7 +353,7 @@ label, label + * {
     margin: 0 0 10px;
     text-align: center;
     font-size: 14px; /*reset zeroing*/
-    color: var(--main-contrast-white);
+    color: var(--text);
   }
 
   .inputs input[type="text"],
@@ -462,7 +468,7 @@ label, label + * {
 .forum-table th {
   border-width: 1px 1px 0;
   border-style: solid;
-  border-color: #ddd;
+  border-color: var(--border);
   background-color: var(--bar-off);
   padding: 10px;
   white-space: nowrap;
@@ -1159,7 +1165,7 @@ label, label + * {
 
     .footer-block .title strong {
       font-weight: normal;
-      color: var(--main-contrast-white);
+      color: var(--text-footer);
     }
 
   .footer-block .list {
@@ -1174,11 +1180,12 @@ label, label + * {
       display: block;
       padding: 10px 15px;
       line-height: 20px;
+      color: var(--text-footer);
     }
 
       .footer-block .list a:hover,
       .footer-block .list a:focus {
-        color: var(--link);
+        color: var(--link-text-hover);
       }
 
 .follow-us {
@@ -1304,7 +1311,7 @@ label, label + * {
 
   .footer-powered-by a {
     font-weight: bold;
-    color: #4ab2f1;
+    color: var(--link-text-hover);
   }
 
     .footer-powered-by a:hover,
@@ -1362,7 +1369,7 @@ label, label + * {
     position: relative;
     padding: 5px 0;
     font-size: 16px;
-    color: #fff;
+    color: var(--text);
     -webkit-transition: all 0.1s ease;
     transition: all 0.1s ease;
   }
@@ -1566,7 +1573,7 @@ label, label + * {
 
   .breadcrumb a:hover,
   .breadcrumb a:focus {
-    color: var(--accent);
+    color: var(--breadcrumb);
   }
 
 .category-description,
@@ -1619,7 +1626,7 @@ label, label + * {
   .product-selectors span {
     vertical-align: middle;
     font-size: 16px;
-    color: #fff;
+    color: var(--text);
   }
 
   .product-selectors select {
@@ -1649,7 +1656,7 @@ label, label + * {
 
 .product-filter .filter-content {
   padding: 10px;
-  color: var(--main-contrast-white);
+  color: var(--text);
 }
 
 .product-filter .group {
@@ -1831,7 +1838,7 @@ label, label + * {
   .item-box .actual-price {
     margin: 0 5px 0 0;
     font-size: 16px;
-    color: #fff;
+    color: var(--text);
   }
 
   .item-box .tax-shipping-info a {
@@ -1955,7 +1962,7 @@ label, label + * {
 
     .product-grid .title strong {
       font-weight: normal;
-      color: #fff;
+      color: var(--text);
     }
 
 .manufacturer-grid .title {
@@ -2155,7 +2162,7 @@ label, label + * {
   .overview .short-description {
     margin: 0 0 25px;
     line-height: 22px;
-    color: var(--main-contrast-white);
+    color: var(--text);
   }
 
 .product-no-reviews,
@@ -2166,7 +2173,7 @@ label, label + * {
 
   .product-no-reviews a {
     text-decoration: underline;
-    color: var(--main-contrast-white);
+    color: var(--text);
   }
 
 .product-review-box {
@@ -2196,7 +2203,7 @@ label, label + * {
 
 .overview .value,
 .variant-overview .value {
-  color: var(--main-contrast-white);
+  color: var(--text);
 }
 
   .overview .value a,
@@ -2347,7 +2354,7 @@ label, label + * {
     .overview .prices > div > span,
     .variant-overview .prices > div > span {
       vertical-align: middle;
-      color: var(--main-contrast-white);
+      color: var(--text);
     }
 
 .overview .old-product-price,
@@ -3191,7 +3198,7 @@ label, label + * {
 
   .wishlist-content .update-wishlist-button,
   .wishlist-content .wishlist-add-to-cart-button {
-    background-color: var(--accent);
+    background-color: var(--accent2);
     text-transform: uppercase;
   }
 
@@ -3585,7 +3592,7 @@ label, label + * {
 .return-request-page .button-1 {
   min-width: 140px;
   border: none;
-  background-color: var(--accent);
+  background-color: var(--button);
   padding: 10px 30px;
   text-align: center;
   font-size: 15px;
@@ -3609,7 +3616,7 @@ label, label + * {
   .account-page .button-1:focus,
   .return-request-page .button-1:hover,
   .return-request-page .button-1:focus {
-    background-color: var(--accent-shadow);
+    background-color: var(--button-hover);
   }
 
 .return-request-page h1 a {
@@ -3716,12 +3723,12 @@ label, label + * {
       width: auto;
       margin: 5px;
       font-size: 14px; /*reset zeroing*/
-      color: var(--main-contrast-white);
+      color: var(--text);
     }
 
     .login-page .returning-wrapper .inputs.reversed a:hover,
     .login-page .returning-wrapper .inputs.reversed a:focus {
-      color: var(--accent);
+      color: var(--accent2);
     }
 
 .login-page .captcha-box {
@@ -4672,7 +4679,7 @@ label, label + * {
   .product-estimate-shipping .shipping-title {
     font-size: 16px;
     font-weight: bold;
-    color: var(--main-contrast-white);
+    color: var(--text);
     margin-bottom: 5px;
     justify-content: center;
   }
@@ -4680,7 +4687,7 @@ label, label + * {
     .product-estimate-shipping .shipping-title .shipping-price {
       margin-left: 5px;
       vertical-align: middle;
-      color: var(--main-contrast-white);
+      color: var(--text);
     }
 
     .product-estimate-shipping .shipping-title .shipping-loading {
@@ -4798,7 +4805,7 @@ label, label + * {
   .checkout-page .pickup-in-store .selector {
     margin: 0 0 5px;
     font-weight: bold;
-    color: var(--main-contrast-white);
+    color: var(--text);
   }
 
 .select-pickup-point {
@@ -4876,7 +4883,7 @@ label, label + * {
 
 .payment-info .info {
   padding: 30px 15px;
-  color: var(--main-contrast-white);
+  color: var(--text);
 }
 
   .payment-info .info tr {
@@ -4981,7 +4988,7 @@ label, label + * {
   }
 
   .order-completed .details a {
-    color: var(--accent);
+    color: var(--link-text);
   }
 
     .order-completed .details a:hover,
@@ -5063,12 +5070,12 @@ label, label + * {
     margin: 0 0 0 -15px;
     background: url('../images/back-button.png') left center no-repeat;
     padding: 0 0 0 18px;
-    color: var(--main-contrast-white);
+    color: var(--text);
   }
 
     .opc .back-link a:hover,
     .opc .back-link a:focus {
-      color: #4ab2f1;
+      color: var(--link-text-hover);
     }
 
 .opc .buttons .please-wait {
@@ -7865,7 +7872,7 @@ pre {
     z-index: 100;
     width: 300px;
     box-shadow: 0 0 2px rgba(0,0,0,0.25);
-    background-color: var(--main-shadow);
+    background-color: var(--main);
   }
 
     .flyout-cart.active {
@@ -7890,8 +7897,8 @@ pre {
       }
 
     .mini-shopping-cart .items {
-      border-top: 1px solid #333;
-      border-bottom: 1px solid #333;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
       margin: 0 0 20px;
     }
 
@@ -8091,7 +8098,7 @@ pre {
 
       .header-menu .sublist li:hover > a,
       .header-menu .sublist li:focus > a {
-        background-color: var(--accent);
+        background-color: var(--accent2);
       }
 
   .header-menu ul li:hover > .sublist,
@@ -8175,14 +8182,14 @@ pre {
   .footer-info {
     float: right;
     line-height: 32px;
-    color: #fff;
+    color: var(--text-footer);
   }
 
   .footer-powered-by {
     float: left;
     margin: 0;
     line-height: 32px;
-    color: #fff;
+    color: var(--text-footer);
   }
 
   .theme-selector {
@@ -8209,7 +8216,7 @@ pre {
 
       .block .title strong {
         font-weight: bold;
-        color: #fff;
+        color: var(--text);
       }
 
     .block .listbox {
