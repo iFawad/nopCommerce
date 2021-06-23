@@ -1909,30 +1909,45 @@ label, label + * {
   margin: 0 0 20px;
 }
 
-  .home-page-category-grid .title,
-  .sub-category-grid .title {
-    text-align: center;
-    font-size: 22px;
+.category-grid .title {
+  margin: 0 0 30px;
+  border-bottom: 1px solid var(--border);
+  padding: 0 0 15px;
+  font-size: 30px;
+  font-weight: normal;
+  color: #444;
+}
+
+  .category-grid .title strong {
     font-weight: normal;
-    -webkit-transition: all 0.3s ease;
-    transition: all 0.3s ease;
+    color: var(--text);
   }
 
-    .home-page-category-grid .title a,
-    .sub-category-grid .title a {
-      display: block;
-      padding: 0 0 15px;
-    }
+.home-page-category-grid .title,
+.sub-category-grid .title {
+  text-align: center;
+  font-size: 30px;
+  font-weight: normal;
+  -webkit-transition: all 0.3s ease;
+  transition: all 0.3s ease;
+}
 
-  .home-page-category-grid .picture,
-  .sub-category-grid .picture {
-    margin: 0;
+  .home-page-category-grid .title a,
+  .sub-category-grid .title a {
+    display: block;
+    padding: 0 0 15px;
   }
 
-    .home-page-category-grid .picture a:before,
-    .sub-category-grid .picture a:before {
-      padding-top: 65%;
-    }
+.home-page-category-grid .picture,
+.sub-category-grid .picture {
+  margin: 0;
+}
+
+  .home-page-category-grid .picture a:before,
+  .sub-category-grid .picture a:before {
+    padding-top: 65%;
+  }
+
 
 .products-container {
   position: relative;
