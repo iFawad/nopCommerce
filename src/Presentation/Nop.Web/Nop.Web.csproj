@@ -38,7 +38,13 @@
 
     <Content Include="Plugins\bin\placeholder.txt" CopyToPublishDirectory="PreserveNewest" />
 
+    <Content Include="Themes\FsvTheme\Views\Product\_AddToCart.cshtml" />
+
     <Content Include="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
+
+    <Content Include="Themes\FsvTheme\Views\Shared\_ProductBox.cshtml" />
+
+    <Content Include="Themes\FsvTheme\Views\ShoppingCart\Wishlist.cshtml" />
     <None Include="Plugins\**" CopyToPublishDirectory="PreserveNewest" Exclude="Plugins\**\runtimes\**;Plugins\**\ref\**;Plugins\**\*.pdb" />
 
     <Content Include="Themes\**" CopyToPublishDirectory="PreserveNewest" Exclude="Themes\**\*.config;Themes\**\*.cshtml;Themes\**\*.json" />
@@ -100,7 +106,10 @@
     <None Remove="Themes\FsvTheme\Content\images\watch.png" />
     <None Remove="Themes\FsvTheme\Content\images\wishlist-button.png" />
     <None Remove="Themes\FsvTheme\preview.jpg" />
+    <None Remove="Themes\FsvTheme\Views\Product\_AddToCart.cshtml" />
     <None Remove="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
+    <None Remove="Themes\FsvTheme\Views\Shared\_ProductBox.cshtml" />
+    <None Remove="Themes\FsvTheme\Views\ShoppingCart\Wishlist.cshtml" />
 
     <None Update="Areas\Admin\sitemap.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -121,7 +130,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Themes\FsvTheme\Views\Product\_AddToCart.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\FsvTheme\Views\Shared\_ProductBox.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\FsvTheme\Views\ShoppingCart\Wishlist.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
