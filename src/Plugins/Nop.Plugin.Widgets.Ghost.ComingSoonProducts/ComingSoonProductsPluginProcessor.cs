@@ -95,7 +95,7 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts
 
             //locales
 
-            await _localizationService.DeleteLocaleResourcesAsync("Plugins.Widgets.Ghost.ComingSoonProducts");
+            await _localizationService.DeleteLocaleResourcesAsync("Plugin.Widgets.Ghost.ComingSoonProducts");
             await base.UninstallAsync();
         }
 
