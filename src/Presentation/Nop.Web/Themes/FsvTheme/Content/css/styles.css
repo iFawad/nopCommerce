@@ -84,6 +84,8 @@ script {
   --accent2: #9acb31;
   --accent2-shadow: #75922f;
   --error: #f00;
+  --font-family-alpha: 'PROGRESS PERSONAL USE';
+  --font-family-other: 'Arial';
   --bar: var(--accent2);
   --bar-off: var(--main-shadow);
   --bar-shadow: var(--accent2-shadow);
@@ -105,12 +107,28 @@ script {
   --label-error: var(--error);
 }
 
+@font-face {
+  font-family: 'PROGRESS PERSONAL USE';
+  src: url('../fonts/PROGRESSPERSONALUSE.woff2') format('woff2'), url('../fonts/PROGRESSPERSONALUSE.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mieghommel';
+  src: url('../fonts/Mieghommel.woff2') format('woff2'), url('../fonts/Mieghommel.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 body {
   max-width: 100%;
   overflow-x: hidden;
   background-color: var(--main);
-  font: normal 14px Arial, Helvetica, sans-serif;
+  /*font: normal 14px Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
   color: var(--text);
 }
 
@@ -145,7 +163,8 @@ textarea, select {
 
 input, textarea, select, button {
   font-size: 14px;
-  font-family: Arial, Helvetica, sans-serif;
+  /*font-family: Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
   color: #777;
 }
 
@@ -728,7 +747,8 @@ label, label + * {
   /*override jQuery UI styles, do not delete doubled properties*/
   border-radius: 0;
   padding: 0;
-  font: normal 14px Arial, Helvetica, sans-serif;
+  /*font: normal 14px Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
 }
 
   .ui-dialog:before {
@@ -1091,7 +1111,8 @@ label, label + * {
   /*override jQuery UI styles, do not delete doubled properties*/
   border-radius: 0;
   padding: 0;
-  font: normal 14px Arial, Helvetica, sans-serif;
+  /*font: normal 14px Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
 }
 
   .ui-autocomplete li {
@@ -1780,6 +1801,7 @@ label, label + * {
 
   .item-box .product-title {
     margin: 0 0 10px;
+    font-family: var(--font-family-other);
     font-size: 17px;
     line-height: 1.2;
     font-weight: normal;
@@ -1838,6 +1860,7 @@ label, label + * {
 
   .item-box .actual-price {
     margin: 0 5px 0 0;
+    font-family: var(--font-family-other);
     font-size: 16px;
     color: var(--text);
   }
@@ -2722,7 +2745,8 @@ label, label + * {
   border: none;
   border-radius: 0;
   padding: 0;
-  font: normal 14px Arial, Helvetica, sans-serif;
+  /*font: normal 14px Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
   color: #777;
 }
 
@@ -6329,7 +6353,8 @@ label, label + * {
   border-radius: 0;
   background: none;
   padding: 0;
-  font: normal 14px Arial, Helvetica, sans-serif;
+  /*font: normal 14px Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
   color: #777;
 }
 
@@ -6472,7 +6497,8 @@ label, label + * {
   /*override jQuery UI styles, do not delete doubled properties*/
   line-height: normal;
   font-size: 14px;
-  font-family: Arial, Helvetica, sans-serif;
+  /*font-family: Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
   color: #777;
 }
 
@@ -6498,7 +6524,8 @@ label, label + * {
   /*override jQuery UI styles, do not delete doubled properties*/
   line-height: normal;
   font-size: 14px;
-  font-family: Arial, Helvetica, sans-serif;
+  /*font-family: Arial, Helvetica, sans-serif;*/
+  font-family: var(--font-family-alpha);
   color: #777;
 }
 
@@ -8198,6 +8225,7 @@ pre {
   .footer-info {
     float: right;
     line-height: 32px;
+    font-family: var(--font-family-other);
     color: var(--text-footer);
   }
 

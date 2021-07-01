@@ -1,6 +1,23 @@
+@font-face {
+  font-family: 'PROGRESS PERSONAL USE';
+  src: url('../fonts/PROGRESSPERSONALUSE.woff2') format('woff2'), 
+      url('../fonts/PROGRESSPERSONALUSE.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mieghommel';
+  src: url('Mieghommel.woff2') format('woff2'), url('Mieghommel.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 body {
-	font: normal 9pt Arial, Helvetica, sans-serif;
+    font-family: 'Arial';
+	/*font: normal 9pt Arial, Helvetica, sans-serif;*/
 	color: #000;
 }
 table {

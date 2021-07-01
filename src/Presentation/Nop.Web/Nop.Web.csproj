@@ -52,6 +52,12 @@
 
     <!-- We copy the \Logs directory -->
     <Content Include="Logs\**" CopyToPublishDirectory="PreserveNewest" />
+    <Content Remove="Themes\FsvTheme\Content\fonts\Mieghommel.ttf" />
+    <Content Remove="Themes\FsvTheme\Content\fonts\Mieghommel.woff" />
+    <Content Remove="Themes\FsvTheme\Content\fonts\Mieghommel.woff2" />
+    <Content Remove="Themes\FsvTheme\Content\fonts\progress-personal-use.ttf" />
+    <Content Remove="Themes\FsvTheme\Content\fonts\PROGRESSPERSONALUSE.woff" />
+    <Content Remove="Themes\FsvTheme\Content\fonts\PROGRESSPERSONALUSE.woff2" />
     <Content Remove="wwwroot\js\public.common.extension.js" />
     <None Remove="Themes\FsvTheme\Content\css\print.css" />
     <None Remove="Themes\FsvTheme\Content\css\styles.css" />
