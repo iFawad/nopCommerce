@@ -40,7 +40,13 @@
 
     <Content Include="Themes\FsvTheme\Views\Product\_AddToCart.cshtml" />
 
+    <Content Include="Themes\FsvTheme\Views\Shared\Components\Footer\Default.cshtml" />
+
+    <Content Include="Themes\FsvTheme\Views\Shared\Components\HomepageBestSellers\Default.cshtml" />
+
     <Content Include="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
+
+    <Content Include="Themes\FsvTheme\Views\Shared\Components\HomepageProducts\Default.cshtml" />
 
     <Content Include="Themes\FsvTheme\Views\Shared\_ProductBox.cshtml" />
 
@@ -110,7 +116,10 @@
     <None Remove="Themes\FsvTheme\Content\images\wishlist-button.png" />
     <None Remove="Themes\FsvTheme\preview.jpg" />
     <None Remove="Themes\FsvTheme\Views\Product\_AddToCart.cshtml" />
+    <None Remove="Themes\FsvTheme\Views\Shared\Components\Footer\Default.cshtml" />
+    <None Remove="Themes\FsvTheme\Views\Shared\Components\HomepageBestSellers\Default.cshtml" />
     <None Remove="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
+    <None Remove="Themes\FsvTheme\Views\Shared\Components\HomepageProducts\Default.cshtml" />
     <None Remove="Themes\FsvTheme\Views\Shared\_ProductBox.cshtml" />
     <None Remove="Themes\FsvTheme\Views\ShoppingCart\Wishlist.cshtml" />
 
@@ -137,7 +146,19 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <Content Update="Themes\FsvTheme\Views\Shared\Components\Footer\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\FsvTheme\Views\Shared\Components\HomepageBestSellers\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="Themes\FsvTheme\Views\Shared\Components\HomepageCategories\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\FsvTheme\Views\Shared\Components\HomepageProducts\Default.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
