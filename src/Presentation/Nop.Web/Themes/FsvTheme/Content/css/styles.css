@@ -78,11 +78,12 @@ script {
   --main-shadow-light: #f6f6f6;
   --main-contrast-white: #fff;
   --main-contrast-black: #000;
-  --text-color: #777;
+  --text-color: #333;
   --accent: #8ffe0c;
   --accent-shadow: #42ce24;
   --accent2: #9acb31;
   --accent2-shadow: #75922f;
+  --accent2-shadow2: #5a6f26;
   --error: #f00;
   --font-family-alpha: 'Source Sans Pro';
   /*--font-family-other: 'Arial';*/
@@ -96,8 +97,8 @@ script {
   --button-text: var(--main-contrast-black);
   --button-text-hover: var(--main-contrast-black);
   --link: var(--accent2);
-  --link-text: var(--accent2);
-  --link-text-hover: var(--accent2-shadow);
+  --link-text: var(--accent2-shadow);
+  --link-text-hover: var(--accent2-shadow2);
   --text: var(--text-color);
   --text-black: var(--main-contrast-black);
   --text-accent: var(--accent2);
@@ -111,7 +112,7 @@ script {
 @font-face {
   font-family: 'Source Sans Pro';
   src: url('../fonts/SourceSansPro-Regular.woff2') format('woff2'), url('../fonts/SourceSansPro-Regular.woff') format('woff');
-  font-weight: normal;
+  font-weight: bolder;
   font-style: normal;
   font-display: swap;
 }
@@ -4393,7 +4394,7 @@ label, label + * {
 
     .cart-collaterals .title strong {
       font-weight: normal;
-      color: var(--main-contrast-white);
+      color: var(--text);
     }
 
   .cart-collaterals .hint {
@@ -7368,7 +7369,7 @@ pre {
     .cart-footer .cart-collaterals div,
     .cart-footer .cart-collaterals label {
       text-align: left;
-      color: var(--main-contrast-white);
+      color: var(--text);
     }
 
   .cart-footer .estimate-shipping label {
