@@ -19,6 +19,8 @@
   
   <ItemGroup>
     <None Remove="AuthorizeNet.dll" />
+    <None Remove="Images\mastercard-icon-64x40.png" />
+    <None Remove="Images\visa-icon-64x52.png" />
     <None Remove="logo.png" />
     <None Remove="plugin.json" />
     <None Remove="Views\Configure.cshtml" />
@@ -27,6 +29,12 @@
   
    <ItemGroup>
     <Content Include="AuthorizeNet.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\mastercard-icon-64x40.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\visa-icon-64x52.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="logo.png">
