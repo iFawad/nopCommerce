@@ -147,12 +147,13 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
                 throw new ArgumentNullException(nameof(messageTemplate));
 
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-            var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.Body, languageId);
+            //var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.Body, languageId);
+            var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.BodySms, languageId);
             var bodyReplaced = _tokenizer.Replace(body, tokens, true);
 
             //Remove Html tags for Sms
             //Regex regex = new Regex("\\<[^\\>]*\\>");
-            bodyReplaced = StripHtmlExceptHyperlinks(bodyReplaced);
+            //bodyReplaced = StripHtmlExceptHyperlinks(bodyReplaced);
 
             //extract Order.CustomerEmail token
             var customerEmailToken = tokens.Where(token =>
