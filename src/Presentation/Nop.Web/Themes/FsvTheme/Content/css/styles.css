@@ -97,8 +97,8 @@ script {
   --button-text: var(--main-contrast-black);
   --button-text-hover: var(--main-contrast-black);
   --link: var(--accent2);
-  --link-text: var(--accent2-shadow);
-  --link-text-hover: var(--accent2-shadow2);
+  --link-text: var(--main-contrast-black);
+  --link-text-hover: var(--accent2);
   --text: var(--text-color);
   --text-black: var(--main-contrast-black);
   --text-accent: var(--accent2);
