@@ -4,14 +4,9 @@
 @model Nop.Plugin.Payments.AuthorizeNet.Models.PaymentInfoModel
 
 <table width="100%" cellspacing="2" cellpadding="1" border="0">
-    <tr>
-        <td>
-            <div>
-                <span id="visaDiv"><img src="~/Plugins/Payments.AuthorizeNet/Images/visa-icon-64x52.png" alt="Visa" /></span>
-                <span id="mastercardDiv"><img src="~/Plugins/Payments.AuthorizeNet/Images/mastercard-icon-64x40.png" alt="MasterCard" /></span>
-            </div>
-        </td>
-    </tr>
+    @*<tr>
+        
+    </tr>*@
     <tr>
         <td>
             @Html.LabelFor(model => model.CardholderName, false):
@@ -19,6 +14,9 @@
         <td>
             @Html.TextBoxFor(model => model.CardholderName, new { style = "Width: 165px;", autocomplete = "off" })
             @Html.ValidationMessageFor(model => model.CardholderName)
+        </td>
+        <td>
+
         </td>
     </tr>
     <tr>
@@ -28,6 +26,12 @@
         <td>
             @Html.TextBoxFor(model => model.CardNumber, new { style = "Width: 165px;", autocomplete = "off", maxlength = 22 })
             @Html.ValidationMessageFor(model => model.CardNumber)
+        </td>
+        <td>
+            <div>
+                <span id="visaDiv"><img src="~/Plugins/Payments.AuthorizeNet/Images/visa-icon-64x52.png" alt="Visa" /></span>
+                <span id="mastercardDiv"><img src="~/Plugins/Payments.AuthorizeNet/Images/mastercard-icon-64x40.png" alt="MasterCard" /></span>
+            </div>
         </td>
     </tr>
     <tr>
@@ -40,6 +44,9 @@
             @Html.DropDownListFor(model => model.ExpireYear, Model.ExpireYears)
             @Html.ValidationMessageFor(model => model.ExpireMonth)
         </td>
+        <td>
+
+        </td>
     </tr>
     <tr>
         <td>
@@ -48,6 +55,9 @@
         <td>
             @Html.TextBoxFor(model => model.CardCode, new { style = "Width: 60px;", autocomplete = "off", maxlength = 4 })
             @Html.ValidationMessageFor(model => model.CardCode)
+        </td>
+        <td>
+
         </td>
     </tr>
 </table>
@@ -65,8 +75,8 @@
         var cardNumber = $("#CardNumber").val();
 
         if (cardNumber == "") {
-            $("#visaDiv").show();
-            $("#mastercardDiv").show();
+            $("#visaDiv").hide();
+            $("#mastercardDiv").hide();
             return;
         }
 
