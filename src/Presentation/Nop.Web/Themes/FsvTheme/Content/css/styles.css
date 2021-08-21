@@ -4961,7 +4961,7 @@ label, label + * {
   .payment-info .info td {
     display: inline-block;
     width: 100% !important;
-    max-width: 400px !important;
+    max-width: 300px !important;
     font-size: 14px; /*reset zeroing*/
   }
 
