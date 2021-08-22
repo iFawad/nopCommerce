@@ -8,6 +8,7 @@ using Nop.Core;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Payments.Ghost.CashOnDelivery.Components;
 using Nop.Services.Configuration;
+using Nop.Services.Customers;
 using Nop.Services.Localization;
 using Nop.Services.Orders;
 using Nop.Services.Payments;
@@ -26,6 +27,8 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery
         private readonly ISettingService _settingService;
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IWebHelper _webHelper;
+        private readonly IWorkContext _workContext;
+        private readonly ICustomerService _customerService;
 
         #endregion
 
@@ -36,7 +39,9 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery
             IOrderTotalCalculationService orderTotalCalculationService,
             ISettingService settingService,
             IShoppingCartService shoppingCartService,
-            IWebHelper webHelper)
+            IWebHelper webHelper,
+            IWorkContext workContext,
+            ICustomerService customerService)
         {
             _cashOnDeliveryPaymentSettings = cashOnDeliveryPaymentSettings;
             _localizationService = localizationService;
@@ -44,6 +49,8 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery
             _settingService = settingService;
             _shoppingCartService = shoppingCartService;
             _webHelper = webHelper;
+            _workContext = workContext;
+            _customerService = customerService;
         }
 
         #endregion
@@ -82,6 +89,20 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery
             //for example, hide this payment method if all products in the cart are downloadable
             //or hide this payment method if current customer is from certain country
 
+            if (_cashOnDeliveryPaymentSettings.RestrictToUserRole)
+            {
+                //get Customer
+                var customer = await _workContext.GetCurrentCustomerAsync();
+                var customerRoles = await _customerService.GetCustomerRolesAsync(customer);
+                var codUser = customerRoles.Where(x => x.SystemName == "coduser").ToList();
+                var isCodUser = false;
+                if (codUser.Count > 0)
+                    isCodUser = true;
+
+                if (!isCodUser)
+                    return true;
+            }
+            
             if (_cashOnDeliveryPaymentSettings.ShippableProductRequired && !await _shoppingCartService.ShoppingCartRequiresShippingAsync(cart))
                 return true;
 
@@ -231,7 +252,9 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery
                 ["Plugin.Payments.Ghost.CashOnDelivery.ShippableProductRequired.Hint"] = "An option indicating whether shippable products are required in order to display this payment method during checkout.",
                 ["Plugin.Payments.Ghost.CashOnDelivery.PaymentMethodDescription"] = "Pay by \"Cash on delivery\"",
                 ["Plugin.Payments.Ghost.CashOnDelivery.SkipPaymentInfo"] = "Skip payment information page",
-                ["Plugin.Payments.Ghost.CashOnDelivery.SkipPaymentInfo.Hint"] = "An option indicating whether we should display a payment information page for this plugin."
+                ["Plugin.Payments.Ghost.CashOnDelivery.SkipPaymentInfo.Hint"] = "An option indicating whether we should display a payment information page for this plugin.",
+                ["Plugin.Payments.Ghost.CashOnDelivery.RestrictToUserRole"] = "Restrict to user role",
+                ["Plugin.Payments.Ghost.CashOnDelivery.RestrictToUserRole.Hint"] = "An option indicating whether this payment method should be restricted to specific user role with system name \"coduser\"."
             });
 
             await base.InstallAsync();
