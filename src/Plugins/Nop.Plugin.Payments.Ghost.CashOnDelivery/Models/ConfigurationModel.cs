@@ -37,6 +37,10 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery.Models
         public bool SkipPaymentInfo { get; set; }
         public bool SkipPaymentInfo_OverrideForStore { get; set; }
 
+        [NopResourceDisplayName("Plugin.Payments.Ghost.CashOnDelivery.RestrictToUserRole")]
+        public bool RestrictToUserRole { get; set; }
+        public bool RestrictToUserRole_OverrideForStore { get; set; }
+
         public IList<ConfigurationLocalizedModel> Locales { get; set; }
 
         #region Nested class

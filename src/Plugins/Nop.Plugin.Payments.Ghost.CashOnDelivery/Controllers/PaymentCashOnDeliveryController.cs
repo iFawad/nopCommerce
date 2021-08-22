@@ -77,6 +77,7 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery.Controllers
             model.AdditionalFeePercentage = cashOnDeliveryPaymentSettings.AdditionalFeePercentage;
             model.ShippableProductRequired = cashOnDeliveryPaymentSettings.ShippableProductRequired;
             model.SkipPaymentInfo = cashOnDeliveryPaymentSettings.SkipPaymentInfo;
+            model.RestrictToUserRole = cashOnDeliveryPaymentSettings.RestrictToUserRole;
             model.ActiveStoreScopeConfiguration = storeScope;
             if (storeScope > 0)
             {
@@ -85,6 +86,7 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery.Controllers
                 model.AdditionalFeePercentage_OverrideForStore = await _settingService.SettingExistsAsync(cashOnDeliveryPaymentSettings, x => x.AdditionalFeePercentage, storeScope);
                 model.ShippableProductRequired_OverrideForStore = await _settingService.SettingExistsAsync(cashOnDeliveryPaymentSettings, x => x.ShippableProductRequired, storeScope);
                 model.SkipPaymentInfo_OverrideForStore = await _settingService.SettingExistsAsync(cashOnDeliveryPaymentSettings, x => x.SkipPaymentInfo, storeScope);
+                model.RestrictToUserRole_OverrideForStore = await _settingService.SettingExistsAsync(cashOnDeliveryPaymentSettings, x => x.RestrictToUserRole, storeScope);
             }
 
             return View("~/Plugins/Payments.Ghost.CashOnDelivery/Views/Configure.cshtml", model);
@@ -109,6 +111,7 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery.Controllers
             cashOnDeliveryPaymentSettings.AdditionalFeePercentage = model.AdditionalFeePercentage;
             cashOnDeliveryPaymentSettings.ShippableProductRequired = model.ShippableProductRequired;
             cashOnDeliveryPaymentSettings.SkipPaymentInfo = model.SkipPaymentInfo;
+            cashOnDeliveryPaymentSettings.RestrictToUserRole = model.RestrictToUserRole;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
@@ -118,6 +121,7 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery.Controllers
             await _settingService.SaveSettingOverridablePerStoreAsync(cashOnDeliveryPaymentSettings, x => x.AdditionalFeePercentage, model.AdditionalFeePercentage_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(cashOnDeliveryPaymentSettings, x => x.ShippableProductRequired, model.ShippableProductRequired_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(cashOnDeliveryPaymentSettings, x => x.SkipPaymentInfo, model.SkipPaymentInfo_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(cashOnDeliveryPaymentSettings, x => x.RestrictToUserRole, model.RestrictToUserRole_OverrideForStore, storeScope, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
