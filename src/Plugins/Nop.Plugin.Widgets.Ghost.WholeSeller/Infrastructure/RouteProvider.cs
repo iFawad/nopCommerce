@@ -34,6 +34,16 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller.Infrastructure
             endpointRouteBuilder.MapControllerRoute(name: "WholeSellerApply",
                 pattern: $"{lang}/vendor/apply",
                 defaults: new { controller = "Vendor", action = "ApplyVendor" });
+
+            //Contact us page
+            endpointRouteBuilder.MapControllerRoute(name: "ContactUs2",
+                pattern: $"{lang}/contactus",
+                defaults: new { controller = "Common", action = "ContactUs" });
+
+            //Home page
+            endpointRouteBuilder.MapControllerRoute(name: "Homepage2",
+                pattern: $"{lang}",
+                defaults: new { controller = "Home", action = "Index" });
         }
 
         #endregion

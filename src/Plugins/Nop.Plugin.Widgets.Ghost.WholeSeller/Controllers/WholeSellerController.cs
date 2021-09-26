@@ -62,16 +62,24 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller.Controllers
 
             var model = new ConfigurationModel
             {
-                Title = wholeSellerSettings.Title,
-                RouteUrl = wholeSellerSettings.RouteUrl,
+                TitleWholeSeller = wholeSellerSettings.TitleWholeSeller,
+                RouteUrlWholeSeller = wholeSellerSettings.RouteUrlWholeSeller,
+                TitleContactUs = wholeSellerSettings.TitleContactUs,
+                RouteUrlContactUs = wholeSellerSettings.RouteUrlContactUs,
+                TitleHome = wholeSellerSettings.TitleHome,
+                RouteUrlHome = wholeSellerSettings.RouteUrlHome,
                 ActiveStoreScopeConfiguration = storeScope
             };
 
 
             if (storeScope > 0)
             {
-                model.Title_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.Title, storeScope);
-                model.RouteUrl_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.RouteUrl, storeScope);
+                model.TitleWholeSeller_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.TitleWholeSeller, storeScope);
+                model.RouteUrlWholeSeller_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.RouteUrlWholeSeller, storeScope);
+                model.TitleContactUs_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.TitleContactUs, storeScope);
+                model.RouteUrlContactUs_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.RouteUrlContactUs, storeScope);
+                model.TitleHome_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.TitleHome, storeScope);
+                model.RouteUrlHome_OverrideForStore = await _settingService.SettingExistsAsync(wholeSellerSettings, x => x.RouteUrlHome, storeScope);
             }
 
             return View("~/Plugins/Widgets.Ghost.WholeSeller/Views/Configure.cshtml", model);
@@ -91,14 +99,22 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller.Controllers
             var wholeSellerSettings = await _settingService.LoadSettingAsync<WholeSellerSettings>(storeScope);
 
             //save settings
-            wholeSellerSettings.Title = model.Title;
-            wholeSellerSettings.RouteUrl = model.RouteUrl;
+            wholeSellerSettings.TitleWholeSeller = model.TitleWholeSeller;
+            wholeSellerSettings.RouteUrlWholeSeller = model.RouteUrlWholeSeller;
+            wholeSellerSettings.TitleContactUs = model.TitleContactUs;
+            wholeSellerSettings.RouteUrlContactUs = model.RouteUrlContactUs;
+            wholeSellerSettings.TitleHome = model.TitleHome;
+            wholeSellerSettings.RouteUrlHome = model.RouteUrlHome;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
              * and loaded from database after each update */
-            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.Title, model.Title_OverrideForStore, storeScope, false);
-            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.RouteUrl, model.RouteUrl_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.TitleWholeSeller, model.TitleWholeSeller_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.RouteUrlWholeSeller, model.RouteUrlWholeSeller_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.TitleContactUs, model.TitleContactUs_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.RouteUrlContactUs, model.RouteUrlContactUs_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.TitleHome, model.TitleHome_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(wholeSellerSettings, x => x.RouteUrlHome, model.RouteUrlHome_OverrideForStore, storeScope, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();
