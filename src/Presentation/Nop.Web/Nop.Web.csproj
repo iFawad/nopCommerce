@@ -38,6 +38,8 @@
 
     <Content Include="Plugins\bin\placeholder.txt" CopyToPublishDirectory="PreserveNewest" />
 
+    <Content Include="Themes\FsvTheme\Views\Customer\Login.cshtml" />
+
     <Content Include="Themes\FsvTheme\Views\Product\_AddToCart.cshtml" />
 
     <Content Include="Themes\FsvTheme\Views\Shared\Components\Footer\Default.cshtml" />
@@ -115,6 +117,7 @@
     <None Remove="Themes\FsvTheme\Content\images\watch.png" />
     <None Remove="Themes\FsvTheme\Content\images\wishlist-button.png" />
     <None Remove="Themes\FsvTheme\preview.jpg" />
+    <None Remove="Themes\FsvTheme\Views\Customer\Login.cshtml" />
     <None Remove="Themes\FsvTheme\Views\Product\_AddToCart.cshtml" />
     <None Remove="Themes\FsvTheme\Views\Shared\Components\Footer\Default.cshtml" />
     <None Remove="Themes\FsvTheme\Views\Shared\Components\HomepageBestSellers\Default.cshtml" />
@@ -142,6 +145,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Themes\FsvTheme\Views\Customer\Login.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="Themes\FsvTheme\Views\Product\_AddToCart.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
