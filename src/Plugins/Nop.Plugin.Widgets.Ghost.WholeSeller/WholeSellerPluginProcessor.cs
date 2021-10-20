@@ -72,10 +72,18 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller
 
             await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
-                ["Plugin.Widgets.Ghost.WholeSeller.Title"] = "Title:",
-                ["Plugin.Widgets.Ghost.WholeSeller.Title.Hint"] = "Name to be displayed in header menu.",
-                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrl"] = "RouteUrl:",
-                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrl.Hint"] = "RouteUrl link to the whole seller page."
+                ["Plugin.Widgets.Ghost.WholeSeller.TitleWholeSeller"] = "Title Wholeseller:",
+                ["Plugin.Widgets.Ghost.WholeSeller.TitleWholeSeller.Hint"] = "Name to be displayed in header menu for wholeseller.",
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrlWholeSeller"] = "RouteUrl Wholeseller:",
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrlWholeSeller.Hint"] = "RouteUrl link to the whole seller page.",
+                ["Plugin.Widgets.Ghost.WholeSeller.TitleContactUs"] = "Title Contact Us:",
+                ["Plugin.Widgets.Ghost.WholeSeller.TitleContactUs.Hint"] = "Name to be displayed in header menu for contact us.",
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrlContactUs"] = "RouteUrl Contact Us:",
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrlContactUs.Hint"] = "RouteUrl link to the contact us page.",
+                ["Plugin.Widgets.Ghost.WholeSeller.TitleHome"] = "Title Home:",
+                ["Plugin.Widgets.Ghost.WholeSeller.TitleHome.Hint"] = "Name to be displayed in header menu for home.",
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrlHome"] = "RouteUrl Home:",
+                ["Plugin.Widgets.Ghost.WholeSeller.RouteUrlHome.Hint"] = "RouteUrl link to the home page."
             });
 
 

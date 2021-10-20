@@ -9,7 +9,11 @@ namespace Nop.Plugin.Widgets.Ghost.WholeSeller
 {
     public class WholeSellerSettings : ISettings
     {
-        public string Title { get; set; }
-        public string RouteUrl { get; set; }
+        public string TitleWholeSeller { get; set; }
+        public string RouteUrlWholeSeller { get; set; }
+        public string TitleContactUs { get; set; }
+        public string RouteUrlContactUs { get; set; }
+        public string TitleHome { get; set; }
+        public string RouteUrlHome { get; set; }
     }
 }
