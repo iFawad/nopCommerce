@@ -29,5 +29,10 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery
         /// Gets a value indicating whether we should display a payment information page for this plugin
         /// </summary>
         public bool SkipPaymentInfo { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the plugin should be restricted to a UserRole SystemName "coduser"
+        /// </summary>
+        public bool RestrictToUserRole { get; set; }
     }
 }
