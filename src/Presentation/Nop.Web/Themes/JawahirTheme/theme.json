@@ -1,0 +1,7 @@
+﻿{
+  "SystemName": "FsvTheme",
+  "FriendlyName": "FSV Theme",
+  "SupportRTL": true,
+  "PreviewImageUrl": "~/Themes/FsvTheme/preview.jpg",
+  "PreviewText": "Theme for FSV, based on The 'DefaultClean' site theme"
+}
