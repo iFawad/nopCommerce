@@ -147,12 +147,13 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
                 throw new ArgumentNullException(nameof(messageTemplate));
 
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
-            var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.Body, languageId);
+            //var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.Body, languageId);
+            var body = await _localizationService.GetLocalizedAsync(messageTemplate, mt => mt.BodySms, languageId);
             var bodyReplaced = _tokenizer.Replace(body, tokens, true);
 
             //Remove Html tags for Sms
-            Regex regex = new Regex("\\<[^\\>]*\\>");
-            bodyReplaced = regex.Replace(bodyReplaced, string.Empty);
+            //Regex regex = new Regex("\\<[^\\>]*\\>");
+            //bodyReplaced = StripHtmlExceptHyperlinks(bodyReplaced);
 
             //extract Order.CustomerEmail token
             var customerEmailToken = tokens.Where(token =>
@@ -195,6 +196,20 @@ namespace Nop.Plugin.Sms.Ghost.Twilio.Services
             return await base.SendNotificationAsync(messageTemplate, emailAccount, languageId, tokens,
                 toEmailAddress, toName, attachmentFilePath, attachmentFileName,
                 replyToEmailAddress, replyToName, fromEmail, fromName, subject);
+        }
+
+        private string StripHtmlExceptHyperlinks(string html)
+        {
+            string strippedHtml = string.Empty;
+            strippedHtml = System.Text.RegularExpressions.Regex.Replace(html, "<a[\\s]href=", "{{a href=");
+            strippedHtml = System.Text.RegularExpressions.Regex.Replace(strippedHtml, "</a>", "{{/a}}");
+            strippedHtml = System.Text.RegularExpressions.Regex.Replace(strippedHtml, "<[^>]*>", string.Empty);
+            //strippedHtml = System.Text.RegularExpressions.Regex.Replace(strippedHtml, "{{a href=", "<a href=");
+            //strippedHtml = System.Text.RegularExpressions.Regex.Replace(strippedHtml, "{{/a}}", "</a>");
+            strippedHtml = System.Text.RegularExpressions.Regex.Replace(strippedHtml, "{{a href=", string.Empty);
+            strippedHtml = System.Text.RegularExpressions.Regex.Replace(strippedHtml, "{{/a}}", string.Empty);
+            strippedHtml = System.Text.RegularExpressions.Regex.Replace(strippedHtml, "\">", "\"");
+            return strippedHtml;
         }
 
         #endregion
