@@ -38,6 +38,16 @@
 
     <Content Include="Plugins\bin\placeholder.txt" CopyToPublishDirectory="PreserveNewest" />
 
+    <Content Include="Themes\JawahirTheme\Views\Customer\Login.cshtml" />
+
+    <Content Include="Themes\JawahirTheme\Views\Shared\Components\Footer\Default.cshtml" />
+
+    <Content Include="Themes\JawahirTheme\Views\Shared\Components\HomepageBestSellers\Default.cshtml" />
+
+    <Content Include="Themes\JawahirTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
+
+    <Content Include="Themes\JawahirTheme\Views\Shared\Components\HomepageProducts\Default.cshtml" />
+
     <Content Include="Themes\FsvTheme\Views\Customer\Login.cshtml" />
 
     <Content Include="Themes\FsvTheme\Views\Product\_AddToCart.cshtml" />
@@ -60,10 +70,71 @@
 
     <!-- We copy the \Logs directory -->
     <Content Include="Logs\**" CopyToPublishDirectory="PreserveNewest" />
+    <Content Remove="Themes\JawahirTheme\Content\fonts\SourceSansPro-Regular.ttf" />
+    <Content Remove="Themes\JawahirTheme\Content\fonts\SourceSansPro-Regular.woff" />
+    <Content Remove="Themes\JawahirTheme\Content\fonts\SourceSansPro-Regular.woff2" />
     <Content Remove="Themes\FsvTheme\Content\fonts\SourceSansPro-Regular.ttf" />
     <Content Remove="Themes\FsvTheme\Content\fonts\SourceSansPro-Regular.woff" />
     <Content Remove="Themes\FsvTheme\Content\fonts\SourceSansPro-Regular.woff2" />
     <Content Remove="wwwroot\js\public.common.extension.js" />
+    <None Remove="Themes\JawahirTheme\Content\css\print.css" />
+    <None Remove="Themes\JawahirTheme\Content\css\styles.css" />
+    <None Remove="Themes\JawahirTheme\Content\css\styles.rtl.css" />
+    <None Remove="Themes\JawahirTheme\Content\images\ajax-loader-small.gif" />
+    <None Remove="Themes\JawahirTheme\Content\images\back-button.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\calendar-next.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\calendar-prev.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\close.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\compare-button.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\details.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\discontinued-product-icon.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\download-button.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\edit.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\edit_.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\email-button.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\first.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\ie_warning.jpg" />
+    <None Remove="Themes\JawahirTheme\Content\images\last.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\loading.gif" />
+    <None Remove="Themes\JawahirTheme\Content\images\logo.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\menu-icon.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\move.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\new.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\next.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\pointer.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\prev.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\rating1.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\rating2.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\remove.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\remove_.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\reply.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\retry.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\return.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\rss.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\shipping.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\shopping-bag.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\social-sprite.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\subscribe-button.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\toggle-black.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\toggle-gray.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\toggle-white.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\topic-type1.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\topic-type2.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\topic-type3.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\view-grid.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\view-list.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\vote-down-selected.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\vote-down.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\vote-up-selected.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\vote-up.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\watch.png" />
+    <None Remove="Themes\JawahirTheme\Content\images\wishlist-button.png" />
+    <None Remove="Themes\JawahirTheme\preview.jpg" />
+    <None Remove="Themes\JawahirTheme\Views\Customer\Login.cshtml" />
+    <None Remove="Themes\JawahirTheme\Views\Shared\Components\Footer\Default.cshtml" />
+    <None Remove="Themes\JawahirTheme\Views\Shared\Components\HomepageBestSellers\Default.cshtml" />
+    <None Remove="Themes\JawahirTheme\Views\Shared\Components\HomepageCategories\Default.cshtml" />
+    <None Remove="Themes\JawahirTheme\Views\Shared\Components\HomepageProducts\Default.cshtml" />
     <None Remove="Themes\FsvTheme\Content\css\print.css" />
     <None Remove="Themes\FsvTheme\Content\css\styles.css" />
     <None Remove="Themes\FsvTheme\Content\css\styles.rtl.css" />
@@ -145,6 +216,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Themes\JawahirTheme\Views\Customer\Login.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\JawahirTheme\Views\Shared\Components\Footer\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\JawahirTheme\Views\Shared\Components\HomepageBestSellers\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\JawahirTheme\Views\Shared\Components\HomepageCategories\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Themes\JawahirTheme\Views\Shared\Components\HomepageProducts\Default.cshtml">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <Content Update="Themes\FsvTheme\Views\Customer\Login.cshtml">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
