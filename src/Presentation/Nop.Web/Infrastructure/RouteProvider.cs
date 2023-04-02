@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
-using Nop.Services.Installation;
+﻿using Nop.Services.Installation;
 using Nop.Web.Framework.Mvc.Routing;
 
 namespace Nop.Web.Infrastructure
@@ -176,10 +174,6 @@ namespace Nop.Web.Infrastructure
                 defaults: new { controller = "Product", action = "ProductEmailAFriend" });
 
             //reviews
-            endpointRouteBuilder.MapControllerRoute(name: "ProductReviews",
-                pattern: $"{lang}/productreviews/{{productId}}",
-                defaults: new { controller = "Product", action = "ProductReviews" });
-
             endpointRouteBuilder.MapControllerRoute(name: "CustomerProductReviews",
                 pattern: $"{lang}/customer/productreviews",
                 defaults: new { controller = "Product", action = "CustomerProductReviews" });
