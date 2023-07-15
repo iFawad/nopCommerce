@@ -79,10 +79,10 @@ script {
   --main-contrast-white: #fff;
   --main-contrast-black: #000;
   --text-color: #333;
-  --accent: #8ffe0c;
-  --accent-shadow: #42ce24;
-  --accent2: #9acb31;
-  --accent2-shadow: #75922f;
+  --accent: #d32027;
+  --accent-shadow: #b10202;
+  --accent2: #d32027;
+  --accent2-shadow: #b10202;
   --accent2-shadow2: #5a6f26;
   --error: #f00;
   --font-family-alpha: 'Arial';
@@ -2116,7 +2116,7 @@ label, label + * {
 
     .pager li span {
       border-color: transparent;
-      background-color: #4ab2f1;
+      background-color: var(--accent-shadow);
       color: #fff;
     }
 
@@ -5560,7 +5560,7 @@ label, label + * {
   .post-title:focus,
   .news-title:hover,
   .news-title:focus {
-    color: #4ab2f1;
+    color: var(--accent-shadow);
   }
 
 .post-date,
@@ -5641,14 +5641,14 @@ label, label + * {
 
     .blog-posts .buttons .read-comments:hover,
     .blog-posts .buttons .read-comments:focus {
-      color: #4ab2f1;
+      color: var(--accent-shadow);
     }
 
   .blog-posts .buttons .read-more,
   .news-items .buttons .read-more {
     display: inline-block;
     border: none;
-    background-color: #4ab2f1;
+    background-color: var(--accent);
     padding: 10px 20px;
     font-size: 12px;
     color: #fff;
@@ -5659,7 +5659,7 @@ label, label + * {
     .blog-posts .buttons .read-more:focus,
     .news-items .buttons .read-more:hover,
     .news-items .buttons .read-more:focus {
-      background-color: #248ece;
+      background-color: var(--accent-shadow);
     }
 
 .new-comment {
