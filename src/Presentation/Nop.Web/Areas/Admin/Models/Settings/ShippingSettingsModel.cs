@@ -1,6 +1,7 @@
-﻿using Nop.Web.Areas.Admin.Models.Common;
-using Nop.Web.Framework.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Nop.Web.Areas.Admin.Models.Common;
 using Nop.Web.Framework.Models;
+using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Web.Areas.Admin.Models.Settings
 {
@@ -21,7 +22,7 @@ namespace Nop.Web.Areas.Admin.Models.Settings
         #region Properties
 
         public int ActiveStoreScopeConfiguration { get; set; }
-        
+
         [NopResourceDisplayName("Admin.Configuration.Settings.Shipping.ShipToSameAddress")]
         public bool ShipToSameAddress { get; set; }
         public bool ShipToSameAddress_OverrideForStore { get; set; }
@@ -49,7 +50,7 @@ namespace Nop.Web.Areas.Admin.Models.Settings
         [NopResourceDisplayName("Admin.Configuration.Settings.Shipping.NotifyCustomerAboutShippingFromMultipleLocations")]
         public bool NotifyCustomerAboutShippingFromMultipleLocations { get; set; }
         public bool NotifyCustomerAboutShippingFromMultipleLocations_OverrideForStore { get; set; }
-        
+
         [NopResourceDisplayName("Admin.Configuration.Settings.Shipping.FreeShippingOverXEnabled")]
         public bool FreeShippingOverXEnabled { get; set; }
         public bool FreeShippingOverXEnabled_OverrideForStore { get; set; }
@@ -93,6 +94,11 @@ namespace Nop.Web.Areas.Admin.Models.Settings
         [NopResourceDisplayName("Admin.Configuration.Settings.Shipping.ConsiderAssociatedProductsDimensions")]
         public bool ConsiderAssociatedProductsDimensions { get; set; }
         public bool ConsiderAssociatedProductsDimensions_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Admin.Configuration.Settings.Shipping.ShippingSorting")]
+        public int ShippingSorting { get; set; }
+        public bool ShippingSorting_OverrideForStore { get; set; }
+        public SelectList SortShippingValues { get; set; }
 
         public AddressModel ShippingOriginAddress { get; set; }
         public bool ShippingOriginAddress_OverrideForStore { get; set; }

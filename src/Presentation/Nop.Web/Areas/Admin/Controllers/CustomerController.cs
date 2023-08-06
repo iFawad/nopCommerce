@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Nop.Core;
@@ -16,6 +11,7 @@ using Nop.Core.Domain.Gdpr;
 using Nop.Core.Domain.Messages;
 using Nop.Core.Domain.Tax;
 using Nop.Core.Events;
+using Nop.Services.Attributes;
 using Nop.Services.Common;
 using Nop.Services.Customers;
 using Nop.Services.ExportImport;
@@ -42,38 +38,39 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly CustomerSettings _customerSettings;
-        private readonly DateTimeSettings _dateTimeSettings;
-        private readonly EmailAccountSettings _emailAccountSettings;
-        private readonly ForumSettings _forumSettings;
-        private readonly GdprSettings _gdprSettings;
-        private readonly IAddressAttributeParser _addressAttributeParser;
-        private readonly IAddressService _addressService;
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly ICustomerAttributeParser _customerAttributeParser;
-        private readonly ICustomerAttributeService _customerAttributeService;
-        private readonly ICustomerModelFactory _customerModelFactory;
-        private readonly ICustomerRegistrationService _customerRegistrationService;
-        private readonly ICustomerService _customerService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IEmailAccountService _emailAccountService;
-        private readonly IEventPublisher _eventPublisher;
-        private readonly IExportManager _exportManager;
-        private readonly IForumService _forumService;
-        private readonly IGdprService _gdprService;
-        private readonly IGenericAttributeService _genericAttributeService;
-        private readonly ILocalizationService _localizationService;
-        private readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly IQueuedEmailService _queuedEmailService;
-        private readonly IRewardPointService _rewardPointService;
-        private readonly IStoreContext _storeContext;
-        private readonly IStoreService _storeService;
-        private readonly ITaxService _taxService;
-        private readonly IWorkContext _workContext;
-        private readonly IWorkflowMessageService _workflowMessageService;
-        private readonly TaxSettings _taxSettings;
+        protected readonly CustomerSettings _customerSettings;
+        protected readonly DateTimeSettings _dateTimeSettings;
+        protected readonly EmailAccountSettings _emailAccountSettings;
+        protected readonly ForumSettings _forumSettings;
+        protected readonly GdprSettings _gdprSettings;
+        protected readonly IAddressService _addressService;
+        protected readonly IAttributeParser<AddressAttribute, AddressAttributeValue> _addressAttributeParser;
+        protected readonly IAttributeParser<CustomerAttribute, CustomerAttributeValue> _customerAttributeParser;
+        protected readonly IAttributeService<CustomerAttribute, CustomerAttributeValue> _customerAttributeService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ICustomerModelFactory _customerModelFactory;
+        protected readonly ICustomerRegistrationService _customerRegistrationService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IEmailAccountService _emailAccountService;
+        protected readonly IEventPublisher _eventPublisher;
+        protected readonly IExportManager _exportManager;
+        protected readonly IForumService _forumService;
+        protected readonly IGdprService _gdprService;
+        protected readonly IGenericAttributeService _genericAttributeService;
+        protected readonly IImportManager _importManager;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly INewsLetterSubscriptionService _newsLetterSubscriptionService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IQueuedEmailService _queuedEmailService;
+        protected readonly IRewardPointService _rewardPointService;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IStoreService _storeService;
+        protected readonly ITaxService _taxService;
+        protected readonly IWorkContext _workContext;
+        protected readonly IWorkflowMessageService _workflowMessageService;
+        protected readonly TaxSettings _taxSettings;
 
         #endregion
 
@@ -84,11 +81,11 @@ namespace Nop.Web.Areas.Admin.Controllers
             EmailAccountSettings emailAccountSettings,
             ForumSettings forumSettings,
             GdprSettings gdprSettings,
-            IAddressAttributeParser addressAttributeParser,
             IAddressService addressService,
+            IAttributeParser<AddressAttribute, AddressAttributeValue> addressAttributeParser,
+            IAttributeParser<CustomerAttribute, CustomerAttributeValue> customerAttributeParser,
+            IAttributeService<CustomerAttribute, CustomerAttributeValue> customerAttributeService,
             ICustomerActivityService customerActivityService,
-            ICustomerAttributeParser customerAttributeParser,
-            ICustomerAttributeService customerAttributeService,
             ICustomerModelFactory customerModelFactory,
             ICustomerRegistrationService customerRegistrationService,
             ICustomerService customerService,
@@ -99,6 +96,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             IForumService forumService,
             IGdprService gdprService,
             IGenericAttributeService genericAttributeService,
+            IImportManager importManager,
             ILocalizationService localizationService,
             INewsLetterSubscriptionService newsLetterSubscriptionService,
             INotificationService notificationService,
@@ -117,11 +115,11 @@ namespace Nop.Web.Areas.Admin.Controllers
             _emailAccountSettings = emailAccountSettings;
             _forumSettings = forumSettings;
             _gdprSettings = gdprSettings;
-            _addressAttributeParser = addressAttributeParser;
             _addressService = addressService;
-            _customerActivityService = customerActivityService;
+            _addressAttributeParser = addressAttributeParser;
             _customerAttributeParser = customerAttributeParser;
             _customerAttributeService = customerAttributeService;
+            _customerActivityService = customerActivityService;
             _customerModelFactory = customerModelFactory;
             _customerRegistrationService = customerRegistrationService;
             _customerService = customerService;
@@ -132,6 +130,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             _forumService = forumService;
             _gdprService = gdprService;
             _genericAttributeService = genericAttributeService;
+            _importManager = importManager;
             _localizationService = localizationService;
             _newsLetterSubscriptionService = newsLetterSubscriptionService;
             _notificationService = notificationService;
@@ -150,7 +149,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task<string> ValidateCustomerRolesAsync(IList<CustomerRole> customerRoles, IList<CustomerRole> existingCustomerRoles)
         {
             if (customerRoles == null)
@@ -160,8 +158,8 @@ namespace Nop.Web.Areas.Admin.Controllers
                 throw new ArgumentNullException(nameof(existingCustomerRoles));
 
             //check ACL permission to manage customer roles
-            var rolesToAdd = customerRoles.Except(existingCustomerRoles);
-            var rolesToDelete = existingCustomerRoles.Except(customerRoles);
+            var rolesToAdd = customerRoles.Except(existingCustomerRoles, new CustomerRoleComparerByName());
+            var rolesToDelete = existingCustomerRoles.Except(customerRoles, new CustomerRoleComparerByName());
             if (rolesToAdd.Any(role => role.SystemName != NopCustomerDefaults.RegisteredRoleName) || rolesToDelete.Any())
             {
                 if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAcl))
@@ -181,14 +179,13 @@ namespace Nop.Web.Areas.Admin.Controllers
             return string.Empty;
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task<string> ParseCustomCustomerAttributesAsync(IFormCollection form)
         {
             if (form == null)
                 throw new ArgumentNullException(nameof(form));
 
             var attributesXml = string.Empty;
-            var customerAttributes = await _customerAttributeService.GetAllCustomerAttributesAsync();
+            var customerAttributes = await _customerAttributeService.GetAllAttributesAsync();
             foreach (var attribute in customerAttributes)
             {
                 var controlId = $"{NopCustomerServicesDefaults.CustomerAttributePrefix}{attribute.Id}";
@@ -203,7 +200,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         {
                             var selectedAttributeId = int.Parse(ctrlAttributes);
                             if (selectedAttributeId > 0)
-                                attributesXml = _customerAttributeParser.AddCustomerAttribute(attributesXml,
+                                attributesXml = _customerAttributeParser.AddAttribute(attributesXml,
                                     attribute, selectedAttributeId.ToString());
                         }
 
@@ -217,7 +214,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                             {
                                 var selectedAttributeId = int.Parse(item);
                                 if (selectedAttributeId > 0)
-                                    attributesXml = _customerAttributeParser.AddCustomerAttribute(attributesXml,
+                                    attributesXml = _customerAttributeParser.AddAttribute(attributesXml,
                                         attribute, selectedAttributeId.ToString());
                             }
                         }
@@ -225,13 +222,13 @@ namespace Nop.Web.Areas.Admin.Controllers
                         break;
                     case AttributeControlType.ReadonlyCheckboxes:
                         //load read-only (already server-side selected) values
-                        var attributeValues = await _customerAttributeService.GetCustomerAttributeValuesAsync(attribute.Id);
+                        var attributeValues = await _customerAttributeService.GetAttributeValuesAsync(attribute.Id);
                         foreach (var selectedAttributeId in attributeValues
                             .Where(v => v.IsPreSelected)
                             .Select(v => v.Id)
                             .ToList())
                         {
-                            attributesXml = _customerAttributeParser.AddCustomerAttribute(attributesXml,
+                            attributesXml = _customerAttributeParser.AddAttribute(attributesXml,
                                 attribute, selectedAttributeId.ToString());
                         }
 
@@ -242,7 +239,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                         if (!StringValues.IsNullOrEmpty(ctrlAttributes))
                         {
                             var enteredText = ctrlAttributes.ToString().Trim();
-                            attributesXml = _customerAttributeParser.AddCustomerAttribute(attributesXml,
+                            attributesXml = _customerAttributeParser.AddAttribute(attributesXml,
                                 attribute, enteredText);
                         }
 
@@ -260,8 +257,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             return attributesXml;
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
-        private async Task<bool> SecondAdminAccountExistsAsync(Customer customer)
+        protected virtual async Task<bool> SecondAdminAccountExistsAsync(Customer customer)
         {
             var customers = await _customerService.GetAllCustomersAsync(customerRoleIds: new[] { (await _customerService.GetCustomerRoleBySystemNameAsync(NopCustomerDefaults.AdministratorsRoleName)).Id });
 
@@ -364,48 +360,47 @@ namespace Nop.Web.Areas.Admin.Controllers
             {
                 //fill entity from model
                 var customer = model.ToEntity<Customer>();
+                var currentStore = await _storeContext.GetCurrentStoreAsync();
 
                 customer.CustomerGuid = Guid.NewGuid();
                 customer.CreatedOnUtc = DateTime.UtcNow;
                 customer.LastActivityDateUtc = DateTime.UtcNow;
-                customer.RegisteredInStoreId = (await _storeContext.GetCurrentStoreAsync()).Id;
-
-                await _customerService.InsertCustomerAsync(customer);
+                customer.RegisteredInStoreId = currentStore.Id;
 
                 //form fields
                 if (_dateTimeSettings.AllowCustomersToSetTimeZone)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.TimeZoneIdAttribute, model.TimeZoneId);
+                    customer.TimeZoneId = model.TimeZoneId;
                 if (_customerSettings.GenderEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.GenderAttribute, model.Gender);
+                    customer.Gender = model.Gender;
                 if (_customerSettings.FirstNameEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.FirstNameAttribute, model.FirstName);
+                    customer.FirstName = model.FirstName;
                 if (_customerSettings.LastNameEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.LastNameAttribute, model.LastName);
+                    customer.LastName = model.LastName;
                 if (_customerSettings.DateOfBirthEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.DateOfBirthAttribute, model.DateOfBirth);
+                    customer.DateOfBirth = model.DateOfBirth;
                 if (_customerSettings.CompanyEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CompanyAttribute, model.Company);
+                    customer.Company = model.Company;
                 if (_customerSettings.StreetAddressEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.StreetAddressAttribute, model.StreetAddress);
+                    customer.StreetAddress = model.StreetAddress;
                 if (_customerSettings.StreetAddress2Enabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.StreetAddress2Attribute, model.StreetAddress2);
+                    customer.StreetAddress2 = model.StreetAddress2;
                 if (_customerSettings.ZipPostalCodeEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.ZipPostalCodeAttribute, model.ZipPostalCode);
+                    customer.ZipPostalCode = model.ZipPostalCode;
                 if (_customerSettings.CityEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CityAttribute, model.City);
+                    customer.City = model.City;
                 if (_customerSettings.CountyEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CountyAttribute, model.County);
+                    customer.County = model.County;
                 if (_customerSettings.CountryEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CountryIdAttribute, model.CountryId);
+                    customer.CountryId = model.CountryId;
                 if (_customerSettings.CountryEnabled && _customerSettings.StateProvinceEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.StateProvinceIdAttribute, model.StateProvinceId);
+                    customer.StateProvinceId = model.StateProvinceId;
                 if (_customerSettings.PhoneEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.PhoneAttribute, model.Phone);
+                    customer.Phone = model.Phone;
                 if (_customerSettings.FaxEnabled)
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.FaxAttribute, model.Fax);
+                    customer.Fax = model.Fax;
+                customer.CustomCustomerAttributesXML = customerAttributesXml;
 
-                //custom customer attributes
-                await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CustomCustomerAttributes, customerAttributesXml);
+                await _customerService.InsertCustomerAsync(customer);
 
                 //newsletter subscriptions
                 if (!string.IsNullOrEmpty(customer.Email))
@@ -597,25 +592,19 @@ namespace Nop.Web.Areas.Admin.Controllers
                     //VAT number
                     if (_taxSettings.EuVatEnabled)
                     {
-                        var prevVatNumber = await _genericAttributeService.GetAttributeAsync<string>(customer, NopCustomerDefaults.VatNumberAttribute);
+                        var prevVatNumber = customer.VatNumber;
 
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.VatNumberAttribute, model.VatNumber);
+                        customer.VatNumber = model.VatNumber;
                         //set VAT number status
                         if (!string.IsNullOrEmpty(model.VatNumber))
                         {
                             if (!model.VatNumber.Equals(prevVatNumber, StringComparison.InvariantCultureIgnoreCase))
                             {
-                                await _genericAttributeService.SaveAttributeAsync(customer,
-                                    NopCustomerDefaults.VatNumberStatusIdAttribute,
-                                    (int)(await _taxService.GetVatNumberStatusAsync(model.VatNumber)).vatNumberStatus);
+                                customer.VatNumberStatusId = (int)(await _taxService.GetVatNumberStatusAsync(model.VatNumber)).vatNumberStatus;
                             }
                         }
                         else
-                        {
-                            await _genericAttributeService.SaveAttributeAsync(customer,
-                                NopCustomerDefaults.VatNumberStatusIdAttribute,
-                                (int)VatNumberStatus.Empty);
-                        }
+                            customer.VatNumberStatusId = (int)VatNumberStatus.Empty;
                     }
 
                     //vendor
@@ -623,38 +612,38 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                     //form fields
                     if (_dateTimeSettings.AllowCustomersToSetTimeZone)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.TimeZoneIdAttribute, model.TimeZoneId);
+                        customer.TimeZoneId = model.TimeZoneId;
                     if (_customerSettings.GenderEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.GenderAttribute, model.Gender);
+                        customer.Gender = model.Gender;
                     if (_customerSettings.FirstNameEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.FirstNameAttribute, model.FirstName);
+                        customer.FirstName = model.FirstName;
                     if (_customerSettings.LastNameEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.LastNameAttribute, model.LastName);
+                        customer.LastName = model.LastName;
                     if (_customerSettings.DateOfBirthEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.DateOfBirthAttribute, model.DateOfBirth);
+                        customer.DateOfBirth = model.DateOfBirth;
                     if (_customerSettings.CompanyEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CompanyAttribute, model.Company);
+                        customer.Company = model.Company;
                     if (_customerSettings.StreetAddressEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.StreetAddressAttribute, model.StreetAddress);
+                        customer.StreetAddress = model.StreetAddress;
                     if (_customerSettings.StreetAddress2Enabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.StreetAddress2Attribute, model.StreetAddress2);
+                        customer.StreetAddress2 = model.StreetAddress2;
                     if (_customerSettings.ZipPostalCodeEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.ZipPostalCodeAttribute, model.ZipPostalCode);
+                        customer.ZipPostalCode = model.ZipPostalCode;
                     if (_customerSettings.CityEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CityAttribute, model.City);
+                        customer.City = model.City;
                     if (_customerSettings.CountyEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CountyAttribute, model.County);
+                        customer.County = model.County;
                     if (_customerSettings.CountryEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CountryIdAttribute, model.CountryId);
+                        customer.CountryId = model.CountryId;
                     if (_customerSettings.CountryEnabled && _customerSettings.StateProvinceEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.StateProvinceIdAttribute, model.StateProvinceId);
+                        customer.StateProvinceId = model.StateProvinceId;
                     if (_customerSettings.PhoneEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.PhoneAttribute, model.Phone);
+                        customer.Phone = model.Phone;
                     if (_customerSettings.FaxEnabled)
-                        await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.FaxAttribute, model.Fax);
+                        customer.Fax = model.Fax;
 
                     //custom customer attributes
-                    await _genericAttributeService.SaveAttributeAsync(customer, NopCustomerDefaults.CustomCustomerAttributes, customerAttributesXml);
+                    customer.CustomCustomerAttributesXML = customerAttributesXml;
 
                     //newsletter subscriptions
                     if (!string.IsNullOrEmpty(customer.Email))
@@ -814,9 +803,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (customer == null)
                 return RedirectToAction("List");
 
-            await _genericAttributeService.SaveAttributeAsync(customer,
-                NopCustomerDefaults.VatNumberStatusIdAttribute,
-                (int)VatNumberStatus.Valid);
+            customer.VatNumberStatusId = (int)VatNumberStatus.Valid;
+            await _customerService.UpdateCustomerAsync(customer);
 
             return RedirectToAction("Edit", new { id = customer.Id });
         }
@@ -833,9 +821,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (customer == null)
                 return RedirectToAction("List");
 
-            await _genericAttributeService.SaveAttributeAsync(customer,
-                NopCustomerDefaults.VatNumberStatusIdAttribute,
-                (int)VatNumberStatus.Invalid);
+            customer.VatNumberStatusId = (int)VatNumberStatus.Invalid;
+            await _customerService.UpdateCustomerAsync(customer);
 
             return RedirectToAction("Edit", new { id = customer.Id });
         }
@@ -953,7 +940,8 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             //ensure that a non-admin user cannot impersonate as an administrator
             //otherwise, that user can simply impersonate as an administrator and gain additional administrative privileges
-            if (!await _customerService.IsAdminAsync(await _workContext.GetCurrentCustomerAsync()) && await _customerService.IsAdminAsync(customer))
+            var currentCustomer = await _workContext.GetCurrentCustomerAsync();
+            if (!await _customerService.IsAdminAsync(currentCustomer) && await _customerService.IsAdminAsync(customer))
             {
                 _notificationService.ErrorNotification(await _localizationService.GetResourceAsync("Admin.Customers.Customers.NonAdminNotImpersonateAsAdminError"));
                 return RedirectToAction("Edit", customer.Id);
@@ -963,12 +951,12 @@ namespace Nop.Web.Areas.Admin.Controllers
             await _customerActivityService.InsertActivityAsync("Impersonation.Started",
                 string.Format(await _localizationService.GetResourceAsync("ActivityLog.Impersonation.Started.StoreOwner"), customer.Email, customer.Id), customer);
             await _customerActivityService.InsertActivityAsync(customer, "Impersonation.Started",
-                string.Format(await _localizationService.GetResourceAsync("ActivityLog.Impersonation.Started.Customer"), (await _workContext.GetCurrentCustomerAsync()).Email, (await _workContext.GetCurrentCustomerAsync()).Id), await _workContext.GetCurrentCustomerAsync());
+                string.Format(await _localizationService.GetResourceAsync("ActivityLog.Impersonation.Started.Customer"), currentCustomer.Email, currentCustomer.Id), currentCustomer);
 
             //ensure login is not required
             customer.RequireReLogin = false;
             await _customerService.UpdateCustomerAsync(customer);
-            await _genericAttributeService.SaveAttributeAsync<int?>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.ImpersonatedCustomerIdAttribute, customer.Id);
+            await _genericAttributeService.SaveAttributeAsync<int?>(currentCustomer, NopCustomerDefaults.ImpersonatedCustomerIdAttribute, customer.Id);
 
             return RedirectToAction("Index", "Home", new { area = string.Empty });
         }
@@ -1086,11 +1074,13 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (string.IsNullOrWhiteSpace(model.SendPm.Message))
                     throw new NopException(await _localizationService.GetResourceAsync("PrivateMessages.MessageCannotBeEmpty"));
 
+                var store = await _storeContext.GetCurrentStoreAsync();
+
                 var privateMessage = new PrivateMessage
                 {
-                    StoreId = (await _storeContext.GetCurrentStoreAsync()).Id,
+                    StoreId = store.Id,
                     ToCustomerId = customer.Id,
-                    FromCustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    FromCustomerId = customer.Id,
                     Subject = model.SendPm.Subject,
                     Text = model.SendPm.Message,
                     IsDeletedByAuthor = false,
@@ -1139,6 +1129,10 @@ namespace Nop.Web.Areas.Admin.Controllers
             //prevent adding a new row with zero value
             if (model.Points == 0)
                 return ErrorJson(await _localizationService.GetResourceAsync("Admin.Customers.Customers.RewardPoints.AddingZeroValueNotAllowed"));
+
+            //prevent adding negative point validity for point reduction
+            if (model.Points < 0 && model.PointsValidity.HasValue)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.Customers.Customers.RewardPoints.Fields.AddNegativePointsValidity"));
 
             //try to get a customer with the specified id
             var customer = await _customerService.GetCustomerByIdAsync(model.CustomerId);
@@ -1197,7 +1191,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 ?? throw new ArgumentException("No customer found with the specified id", nameof(customerId));
 
             //try to get an address with the specified id
-            var address = await _customerService.GetCustomerAddressAsync(customer.Id, id);            
+            var address = await _customerService.GetCustomerAddressAsync(customer.Id, id);
 
             if (address == null)
                 return Content("No address found with the specified id");
@@ -1239,7 +1233,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return RedirectToAction("List");
 
             //custom address attributes
-            var customAttributes = await _addressAttributeParser.ParseCustomAddressAttributesAsync(form);
+            var customAttributes = await _addressAttributeParser.ParseCustomAttributesAsync(form, NopCommonDefaults.AddressAttributeControlName);
             var customAttributeWarnings = await _addressAttributeParser.GetAttributeWarningsAsync(customAttributes);
             foreach (var error in customAttributeWarnings)
             {
@@ -1312,7 +1306,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return RedirectToAction("Edit", new { id = customer.Id });
 
             //custom address attributes
-            var customAttributes = await _addressAttributeParser.ParseCustomAddressAttributesAsync(form);
+            var customAttributes = await _addressAttributeParser.ParseCustomAttributesAsync(form, NopCommonDefaults.AddressAttributeControlName);
             var customAttributeWarnings = await _addressAttributeParser.GetAttributeWarningsAsync(customAttributes);
             foreach (var error in customAttributeWarnings)
             {
@@ -1596,7 +1590,8 @@ namespace Nop.Web.Areas.Admin.Controllers
                 //_gdprService.InsertLog(customer, 0, GdprRequestType.ExportData, await _localizationService.GetResource("Gdpr.Exported"));
                 //export
                 //export
-                var bytes = await _exportManager.ExportCustomerGdprInfoToXlsxAsync(customer, (await _storeContext.GetCurrentStoreAsync()).Id);
+                var store = await _storeContext.GetCurrentStoreAsync();
+                var bytes = await _exportManager.ExportCustomerGdprInfoToXlsxAsync(customer, store.Id);
 
                 return File(bytes, MimeTypes.TextXlsx, $"customerdata-{customer.Id}.xlsx");
             }
@@ -1722,6 +1717,39 @@ namespace Nop.Web.Areas.Admin.Controllers
             catch (Exception exc)
             {
                 await _notificationService.ErrorNotificationAsync(exc);
+                return RedirectToAction("List");
+            }
+        }
+
+        [HttpPost]
+        public virtual async Task<IActionResult> ImportExcel(IFormFile importexcelfile)
+        {
+            if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCustomers))
+                return AccessDeniedView();
+
+            if (await _workContext.GetCurrentVendorAsync() != null)
+                //a vendor can not import customer
+                return AccessDeniedView();
+
+            try
+            {
+                if ((importexcelfile?.Length ?? 0) > 0)
+                    await _importManager.ImportCustomersFromXlsxAsync(importexcelfile.OpenReadStream());
+                else
+                {
+                    _notificationService.ErrorNotification(await _localizationService.GetResourceAsync("Admin.Common.UploadFile"));
+
+                    return RedirectToAction("List");
+                }
+
+                _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Customers.Customers.Imported"));
+
+                return RedirectToAction("List");
+            }
+            catch (Exception exc)
+            {
+                await _notificationService.ErrorNotificationAsync(exc);
+
                 return RedirectToAction("List");
             }
         }

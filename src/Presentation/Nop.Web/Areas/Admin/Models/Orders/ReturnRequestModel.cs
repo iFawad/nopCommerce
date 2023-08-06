@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Nop.Web.Framework.Models;
 using Nop.Web.Framework.Mvc.ModelBinding;
-using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Areas.Admin.Models.Orders
 {
@@ -13,7 +12,7 @@ namespace Nop.Web.Areas.Admin.Models.Orders
 
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.CustomNumber")]
         public string CustomNumber { get; set; }
-        
+
         public int OrderId { get; set; }
 
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.CustomOrderNumber")]
@@ -34,19 +33,22 @@ namespace Nop.Web.Areas.Admin.Models.Orders
 
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.Quantity")]
         public int Quantity { get; set; }
-        
+
+        [NopResourceDisplayName("Admin.ReturnRequests.Fields.ReturnedQuantity")]
+        public int ReturnedQuantity { get; set; }
+
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.ReasonForReturn")]
         public string ReasonForReturn { get; set; }
-        
+
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.RequestedAction")]
         public string RequestedAction { get; set; }
-        
+
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.CustomerComments")]
         public string CustomerComments { get; set; }
 
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.UploadedFile")]
         public Guid UploadedFileGuid { get; set; }
-        
+
         [NopResourceDisplayName("Admin.ReturnRequests.Fields.StaffNotes")]
         public string StaffNotes { get; set; }
 

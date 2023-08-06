@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Core.Configuration;
 using Nop.Core.Domain.Catalog;
-using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Orders;
@@ -56,54 +49,52 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly AdminAreaSettings _adminAreaSettings;
-        private readonly AppSettings _appSettings;
-        private readonly CatalogSettings _catalogSettings;
-        private readonly CurrencySettings _currencySettings;
-        private readonly IActionContextAccessor _actionContextAccessor;
-        private readonly IAuthenticationPluginManager _authenticationPluginManager;
-        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
-        private readonly ICurrencyService _currencyService;
-        private readonly ICustomerService _customerService;
-        private readonly IEventPublisher _eventPublisher;
-        private readonly INopDataProvider _dataProvider;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IExchangeRatePluginManager _exchangeRatePluginManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ILanguageService _languageService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IMaintenanceService _maintenanceService;
-        private readonly IMeasureService _measureService;
-        private readonly IMultiFactorAuthenticationPluginManager _multiFactorAuthenticationPluginManager;
-        private readonly INopFileProvider _fileProvider;
-        private readonly IOrderService _orderService;
-        private readonly IPaymentPluginManager _paymentPluginManager;
-        private readonly IPickupPluginManager _pickupPluginManager;
-        private readonly IPluginService _pluginService;
-        private readonly IProductService _productService;
-        private readonly IReturnRequestService _returnRequestService;
-        private readonly ISearchTermService _searchTermService;
-        private readonly IServiceCollection _serviceCollection;
-        private readonly IShippingPluginManager _shippingPluginManager;
-        private readonly IStaticCacheManager _staticCacheManager;
-        private readonly IStoreContext _storeContext;
-        private readonly IStoreService _storeService;
-        private readonly ITaxPluginManager _taxPluginManager;
-        private readonly IUrlHelperFactory _urlHelperFactory;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IWebHelper _webHelper;
-        private readonly IWidgetPluginManager _widgetPluginManager;
-        private readonly IWorkContext _workContext;
-        private readonly MeasureSettings _measureSettings;
-        private readonly NopHttpClient _nopHttpClient;
-        private readonly ProxySettings _proxySettings;
+        protected readonly AppSettings _appSettings;
+        protected readonly CatalogSettings _catalogSettings;
+        protected readonly CurrencySettings _currencySettings;
+        protected readonly IActionContextAccessor _actionContextAccessor;
+        protected readonly IAuthenticationPluginManager _authenticationPluginManager;
+        protected readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        protected readonly ICurrencyService _currencyService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IEventPublisher _eventPublisher;
+        protected readonly INopDataProvider _dataProvider;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IExchangeRatePluginManager _exchangeRatePluginManager;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
+        protected readonly ILanguageService _languageService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IMaintenanceService _maintenanceService;
+        protected readonly IMeasureService _measureService;
+        protected readonly IMultiFactorAuthenticationPluginManager _multiFactorAuthenticationPluginManager;
+        protected readonly INopFileProvider _fileProvider;
+        protected readonly IOrderService _orderService;
+        protected readonly IPaymentPluginManager _paymentPluginManager;
+        protected readonly IPickupPluginManager _pickupPluginManager;
+        protected readonly IPluginService _pluginService;
+        protected readonly IProductService _productService;
+        protected readonly IReturnRequestService _returnRequestService;
+        protected readonly ISearchTermService _searchTermService;
+        protected readonly IServiceCollection _serviceCollection;
+        protected readonly IShippingPluginManager _shippingPluginManager;
+        protected readonly IStaticCacheManager _staticCacheManager;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IStoreService _storeService;
+        protected readonly ITaxPluginManager _taxPluginManager;
+        protected readonly IUrlHelperFactory _urlHelperFactory;
+        protected readonly IUrlRecordService _urlRecordService;
+        protected readonly IWebHelper _webHelper;
+        protected readonly IWidgetPluginManager _widgetPluginManager;
+        protected readonly IWorkContext _workContext;
+        protected readonly MeasureSettings _measureSettings;
+        protected readonly NopHttpClient _nopHttpClient;
+        protected readonly ProxySettings _proxySettings;
 
         #endregion
 
         #region Ctor
 
-        public CommonModelFactory(AdminAreaSettings adminAreaSettings,
-            AppSettings appSettings,
+        public CommonModelFactory(AppSettings appSettings,
             CatalogSettings catalogSettings,
             CurrencySettings currencySettings,
             IActionContextAccessor actionContextAccessor,
@@ -144,7 +135,6 @@ namespace Nop.Web.Areas.Admin.Factories
             NopHttpClient nopHttpClient,
             ProxySettings proxySettings)
         {
-            _adminAreaSettings = adminAreaSettings;
             _appSettings = appSettings;
             _catalogSettings = catalogSettings;
             _currencySettings = currencySettings;
@@ -202,7 +192,8 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(models));
 
             //check whether current store URL matches the store configured URL
-            var currentStoreUrl = (await _storeContext.GetCurrentStoreAsync()).Url;
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var currentStoreUrl = store.Url;
             if (!string.IsNullOrEmpty(currentStoreUrl) &&
                 (currentStoreUrl.Equals(_webHelper.GetStoreLocation(false), StringComparison.InvariantCultureIgnoreCase) ||
                 currentStoreUrl.Equals(_webHelper.GetStoreLocation(true), StringComparison.InvariantCultureIgnoreCase)))
@@ -220,41 +211,6 @@ namespace Nop.Web.Areas.Admin.Factories
                 Level = SystemWarningLevel.Fail,
                 Text = string.Format(await _localizationService.GetResourceAsync("Admin.System.Warnings.URL.NoMatch"),
                     currentStoreUrl, _webHelper.GetStoreLocation(false))
-            });
-        }
-
-        /// <summary>
-        /// Prepare copyright removal key warning model
-        /// </summary>
-        /// <param name="models">List of system warning models</param>
-        /// <returns>A task that represents the asynchronous operation</returns>
-        protected virtual async Task PrepareRemovalKeyWarningModelAsync(IList<SystemWarningModel> models)
-        {
-            if (models == null)
-                throw new ArgumentNullException(nameof(models));
-
-            if (!_adminAreaSettings.CheckCopyrightRemovalKey)
-                return;
-
-            //try to get a warning
-            var warning = string.Empty;
-            try
-            {
-                warning = await _nopHttpClient.GetCopyrightWarningAsync();
-            }
-            catch
-            {
-                // ignored
-            }
-
-            if (string.IsNullOrEmpty(warning))
-                return;
-
-            models.Add(new SystemWarningModel
-            {
-                Level = SystemWarningLevel.CopyrightRemovalKey,
-                Text = warning,
-                DontEncode = true //this text could contain links, so don't encode it
             });
         }
 
@@ -433,71 +389,6 @@ namespace Nop.Web.Areas.Admin.Factories
         }
 
         /// <summary>
-        /// Prepare plugins warning model
-        /// </summary>
-        /// <param name="models">List of system warning models</param>
-        /// <returns>A task that represents the asynchronous operation</returns>
-        protected virtual async Task PreparePluginsWarningModelAsync(IList<SystemWarningModel> models)
-        {
-            if (models == null)
-                throw new ArgumentNullException(nameof(models));
-
-            //check whether there are incompatible plugins
-            foreach (var pluginName in _pluginService.GetIncompatiblePlugins())
-            {
-                models.Add(new SystemWarningModel
-                {
-                    Level = SystemWarningLevel.Warning,
-                    Text = string.Format(await _localizationService.GetResourceAsync("Admin.System.Warnings.PluginNotLoaded"), pluginName)
-                });
-            }
-
-            //check whether there are any collision of loaded assembly
-            foreach (var assembly in _pluginService.GetAssemblyCollisions())
-            {
-                //get plugin references message
-                var message = (await assembly.Collisions
-                    .SelectAwait(async item => string.Format(await _localizationService
-                        .GetResourceAsync("Admin.System.Warnings.PluginRequiredAssembly"), item.PluginName, item.AssemblyName))
-                    .AggregateAsync("", (curent, all) => all + ", " + curent)).TrimEnd(',', ' ');
-
-                models.Add(new SystemWarningModel
-                {
-                    Level = SystemWarningLevel.Warning,
-                    Text = string.Format(await _localizationService.GetResourceAsync("Admin.System.Warnings.AssemblyHasCollision"),
-                        assembly.ShortName, assembly.AssemblyFullNameInMemory, message)
-                });
-            }
-            
-            //check whether there are different plugins which try to override the same interface
-            var baseLibraries = new[] { "Nop.Core", "Nop.Data", "Nop.Services", "Nop.Web", "Nop.Web.Framework" };
-            var overridenServices = _serviceCollection.Where(p =>
-                    p.ServiceType.FullName != null &&
-                    p.ServiceType.FullName.StartsWith("Nop.", StringComparison.InvariantCulture) &&
-                    !p.ServiceType.FullName.StartsWith(
-                        typeof(IConsumer<>).FullName?.Replace("~1", string.Empty) ?? string.Empty,
-                        StringComparison.InvariantCulture)).Select(p =>
-                    KeyValuePair.Create(p.ServiceType.FullName, p.ImplementationType?.Assembly.GetName().Name))
-                .Where(p => baseLibraries.All(library =>
-                    !p.Value?.StartsWith(library, StringComparison.InvariantCultureIgnoreCase) ?? false))
-                .GroupBy(p => p.Key, p => p.Value)
-                .Where(p => p.Count() > 1)
-                .ToDictionary(p => p.Key, p => p.ToList());
-
-            foreach (var overridenService in overridenServices)
-            {
-                var assemblies = overridenService.Value
-                    .Aggregate("", (current, all) => all + ", " + current).TrimEnd(',', ' ');
-
-                models.Add(new SystemWarningModel
-                {
-                    Level = SystemWarningLevel.Warning,
-                    Text = string.Format(await _localizationService.GetResourceAsync("Admin.System.Warnings.PluginsOverrideSameService"), overridenService.Key, assemblies)
-                });
-            }
-        }
-
-        /// <summary>
         /// Prepare performance settings warning model
         /// </summary>
         /// <param name="models">List of system warning models</param>
@@ -539,10 +430,10 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(models));
 
             var dirPermissionsOk = true;
-            var dirsToCheck = FilePermissionHelper.GetDirectoriesWrite();
+            var dirsToCheck = _fileProvider.GetDirectoriesWrite();
             foreach (var dir in dirsToCheck)
             {
-                if (FilePermissionHelper.CheckPermissions(dir, false, true, true, false))
+                if (_fileProvider.CheckPermissions(dir, false, true, true, false))
                     continue;
 
                 models.Add(new SystemWarningModel
@@ -564,10 +455,10 @@ namespace Nop.Web.Areas.Admin.Factories
             }
 
             var filePermissionsOk = true;
-            var filesToCheck = FilePermissionHelper.GetFilesWrite();
+            var filesToCheck = _fileProvider.GetFilesWrite();
             foreach (var file in filesToCheck)
             {
-                if (FilePermissionHelper.CheckPermissions(file, false, true, true, true))
+                if (_fileProvider.CheckPermissions(file, false, true, true, true))
                     continue;
 
                 models.Add(new SystemWarningModel
@@ -606,11 +497,136 @@ namespace Nop.Web.Areas.Admin.Factories
         }
 
         /// <summary>
+        /// Prepare plugins which try to override the same interface warning model
+        /// </summary>
+        /// <param name="models">List of system warning models</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        protected virtual async Task PreparePluginsOverrideSameInterfaceWarningModelAsync(IList<SystemWarningModel> models)
+        {
+            //check whether there are different plugins which try to override the same interface
+            var baseLibraries = new[] { "Nop.Core", "Nop.Data", "Nop.Services", "Nop.Web", "Nop.Web.Framework" };
+            var overridenServices = _serviceCollection.Where(p =>
+                    p.ServiceType.FullName != null &&
+                    p.ServiceType.FullName.StartsWith("Nop.", StringComparison.InvariantCulture) &&
+                    !p.ServiceType.FullName.StartsWith(
+                        typeof(IConsumer<>).FullName?.Replace("~1", string.Empty) ?? string.Empty,
+                        StringComparison.InvariantCulture)).Select(p =>
+                    KeyValuePair.Create(p.ServiceType.FullName, p.ImplementationType?.Assembly.GetName().Name))
+                .Where(p => baseLibraries.All(library =>
+                    !p.Value?.StartsWith(library, StringComparison.InvariantCultureIgnoreCase) ?? false))
+                .GroupBy(p => p.Key, p => p.Value)
+                .Where(p => p.Count() > 1)
+                .ToDictionary(p => p.Key, p => p.ToList());
+
+            foreach (var overridenService in overridenServices)
+            {
+                var assemblies = overridenService.Value
+                    .Aggregate("", (current, all) => all + ", " + current).TrimEnd(',', ' ');
+
+                models.Add(new SystemWarningModel
+                {
+                    Level = SystemWarningLevel.Warning,
+                    Text = string.Format(await _localizationService.GetResourceAsync("Admin.System.Warnings.PluginsOverrideSameService"), overridenService.Key, assemblies)
+                });
+            }
+        }
+
+        /// <summary>
+        /// Prepare plugins collision of loaded assembly warning model
+        /// </summary>
+        /// <param name="models">List of system warning models</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        protected virtual async Task PreparePluginsCollisionsWarningModelAsync(IList<SystemWarningModel> models)
+        {
+            var assemblyCollisions = _pluginService.GetAssemblyCollisions();
+
+            if (assemblyCollisions.Any())
+            {
+                var warningFormat = await _localizationService
+                    .GetResourceAsync("Admin.System.Warnings.PluginRequiredAssembly");
+
+                //check whether there are any collision of loaded assembly
+                foreach (var assembly in _pluginService.GetAssemblyCollisions())
+                {
+                    //get plugin references message
+                    var message = assembly.Collisions
+                        .Select(item => string.Format(warningFormat, item.PluginName, item.AssemblyVersion))
+                        .Aggregate("", (current, all) => all + ", " + current).TrimEnd(',', ' ');
+
+                    models.Add(new SystemWarningModel
+                    {
+                        Level = SystemWarningLevel.Warning,
+                        Text = string.Format(
+                            await _localizationService.GetResourceAsync("Admin.System.Warnings.AssemblyHasCollision"),
+                            assembly.ShortName, assembly.AssemblyInMemory, message)
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Prepare incompatible plugins warning model 
+        /// </summary>
+        /// <param name="models">List of system warning models</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        protected virtual async Task PrepareIncompatibleWarningModelAsync(IList<SystemWarningModel> models)
+        {
+            foreach (var incompatiblePlugin in _pluginService.GetIncompatiblePlugins())
+            {
+                string warning;
+
+                switch (incompatiblePlugin.Value)
+                {
+                    case PluginIncompatibleType.MainAssemblyNotFound:
+                        warning = string.Format(
+                            await _localizationService.GetResourceAsync("Admin.System.Warnings.PluginMainAssemblyNotFound"),
+                            incompatiblePlugin.Key);
+                        break;
+                    case PluginIncompatibleType.NotCompatibleWithCurrentVersion:
+                        warning = string.Format(
+                            await _localizationService.GetResourceAsync("Admin.System.Warnings.PluginNotCompatibleWithCurrentVersion"),
+                            incompatiblePlugin.Key);
+                        break;
+                    default:
+                        continue;
+                }
+
+                models.Add(new SystemWarningModel
+                {
+                    Level = SystemWarningLevel.Warning,
+                    Text = warning
+                });
+            }
+        }
+
+        /// <summary>
+        /// Prepare plugins installed warning model
+        /// </summary>
+        /// <param name="models">List of system warning models</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        protected virtual async Task PreparePluginsInstalledWarningModelAsync(IList<SystemWarningModel> models)
+        {
+            var plugins = await _pluginService.GetPluginDescriptorsAsync<IPlugin>(LoadPluginsMode.NotInstalledOnly);
+
+            var notInstalled = plugins.Select(p => p.FriendlyName).ToList();
+
+            if (!notInstalled.Any())
+                return;
+
+            models.Add(new SystemWarningModel
+            {
+                Level = SystemWarningLevel.Warning,
+                DontEncode = true,
+                Text = $"{await _localizationService.GetResourceAsync("Admin.System.Warnings.PluginNotInstalled")}: {string.Join(", ", notInstalled)}. {await _localizationService.GetResourceAsync("Admin.System.Warnings.PluginNotInstalled.HelpText")}"
+            });
+        }
+
+        /// <summary>
         /// Prepare plugins enabled warning model
         /// </summary>
         /// <param name="models">List of system warning models</param>
         /// <returns>A task that represents the asynchronous operation</returns>
-        protected virtual async Task PreparePluginsEnabledWarningModelAsync(List<SystemWarningModel> models)
+        protected virtual async Task PreparePluginsEnabledWarningModelAsync(IList<SystemWarningModel> models)
         {
             var plugins = await _pluginService.GetPluginsAsync<IPlugin>();
 
@@ -716,11 +732,12 @@ namespace Nop.Web.Areas.Admin.Factories
 
             foreach (var header in _httpContextAccessor.HttpContext.Request.Headers)
             {
-                model.Headers.Add(new SystemInfoModel.HeaderModel
-                {
-                    Name = header.Key,
-                    Value = header.Value
-                });
+                if (header.Key != HeaderNames.Cookie)
+                    model.Headers.Add(new SystemInfoModel.HeaderModel
+                    {
+                        Name = header.Key,
+                        Value = header.Value
+                    });
             }
 
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -754,13 +771,13 @@ namespace Nop.Web.Areas.Admin.Factories
 
             var currentStaticCacheManagerName = _staticCacheManager.GetType().Name;
 
-            if (_appSettings.DistributedCacheConfig.Enabled)
+            if (_appSettings.Get<DistributedCacheConfig>().Enabled)
                 currentStaticCacheManagerName +=
-                    $"({await _localizationService.GetLocalizedEnumAsync(_appSettings.DistributedCacheConfig.DistributedCacheType)})";
+                    $"({await _localizationService.GetLocalizedEnumAsync(_appSettings.Get<DistributedCacheConfig>().DistributedCacheType)})";
 
             model.CurrentStaticCacheManager = currentStaticCacheManagerName;
 
-            model.AzureBlobStorageEnabled = _appSettings.AzureBlobConfig.Enabled;
+            model.AzureBlobStorageEnabled = _appSettings.Get<AzureBlobConfig>().Enabled;
 
             return model;
         }
@@ -802,6 +819,32 @@ namespace Nop.Web.Areas.Admin.Factories
         }
 
         /// <summary>
+        /// Prepare plugins warning model
+        /// </summary>
+        /// <param name="models">List of system warning models</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task PreparePluginsWarningModelAsync(IList<SystemWarningModel> models)
+        {
+            if (models == null)
+                throw new ArgumentNullException(nameof(models));
+
+            //incompatible plugins
+            await PrepareIncompatibleWarningModelAsync(models);
+
+            //collision of loaded assembly
+            await PreparePluginsCollisionsWarningModelAsync(models);
+
+            //override the same interface
+            await PreparePluginsOverrideSameInterfaceWarningModelAsync(models);
+
+            //not active plugins
+            await PreparePluginsEnabledWarningModelAsync(models);
+
+            //not install plugins
+            await PreparePluginsInstalledWarningModelAsync(models);
+        }
+
+        /// <summary>
         /// Prepare system warning models
         /// </summary>
         /// <returns>
@@ -814,9 +857,6 @@ namespace Nop.Web.Areas.Admin.Factories
 
             //store URL
             await PrepareStoreUrlWarningModelAsync(models);
-
-            //removal key
-            await PrepareRemovalKeyWarningModelAsync(models);
 
             //primary exchange rate currency
             await PrepareExchangeRateCurrencyWarningModelAsync(models);
@@ -833,17 +873,14 @@ namespace Nop.Web.Areas.Admin.Factories
             //payment methods
             await PreparePaymentMethodsWarningModelAsync(models);
 
-            //plugins
-            await PreparePluginsWarningModelAsync(models);
-
             //performance settings
             await PreparePerformanceSettingsWarningModelAsync(models);
 
             //validate write permissions (the same procedure like during installation)
             await PrepareFilePermissionsWarningModelAsync(models);
 
-            //not active plugins
-            await PreparePluginsEnabledWarningModelAsync(models);
+            //plugins
+            await PreparePluginsWarningModelAsync(models);
 
             //proxy connection
             await PrepareProxyConnectionWarningModelAsync(models);
@@ -910,7 +947,7 @@ namespace Nop.Web.Areas.Admin.Factories
                     //fill in additional values (not existing in the entity)
                     Length = $"{_fileProvider.FileLength(file) / 1024f / 1024f:F2} Mb",
 
-                    Link = $"{(_webHelper.GetStoreLocation(false))}db_backups/{_fileProvider.GetFileName(file)}"
+                    Link = $"{_webHelper.GetStoreLocation()}db_backups/{_fileProvider.GetFileName(file)}"
                 });
             });
 
@@ -1045,11 +1082,12 @@ namespace Nop.Web.Areas.Admin.Factories
         /// </returns>
         public virtual async Task<LanguageSelectorModel> PrepareLanguageSelectorModelAsync()
         {
+            var store = await _storeContext.GetCurrentStoreAsync();
             var model = new LanguageSelectorModel
             {
                 CurrentLanguage = (await _workContext.GetWorkingLanguageAsync()).ToModel<LanguageModel>(),
                 AvailableLanguages = (await _languageService
-                    .GetAllLanguagesAsync(storeId: (await _storeContext.GetCurrentStoreAsync()).Id))
+                    .GetAllLanguagesAsync(storeId: store.Id))
                     .Select(language => language.ToModel<LanguageModel>()).ToList()
             };
 

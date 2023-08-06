@@ -1,19 +1,17 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Services.Catalog;
 using Nop.Services.Security;
 
 namespace Nop.Web.Areas.Admin.Controllers
 {
-    public class SearchCompleteController : BaseAdminController
+    public partial class SearchCompleteController : BaseAdminController
     {
         #region Fields
 
-        private readonly IPermissionService _permissionService;
-        private readonly IProductService _productService;
-        private readonly IWorkContext _workContext;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IProductService _productService;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
@@ -43,10 +41,11 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return Content(string.Empty);
 
             //a vendor should have access only to his products
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
             var vendorId = 0;
-            if (await _workContext.GetCurrentVendorAsync() != null)
+            if (currentVendor != null)
             {
-                vendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+                vendorId = currentVendor.Id;
             }
 
             //products
@@ -58,11 +57,11 @@ namespace Nop.Web.Areas.Admin.Controllers
                 showHidden: true);
 
             var result = (from p in products
-                            select new
-                            {
-                                label = p.Name,
-                                productid = p.Id
-                            }).ToList();
+                          select new
+                          {
+                              label = p.Name,
+                              productid = p.Id
+                          }).ToList();
 
             return Json(result);
         }

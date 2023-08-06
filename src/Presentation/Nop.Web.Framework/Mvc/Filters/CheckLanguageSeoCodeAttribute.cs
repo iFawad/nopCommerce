@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Nop.Core;
@@ -48,10 +45,10 @@ namespace Nop.Web.Framework.Mvc.Filters
         {
             #region Fields
 
-            private readonly bool _ignoreFilter;
-            private readonly IWebHelper _webHelper;
-            private readonly IWorkContext _workContext;
-            private readonly LocalizationSettings _localizationSettings;
+            protected readonly bool _ignoreFilter;
+            protected readonly IWebHelper _webHelper;
+            protected readonly IWorkContext _workContext;
+            protected readonly LocalizationSettings _localizationSettings;
 
             #endregion
 
@@ -89,7 +86,7 @@ namespace Nop.Web.Framework.Mvc.Filters
                 if (!context.HttpContext.Request.Method.Equals(WebRequestMethods.Http.Get, StringComparison.InvariantCultureIgnoreCase))
                     return;
 
-                if (!await DataSettingsManager.IsDatabaseInstalledAsync())
+                if (!DataSettingsManager.IsDatabaseInstalled())
                     return;
 
                 //check whether this filter has been overridden for the Action

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using Nop.Core;
@@ -14,6 +10,7 @@ using Nop.Core.Infrastructure;
 using Nop.Data;
 using Nop.Services.Catalog;
 using Nop.Services.Configuration;
+using Nop.Services.Logging;
 using Nop.Services.Seo;
 
 namespace Nop.Services.Media
@@ -25,29 +22,29 @@ namespace Nop.Services.Media
     {
         #region Fields
 
-        private static BlobContainerClient _blobContainerClient;
-        private static BlobServiceClient _blobServiceClient;
-        private static bool _azureBlobStorageAppendContainerName;
-        private static bool _isInitialized;
-        private static string _azureBlobStorageConnectionString;
-        private static string _azureBlobStorageContainerName;
-        private static string _azureBlobStorageEndPoint;
+        protected static BlobContainerClient _blobContainerClient;
+        protected static BlobServiceClient _blobServiceClient;
+        protected static bool _azureBlobStorageAppendContainerName;
+        protected static bool _isInitialized;
+        protected static string _azureBlobStorageConnectionString;
+        protected static string _azureBlobStorageContainerName;
+        protected static string _azureBlobStorageEndPoint;
 
-        private readonly IStaticCacheManager _staticCacheManager;
-        private readonly MediaSettings _mediaSettings;
+        protected readonly IStaticCacheManager _staticCacheManager;
 
-        private readonly object _locker = new();
+        protected readonly object _locker = new();
 
         #endregion
 
         #region Ctor
 
         public AzurePictureService(AppSettings appSettings,
-            INopDataProvider dataProvider,
             IDownloadService downloadService,
             IHttpContextAccessor httpContextAccessor,
+            ILogger logger,
             INopFileProvider fileProvider,
             IProductAttributeParser productAttributeParser,
+            IProductAttributeService productAttributeService,
             IRepository<Picture> pictureRepository,
             IRepository<PictureBinary> pictureBinaryRepository,
             IRepository<ProductPicture> productPictureRepository,
@@ -56,11 +53,12 @@ namespace Nop.Services.Media
             IUrlRecordService urlRecordService,
             IWebHelper webHelper,
             MediaSettings mediaSettings)
-            : base(dataProvider,
-                  downloadService,
+            : base(downloadService,
                   httpContextAccessor,
+                  logger,
                   fileProvider,
                   productAttributeParser,
+                  productAttributeService,
                   pictureRepository,
                   pictureBinaryRepository,
                   productPictureRepository,
@@ -70,7 +68,6 @@ namespace Nop.Services.Media
                   mediaSettings)
         {
             _staticCacheManager = staticCacheManager;
-            _mediaSettings = mediaSettings;
 
             OneTimeInit(appSettings);
         }
@@ -88,13 +85,13 @@ namespace Nop.Services.Media
             if (_isInitialized)
                 return;
 
-            if (string.IsNullOrEmpty(appSettings.AzureBlobConfig.ConnectionString))
+            if (string.IsNullOrEmpty(appSettings.Get<AzureBlobConfig>().ConnectionString))
                 throw new Exception("Azure connection string for Blob is not specified");
 
-            if (string.IsNullOrEmpty(appSettings.AzureBlobConfig.ContainerName))
+            if (string.IsNullOrEmpty(appSettings.Get<AzureBlobConfig>().ContainerName))
                 throw new Exception("Azure container name for Blob is not specified");
 
-            if (string.IsNullOrEmpty(appSettings.AzureBlobConfig.EndPoint))
+            if (string.IsNullOrEmpty(appSettings.Get<AzureBlobConfig>().EndPoint))
                 throw new Exception("Azure end point for Blob is not specified");
 
             lock (_locker)
@@ -102,10 +99,10 @@ namespace Nop.Services.Media
                 if (_isInitialized)
                     return;
 
-                _azureBlobStorageAppendContainerName = appSettings.AzureBlobConfig.AppendContainerName;
-                _azureBlobStorageConnectionString = appSettings.AzureBlobConfig.ConnectionString;
-                _azureBlobStorageContainerName = appSettings.AzureBlobConfig.ContainerName.Trim().ToLower();
-                _azureBlobStorageEndPoint = appSettings.AzureBlobConfig.EndPoint.Trim().ToLower().TrimEnd('/');
+                _azureBlobStorageAppendContainerName = appSettings.Get<AzureBlobConfig>().AppendContainerName;
+                _azureBlobStorageConnectionString = appSettings.Get<AzureBlobConfig>().ConnectionString;
+                _azureBlobStorageContainerName = appSettings.Get<AzureBlobConfig>().ContainerName.Trim().ToLowerInvariant();
+                _azureBlobStorageEndPoint = appSettings.Get<AzureBlobConfig>().EndPoint.Trim().ToLowerInvariant().TrimEnd('/');
 
                 _blobServiceClient = new BlobServiceClient(_azureBlobStorageConnectionString);
                 _blobContainerClient = _blobServiceClient.GetBlobContainerClient(_azureBlobStorageContainerName);
@@ -231,7 +228,9 @@ namespace Nop.Services.Media
             }
 
             if (headers is null)
-                await blobClient.UploadAsync(ms);
+                //We must explicitly indicate through the parameter that the object needs to be overwritten if it already exists
+                //See more: https://github.com/Azure/azure-sdk-for-net/issues/9470
+                await blobClient.UploadAsync(ms, overwrite: true);
             else
                 await blobClient.UploadAsync(ms, new BlobUploadOptions { HttpHeaders = headers });
 

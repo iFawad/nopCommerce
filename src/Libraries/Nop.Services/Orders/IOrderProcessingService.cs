@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core.Domain.Customers;
+﻿using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
 using Nop.Services.Payments;
@@ -91,7 +88,15 @@ namespace Nop.Services.Orders
         /// <param name="notifyCustomer">True to notify customer</param>
         /// <returns>A task that represents the asynchronous operation</returns>
         Task ShipAsync(Shipment shipment, bool notifyCustomer);
-        
+
+        /// <summary>
+        /// Marks a shipment as ready for pickup
+        /// </summary>
+        /// <param name="shipment">Shipment</param>
+        /// <param name="notifyCustomer">True to notify customer</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        Task ReadyForPickupAsync(Shipment shipment, bool notifyCustomer);
+
         /// <summary>
         /// Marks a shipment as delivered
         /// </summary>
@@ -256,10 +261,10 @@ namespace Nop.Services.Orders
         Task<IList<string>> VoidAsync(Order order);
 
         /// <summary>
-        /// Gets a value indicating whether order can be marked as Tasked
+        /// Gets a value indicating whether order can be marked as voided
         /// </summary>
         /// <param name="order">Order</param>
-        /// <returns>A value indicating whether order can be marked as Tasked</returns>
+        /// <returns>A value indicating whether order can be marked as voided</returns>
         bool CanVoidOffline(Order order);
 
         /// <summary>
@@ -273,8 +278,11 @@ namespace Nop.Services.Orders
         /// Place order items in current user shopping cart.
         /// </summary>
         /// <param name="order">The order</param>
-        /// <returns>A task that represents the asynchronous operation</returns>
-        Task ReOrderAsync(Order order);
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the warnings
+        /// </returns>
+        Task<IList<string>> ReOrderAsync(Order order);
 
         /// <summary>
         /// Check whether return request is allowed
@@ -313,7 +321,7 @@ namespace Nop.Services.Orders
         /// <param name="useRewardPoints">A value indicating reward points should be used; null to detect current choice of the customer</param>
         /// <returns>
         /// A task that represents the asynchronous operation
-        /// The task result contains the rue - OK; false - minimum order total amount is not reached
+        /// The task result contains the value indicating whether payment workflow is required
         /// </returns>
         Task<bool> IsPaymentWorkflowRequiredAsync(IList<ShoppingCartItem> cart, bool? useRewardPoints = null);
 

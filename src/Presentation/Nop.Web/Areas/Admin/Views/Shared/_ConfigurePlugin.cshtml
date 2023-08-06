@@ -1,9 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Controllers
-@using Nop.Core
 @using Nop.Services.Authentication.External
 @using Nop.Services.Authentication.MultiFactor
 @using Nop.Services.Cms
-@using Nop.Services.Common
 @using Nop.Services.Payments
 @using Nop.Services.Plugins
 @using Nop.Services.Shipping
@@ -78,7 +76,7 @@
         listControllerName = "Authentication";
 
     }
-    else if (plugin is IWidgetPlugin)
+    else if (plugin is IWidgetPlugin widget && !widget.HideInWidgetList)
     {
         //widgets
         activeMenuSystemName = "Widgets";
@@ -95,13 +93,17 @@
         backToLocale = "Admin.Configuration.Plugins.Misc.BackToList";
         listActionMethodName = "List";
         listControllerName = "Plugin";
-    }    
+    }
+
+    //IAdminMenuPlugin can set own active menu item
+    if (plugin is IAdminMenuPlugin && NopHtml.GetActiveMenuItemSystemName() is string menuItem && !string.IsNullOrEmpty(menuItem))
+        activeMenuSystemName = menuItem;
 
     Layout = "_AdminLayout";
     //page title
     ViewBag.PageTitle = T(configureLocale).Text + " - " + friendlyName;
     //active menu item (system name)
-    Html.SetActiveMenuItemSystemName(activeMenuSystemName);
+    NopHtml.SetActiveMenuItemSystemName(activeMenuSystemName);
 
 }
 <div class="content-header clearfix">

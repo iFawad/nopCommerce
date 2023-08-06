@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Nop.Core.Domain.Directory;
 using Nop.Services.Directory;
 using NUnit.Framework;
@@ -77,6 +75,24 @@ namespace Nop.Tests.Nop.Services.Tests.Directory
             newCurrency.Should().Be(638.825M);
             newCurrency = await _currencyService.ConvertFromPrimaryStoreCurrencyAsync(759M, _currencyUsd);
             newCurrency.Should().Be(759M);
+        }
+
+        [Test]
+        public async Task TestCrud()
+        {
+            var insertItem = new Currency
+            {
+                Name = "Test name",
+                CurrencyCode = "tn"
+            };
+
+            var updateItem = new Currency
+            {
+                Name = "Test name 1",
+                CurrencyCode = "tn"
+            };
+
+            await TestCrud(insertItem, _currencyService.InsertCurrencyAsync, updateItem, _currencyService.UpdateCurrencyAsync, _currencyService.GetCurrencyByIdAsync, (item, other) => item.Name.Equals(other.Name), _currencyService.DeleteCurrencyAsync);
         }
     }
 }

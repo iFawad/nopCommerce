@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Nop.Web.Framework.Mvc.ModelBinding;
+using Nop.Core;
 using Nop.Web.Framework.Models;
+using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Web.Models.Customer
 {
@@ -18,7 +17,7 @@ namespace Nop.Web.Models.Customer
             CustomerAttributes = new List<CustomerAttributeModel>();
             GdprConsents = new List<GdprConsentModel>();
         }
-        
+
         [DataType(DataType.EmailAddress)]
         [NopResourceDisplayName("Account.Fields.Email")]
         public string Email { get; set; }
@@ -56,23 +55,13 @@ namespace Nop.Web.Models.Customer
         public bool DateOfBirthRequired { get; set; }
         public DateTime? ParseDateOfBirth()
         {
-            if (!DateOfBirthYear.HasValue || !DateOfBirthMonth.HasValue || !DateOfBirthDay.HasValue)
-                return null;
-
-            DateTime? dateOfBirth = null;
-            try
-            {
-                dateOfBirth = new DateTime(DateOfBirthYear.Value, DateOfBirthMonth.Value, DateOfBirthDay.Value);
-            }
-            catch { }
-            return dateOfBirth;
+            return CommonHelper.ParseDate(DateOfBirthYear, DateOfBirthMonth, DateOfBirthDay);
         }
 
         public bool CompanyEnabled { get; set; }
         public bool CompanyRequired { get; set; }
         [NopResourceDisplayName("Account.Fields.Company")]
         public string Company { get; set; }
-
         public bool StreetAddressEnabled { get; set; }
         public bool StreetAddressRequired { get; set; }
         [NopResourceDisplayName("Account.Fields.StreetAddress")]
@@ -163,7 +152,7 @@ namespace Nop.Web.Models.Customer
 
             public string AuthMethodName { get; set; }
         }
-        
+
         #endregion
     }
 }

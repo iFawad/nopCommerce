@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Services.Authentication.External;
 using Nop.Services.Authentication.MultiFactor;
 using Nop.Services.Cms;
+using Nop.Services.Common;
 using Nop.Services.Localization;
 using Nop.Services.Payments;
 using Nop.Services.Plugins;
@@ -30,22 +27,22 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly IAclSupportedModelFactory _aclSupportedModelFactory;
-        private readonly IAuthenticationPluginManager _authenticationPluginManager;
-        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedModelFactory _localizedModelFactory;
-        private readonly IMultiFactorAuthenticationPluginManager _multiFactorAuthenticationPluginManager;
-        private readonly IPaymentPluginManager _paymentPluginManager;
-        private readonly IPickupPluginManager _pickupPluginManager;
-        private readonly IPluginService _pluginService;
-        private readonly IShippingPluginManager _shippingPluginManager;
-        private readonly IStaticCacheManager _staticCacheManager;
-        private readonly IStoreMappingSupportedModelFactory _storeMappingSupportedModelFactory;
-        private readonly ITaxPluginManager _taxPluginManager;
-        private readonly IWidgetPluginManager _widgetPluginManager;
-        private readonly IWorkContext _workContext;
-        private readonly OfficialFeedManager _officialFeedManager;
+        protected readonly IAclSupportedModelFactory _aclSupportedModelFactory;
+        protected readonly IAuthenticationPluginManager _authenticationPluginManager;
+        protected readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedModelFactory _localizedModelFactory;
+        protected readonly IMultiFactorAuthenticationPluginManager _multiFactorAuthenticationPluginManager;
+        protected readonly IPaymentPluginManager _paymentPluginManager;
+        protected readonly IPickupPluginManager _pickupPluginManager;
+        protected readonly IPluginService _pluginService;
+        protected readonly IShippingPluginManager _shippingPluginManager;
+        protected readonly IStaticCacheManager _staticCacheManager;
+        protected readonly IStoreMappingSupportedModelFactory _storeMappingSupportedModelFactory;
+        protected readonly ITaxPluginManager _taxPluginManager;
+        protected readonly IWidgetPluginManager _widgetPluginManager;
+        protected readonly IWorkContext _workContext;
+        protected readonly OfficialFeedManager _officialFeedManager;
 
         #endregion
 
@@ -110,6 +107,10 @@ namespace Nop.Web.Areas.Admin.Factories
             model.CanChangeEnabled = true;
             switch (plugin)
             {
+                case IMiscPlugin:
+                    model.CanChangeEnabled = false;
+                    break;
+
                 case IPaymentMethod paymentMethod:
                     model.IsEnabled = _paymentPluginManager.IsPluginActive(paymentMethod);
                     break;
@@ -233,7 +234,7 @@ namespace Nop.Web.Areas.Admin.Factories
         /// </returns>
         public virtual async Task<PluginModel> PreparePluginModelAsync(PluginModel model, PluginDescriptor pluginDescriptor, bool excludeProperties = false)
         {
-            Action<PluginLocalizedModel, int> localizedModelConfiguration = null;
+            Func<PluginLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (pluginDescriptor != null)
             {
@@ -377,7 +378,7 @@ namespace Nop.Web.Areas.Admin.Factories
 
             return model;
         }
-        
+
         /// <summary>
         /// Prepare plugin models for admin navigation
         /// </summary>
@@ -387,11 +388,12 @@ namespace Nop.Web.Areas.Admin.Factories
         /// </returns>
         public virtual async Task<IList<AdminNavigationPluginModel>> PrepareAdminNavigationPluginModelsAsync()
         {
-            var cacheKey = _staticCacheManager.PrepareKeyForDefaultCache(NopPluginDefaults.AdminNavigationPluginsCacheKey, await _workContext.GetCurrentCustomerAsync());
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var cacheKey = _staticCacheManager.PrepareKeyForDefaultCache(NopPluginDefaults.AdminNavigationPluginsCacheKey, customer);
             return await _staticCacheManager.GetAsync(cacheKey, async () =>
             {
                 //get installed plugins
-                return (await _pluginService.GetPluginDescriptorsAsync<IPlugin>(LoadPluginsMode.InstalledOnly, await _workContext.GetCurrentCustomerAsync()))
+                return (await _pluginService.GetPluginDescriptorsAsync<IPlugin>(LoadPluginsMode.InstalledOnly, customer))
                     .Where(plugin => plugin.ShowInPluginsList)
                     .Select(plugin => new AdminNavigationPluginModel
                     {

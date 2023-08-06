@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Nop.Core.Domain.Catalog;
+﻿using Nop.Core.Domain.Catalog;
 using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Models.Common
@@ -10,6 +9,8 @@ namespace Nop.Web.Models.Common
         {
             Values = new List<AddressAttributeValueModel>();
         }
+
+        public string ControlId { get; set; }
 
         public string Name { get; set; }
 

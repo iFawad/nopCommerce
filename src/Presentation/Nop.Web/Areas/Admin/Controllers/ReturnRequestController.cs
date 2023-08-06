@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Orders;
+using Nop.Services.Catalog;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Messages;
@@ -20,15 +18,16 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedEntityService _localizedEntityService;
-        private readonly INotificationService _notificationService;
-        private readonly IOrderService _orderService;
-        private readonly IPermissionService _permissionService;
-        private readonly IReturnRequestModelFactory _returnRequestModelFactory;
-        private readonly IReturnRequestService _returnRequestService;
-        private readonly IWorkflowMessageService _workflowMessageService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedEntityService _localizedEntityService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IOrderService _orderService;
+        protected readonly IProductService _productService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IReturnRequestModelFactory _returnRequestModelFactory;
+        protected readonly IReturnRequestService _returnRequestService;
+        protected readonly IWorkflowMessageService _workflowMessageService;
 
         #endregion Fields
 
@@ -39,6 +38,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             ILocalizedEntityService localizedEntityService,
             INotificationService notificationService,
             IOrderService orderService,
+            IProductService productService,
             IPermissionService permissionService,
             IReturnRequestModelFactory returnRequestModelFactory,
             IReturnRequestService returnRequestService,
@@ -49,6 +49,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             _localizedEntityService = localizedEntityService;
             _notificationService = notificationService;
             _orderService = orderService;
+            _productService = productService;
             _permissionService = permissionService;
             _returnRequestModelFactory = returnRequestModelFactory;
             _returnRequestService = returnRequestService;
@@ -59,7 +60,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(ReturnRequestReason rrr, ReturnRequestReasonModel model)
         {
             foreach (var localized in model.Locales)
@@ -71,7 +71,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(ReturnRequestAction rra, ReturnRequestActionModel model)
         {
             foreach (var localized in model.Locales)
@@ -145,18 +144,41 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             if (ModelState.IsValid)
             {
-                returnRequest = model.ToEntity(returnRequest);
-                returnRequest.UpdatedOnUtc = DateTime.UtcNow;
-                
-                await _returnRequestService.UpdateReturnRequestAsync(returnRequest);
+                var quantityToReturn = model.ReturnedQuantity - returnRequest.ReturnedQuantity;
+                if (quantityToReturn < 0)
+                    _notificationService.ErrorNotification(string.Format(await _localizationService.GetResourceAsync("Admin.ReturnRequests.Fields.ReturnedQuantity.CannotBeLessThanQuantityAlreadyReturned"), returnRequest.ReturnedQuantity));
+                else
+                {
+                    if (quantityToReturn > 0)
+                    {
+                        var orderItem = await _orderService.GetOrderItemByIdAsync(returnRequest.OrderItemId);
+                        if (orderItem != null)
+                        {
+                            var product = await _productService.GetProductByIdAsync(orderItem.ProductId);
+                            if (product != null)
+                            {
+                                var productStockChangedMessage = string.Format(await _localizationService.GetResourceAsync("Admin.ReturnRequests.QuantityReturnedToStock"), quantityToReturn);
 
-                //activity log
-                await _customerActivityService.InsertActivityAsync("EditReturnRequest",
-                    string.Format(await _localizationService.GetResourceAsync("ActivityLog.EditReturnRequest"), returnRequest.Id), returnRequest);
+                                await _productService.AdjustInventoryAsync(product, quantityToReturn, orderItem.AttributesXml, productStockChangedMessage);
 
-                _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.ReturnRequests.Updated"));
+                                _notificationService.SuccessNotification(productStockChangedMessage);
+                            }
+                        }
+                    }
 
-                return continueEditing ? RedirectToAction("Edit", new { id = returnRequest.Id }) : RedirectToAction("List");
+                    returnRequest = model.ToEntity(returnRequest);
+                    returnRequest.UpdatedOnUtc = DateTime.UtcNow;
+
+                    await _returnRequestService.UpdateReturnRequestAsync(returnRequest);
+
+                    //activity log
+                    await _customerActivityService.InsertActivityAsync("EditReturnRequest",
+                        string.Format(await _localizationService.GetResourceAsync("ActivityLog.EditReturnRequest"), returnRequest.Id), returnRequest);
+
+                    _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.ReturnRequests.Updated"));
+
+                    return continueEditing ? RedirectToAction("Edit", new { id = returnRequest.Id }) : RedirectToAction("List");
+                }
             }
 
             //prepare model
@@ -249,7 +271,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             //prepare model
             var model = await _returnRequestModelFactory.PrepareReturnRequestReasonModelAsync(new ReturnRequestReasonModel(), null);
-            
+
             return View(model);
         }
 
@@ -269,7 +291,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Settings.Order.ReturnRequestReasons.Added"));
 
-                return continueEditing 
+                return continueEditing
                     ? RedirectToAction("ReturnRequestReasonEdit", new { id = returnRequestReason.Id })
                     : RedirectToAction("ReturnRequestReasonList");
             }
@@ -293,7 +315,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             //prepare model
             var model = await _returnRequestModelFactory.PrepareReturnRequestReasonModelAsync(null, returnRequestReason);
-            
+
             return View(model);
         }
 
@@ -320,7 +342,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("ReturnRequestReasonList");
-                
+
                 return RedirectToAction("ReturnRequestReasonEdit", new { id = returnRequestReason.Id });
             }
 
@@ -338,7 +360,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return AccessDeniedView();
 
             //try to get a return request reason with the specified id
-            var returnRequestReason = await _returnRequestService.GetReturnRequestReasonByIdAsync(id) 
+            var returnRequestReason = await _returnRequestService.GetReturnRequestReasonByIdAsync(id)
                 ?? throw new ArgumentException("No return request reason found with the specified id", nameof(id));
 
             await _returnRequestService.DeleteReturnRequestReasonAsync(returnRequestReason);
@@ -403,8 +425,8 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Settings.Order.ReturnRequestActions.Added"));
 
-                return continueEditing 
-                    ? RedirectToAction("ReturnRequestActionEdit", new { id = returnRequestAction.Id }) 
+                return continueEditing
+                    ? RedirectToAction("ReturnRequestActionEdit", new { id = returnRequestAction.Id })
                     : RedirectToAction("ReturnRequestActionList");
             }
 
@@ -454,7 +476,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("ReturnRequestActionList");
-                
+
                 return RedirectToAction("ReturnRequestActionEdit", new { id = returnRequestAction.Id });
             }
 

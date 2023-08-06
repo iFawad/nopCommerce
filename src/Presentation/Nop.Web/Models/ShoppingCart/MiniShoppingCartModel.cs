@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Nop.Web.Framework.Models;
+﻿using Nop.Web.Framework.Models;
 using Nop.Web.Models.Media;
 
 namespace Nop.Web.Models.ShoppingCart
@@ -14,6 +13,7 @@ namespace Nop.Web.Models.ShoppingCart
         public IList<ShoppingCartItemModel> Items { get; set; }
         public int TotalProducts { get; set; }
         public string SubTotal { get; set; }
+        public decimal SubTotalValue { get; set; }
         public bool DisplayShoppingCartButton { get; set; }
         public bool DisplayCheckoutButton { get; set; }
         public bool CurrentCustomerIsGuest { get; set; }
@@ -38,6 +38,7 @@ namespace Nop.Web.Models.ShoppingCart
             public int Quantity { get; set; }
 
             public string UnitPrice { get; set; }
+            public decimal UnitPriceValue { get; set; }
 
             public string AttributeInfo { get; set; }
 

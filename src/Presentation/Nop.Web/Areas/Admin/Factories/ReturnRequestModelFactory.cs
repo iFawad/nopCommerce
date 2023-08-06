@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core.Domain.Orders;
 using Nop.Services.Catalog;
 using Nop.Services.Customers;
@@ -23,15 +20,15 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IDownloadService _downloadService;
-        private readonly ICustomerService _customerService;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedModelFactory _localizedModelFactory;
-        private readonly IOrderService _orderService;
-        private readonly IProductService _productService;
-        private readonly IReturnRequestService _returnRequestService;
+        protected readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IDownloadService _downloadService;
+        protected readonly ICustomerService _customerService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedModelFactory _localizedModelFactory;
+        protected readonly IOrderService _orderService;
+        protected readonly IProductService _productService;
+        protected readonly IReturnRequestService _returnRequestService;
 
         #endregion
 
@@ -122,36 +119,7 @@ namespace Nop.Web.Areas.Admin.Factories
             //prepare list model
             var model = await new ReturnRequestListModel().PrepareToGridAsync(searchModel, returnRequests, () =>
             {
-                return returnRequests.SelectAwait(async returnRequest =>
-                {
-                    //fill in model values from the entity
-                    var returnRequestModel = returnRequest.ToModel<ReturnRequestModel>();
-
-                    var customer = await _customerService.GetCustomerByIdAsync(returnRequest.CustomerId);
-
-                    //convert dates to the user time
-                    returnRequestModel.CreatedOn = await _dateTimeHelper.ConvertToUserTimeAsync(returnRequest.CreatedOnUtc, DateTimeKind.Utc);
-
-                    //fill in additional values (not existing in the entity)
-                    returnRequestModel.CustomerInfo = (await _customerService.IsRegisteredAsync(customer))
-                        ? customer.Email
-                        : await _localizationService.GetResourceAsync("Admin.Customers.Guest");
-                    returnRequestModel.ReturnRequestStatusStr = await _localizationService.GetLocalizedEnumAsync(returnRequest.ReturnRequestStatus);
-                    var orderItem = await _orderService.GetOrderItemByIdAsync(returnRequest.OrderItemId);
-                    if (orderItem == null)
-                        return returnRequestModel;
-
-                    var order = await _orderService.GetOrderByIdAsync(orderItem.OrderId);
-                    var product = await _productService.GetProductByIdAsync(orderItem.ProductId);
-
-                    returnRequestModel.ProductId = orderItem.ProductId;
-                    returnRequestModel.ProductName = product.Name;
-                    returnRequestModel.OrderId = order.Id;
-                    returnRequestModel.AttributeInfo = orderItem.AttributeDescription;
-                    returnRequestModel.CustomOrderNumber = order.CustomOrderNumber;
-
-                    return returnRequestModel;
-                });
+                return returnRequests.SelectAwait(async returnRequest => await PrepareReturnRequestModelAsync(null, returnRequest));
             });
 
             return model;
@@ -174,13 +142,7 @@ namespace Nop.Web.Areas.Admin.Factories
                 return model;
 
             //fill in model values from the entity
-            model ??= new ReturnRequestModel
-            {
-                Id = returnRequest.Id,
-                CustomNumber = returnRequest.CustomNumber,
-                CustomerId = returnRequest.CustomerId,
-                Quantity = returnRequest.Quantity
-            };
+            model ??= returnRequest.ToModel<ReturnRequestModel>();
 
             var customer = await _customerService.GetCustomerByIdAsync(returnRequest.CustomerId);
 
@@ -189,6 +151,7 @@ namespace Nop.Web.Areas.Admin.Factories
             model.CustomerInfo = await _customerService.IsRegisteredAsync(customer)
                 ? customer.Email : await _localizationService.GetResourceAsync("Admin.Customers.Guest");
             model.UploadedFileGuid = (await _downloadService.GetDownloadByIdAsync(returnRequest.UploadedFileId))?.DownloadGuid ?? Guid.Empty;
+            model.ReturnRequestStatusStr = await _localizationService.GetLocalizedEnumAsync(returnRequest.ReturnRequestStatus);
             var orderItem = await _orderService.GetOrderItemByIdAsync(returnRequest.OrderItemId);
             if (orderItem != null)
             {
@@ -271,7 +234,7 @@ namespace Nop.Web.Areas.Admin.Factories
         public virtual async Task<ReturnRequestReasonModel> PrepareReturnRequestReasonModelAsync(ReturnRequestReasonModel model,
             ReturnRequestReason returnRequestReason, bool excludeProperties = false)
         {
-            Action<ReturnRequestReasonLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ReturnRequestReasonLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (returnRequestReason != null)
             {
@@ -349,7 +312,7 @@ namespace Nop.Web.Areas.Admin.Factories
         public virtual async Task<ReturnRequestActionModel> PrepareReturnRequestActionModelAsync(ReturnRequestActionModel model,
             ReturnRequestAction returnRequestAction, bool excludeProperties = false)
         {
-            Action<ReturnRequestActionLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ReturnRequestActionLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (returnRequestAction != null)
             {

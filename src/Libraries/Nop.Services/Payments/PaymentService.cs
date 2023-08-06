@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
 using Nop.Core.Http.Extensions;
-using Nop.Core.Infrastructure;
 using Nop.Services.Catalog;
 using Nop.Services.Customers;
-using Nop.Services.Orders;
 
 namespace Nop.Services.Payments
 {
@@ -24,11 +17,12 @@ namespace Nop.Services.Payments
     {
         #region Fields
 
-        private readonly ICustomerService _customerService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IPaymentPluginManager _paymentPluginManager;
-        private readonly PaymentSettings _paymentSettings;
-        private readonly ShoppingCartSettings _shoppingCartSettings;
+        protected readonly ICustomerService _customerService;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
+        protected readonly IPaymentPluginManager _paymentPluginManager;
+        protected readonly IPriceCalculationService _priceCalculationService;
+        protected readonly PaymentSettings _paymentSettings;
+        protected readonly ShoppingCartSettings _shoppingCartSettings;
 
         #endregion
 
@@ -37,12 +31,14 @@ namespace Nop.Services.Payments
         public PaymentService(ICustomerService customerService,
             IHttpContextAccessor httpContextAccessor,
             IPaymentPluginManager paymentPluginManager,
+            IPriceCalculationService priceCalculationService,
             PaymentSettings paymentSettings,
             ShoppingCartSettings shoppingCartSettings)
         {
             _customerService = customerService;
             _httpContextAccessor = httpContextAccessor;
             _paymentPluginManager = paymentPluginManager;
+            _priceCalculationService = priceCalculationService;
             _paymentSettings = paymentSettings;
             _shoppingCartSettings = shoppingCartSettings;
         }
@@ -166,8 +162,7 @@ namespace Nop.Services.Payments
             if (!_shoppingCartSettings.RoundPricesDuringCalculation)
                 return result;
 
-            var priceCalculationService = EngineContext.Current.Resolve<IPriceCalculationService>();
-            result = await priceCalculationService.RoundPriceAsync(result);
+            result = await _priceCalculationService.RoundPriceAsync(result);
 
             return result;
         }
@@ -297,7 +292,7 @@ namespace Nop.Services.Payments
             var paymentMethod = await _paymentPluginManager.LoadPluginBySystemNameAsync(paymentMethodSystemName);
             if (paymentMethod == null)
                 return RecurringPaymentType.NotSupported;
-            
+
             return paymentMethod.RecurringPaymentType;
         }
 
@@ -371,38 +366,6 @@ namespace Nop.Services.Payments
         }
 
         /// <summary>
-        /// Calculate payment method fee
-        /// </summary>
-        /// <param name="cart">Shopping cart</param>
-        /// <param name="fee">Fee value</param>
-        /// <param name="usePercentage">Is fee amount specified as percentage or fixed value?</param>
-        /// <returns>
-        /// A task that represents the asynchronous operation
-        /// The task result contains the result
-        /// </returns>
-        public virtual async Task<decimal> CalculateAdditionalFeeAsync(IList<ShoppingCartItem> cart, decimal fee, bool usePercentage)
-        {
-            if (fee <= 0)
-                return fee;
-
-            decimal result;
-            if (usePercentage)
-            {
-                //percentage
-                var orderTotalCalculationService = EngineContext.Current.Resolve<IOrderTotalCalculationService>();
-                var orderTotalWithoutPaymentFee = (await orderTotalCalculationService.GetShoppingCartTotalAsync(cart, usePaymentMethodAdditionalFee: false)).shoppingCartTotal ?? 0;
-                result = (decimal)((float)orderTotalWithoutPaymentFee * (float)fee / 100f);
-            }
-            else
-            {
-                //fixed value
-                result = fee;
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Serialize CustomValues of ProcessPaymentRequest
         /// </summary>
         /// <param name="request">Request</param>
@@ -459,7 +422,7 @@ namespace Nop.Services.Payments
         /// Generate an order GUID
         /// </summary>
         /// <param name="processPaymentRequest">Process payment request</param>
-        public virtual void GenerateOrderGuid(ProcessPaymentRequest processPaymentRequest)
+        public virtual async Task GenerateOrderGuidAsync(ProcessPaymentRequest processPaymentRequest)
         {
             if (processPaymentRequest == null)
                 return;
@@ -467,7 +430,7 @@ namespace Nop.Services.Payments
             //we should use the same GUID for multiple payment attempts
             //this way a payment gateway can prevent security issues such as credit card brute-force attacks
             //in order to avoid any possible limitations by payment gateway we reset GUID periodically
-            var previousPaymentRequest = _httpContextAccessor.HttpContext.Session.Get<ProcessPaymentRequest>("OrderPaymentInfo");
+            var previousPaymentRequest = await _httpContextAccessor.HttpContext.Session.GetAsync<ProcessPaymentRequest>("OrderPaymentInfo");
             if (_paymentSettings.RegenerateOrderGuidInterval > 0 &&
                 previousPaymentRequest != null &&
                 previousPaymentRequest.OrderGuidGeneratedOnUtc.HasValue)

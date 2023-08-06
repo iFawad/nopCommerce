@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Nop.Web.Framework.Models;
 using Nop.Web.Framework.Mvc.ModelBinding;
-using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Areas.Admin.Models.Orders
 {
@@ -27,6 +25,9 @@ namespace Nop.Web.Areas.Admin.Models.Orders
 
         public int OrderId { get; set; }
 
+        [NopResourceDisplayName("Admin.Orders.Shipments.PickupInStore")]
+        public bool PickupInStore { get; set; }
+
         [NopResourceDisplayName("Admin.Orders.Shipments.CustomOrderNumber")]
         public string CustomOrderNumber { get; set; }
 
@@ -45,6 +46,14 @@ namespace Nop.Web.Areas.Admin.Models.Orders
         public bool CanShip { get; set; }
 
         public DateTime? ShippedDateUtc { get; set; }
+
+        [NopResourceDisplayName("Admin.Orders.Shipments.ReadyForPickupDate")]
+        public string ReadyForPickupDate { get; set; }
+
+        [NopResourceDisplayName("Admin.Orders.Shipments.CanMarkAsReadyForPickup")]
+        public bool CanMarkAsReadyForPickup { get; set; }
+
+        public DateTime? ReadyForPickupDateUtc { get; set; }
 
         [NopResourceDisplayName("Admin.Orders.Shipments.DeliveryDate")]
         public string DeliveryDate { get; set; }

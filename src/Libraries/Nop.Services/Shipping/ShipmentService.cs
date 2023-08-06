@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Orders;
@@ -20,14 +16,14 @@ namespace Nop.Services.Shipping
     {
         #region Fields
 
-        private readonly IPickupPluginManager _pickupPluginManager;
-        private readonly IRepository<Address> _addressRepository;
-        private readonly IRepository<Order> _orderRepository;
-        private readonly IRepository<OrderItem> _orderItemRepository;
-        private readonly IRepository<Product> _productRepository;
-        private readonly IRepository<Shipment> _shipmentRepository;
-        private readonly IRepository<ShipmentItem> _siRepository;
-        private readonly IShippingPluginManager _shippingPluginManager;
+        protected readonly IPickupPluginManager _pickupPluginManager;
+        protected readonly IRepository<Address> _addressRepository;
+        protected readonly IRepository<Order> _orderRepository;
+        protected readonly IRepository<OrderItem> _orderItemRepository;
+        protected readonly IRepository<Product> _productRepository;
+        protected readonly IRepository<Shipment> _shipmentRepository;
+        protected readonly IRepository<ShipmentItem> _siRepository;
+        protected readonly IShippingPluginManager _shippingPluginManager;
 
         #endregion
 
@@ -77,6 +73,7 @@ namespace Nop.Services.Shipping
         /// <param name="shippingCity">Shipping city; null to load all records</param>
         /// <param name="trackingNumber">Search by tracking number</param>
         /// <param name="loadNotShipped">A value indicating whether we should load only not shipped shipments</param>
+        /// <param name="loadNotReadyForPickup">A value indicating whether we should load only not ready for pickup shipments</param>
         /// <param name="loadNotDelivered">A value indicating whether we should load only not delivered shipments</param>
         /// <param name="orderId">Order identifier; 0 to load all records</param>
         /// <param name="createdFromUtc">Created date from (UTC); null to load all records</param>
@@ -94,6 +91,7 @@ namespace Nop.Services.Shipping
             string shippingCity = null,
             string trackingNumber = null,
             bool loadNotShipped = false,
+            bool loadNotReadyForPickup = false,
             bool loadNotDelivered = false,
             int orderId = 0,
             DateTime? createdFromUtc = null, DateTime? createdToUtc = null,
@@ -109,38 +107,47 @@ namespace Nop.Services.Shipping
 
                 if (shippingCountryId > 0)
                     query = from s in query
-                        join o in _orderRepository.Table on s.OrderId equals o.Id
-                        where _addressRepository.Table.Any(a =>
-                            a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
-                            a.CountryId == shippingCountryId)
-                        select s;
+                            join o in _orderRepository.Table on s.OrderId equals o.Id
+                            where _addressRepository.Table.Any(a =>
+                                a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
+                                a.CountryId == shippingCountryId)
+                            select s;
 
                 if (shippingStateId > 0)
                     query = from s in query
-                        join o in _orderRepository.Table on s.OrderId equals o.Id
-                        where _addressRepository.Table.Any(a =>
-                            a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
-                            a.StateProvinceId == shippingStateId)
-                        select s;
+                            join o in _orderRepository.Table on s.OrderId equals o.Id
+                            where _addressRepository.Table.Any(a =>
+                                a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
+                                a.StateProvinceId == shippingStateId)
+                            select s;
 
                 if (!string.IsNullOrWhiteSpace(shippingCounty))
                     query = from s in query
-                        join o in _orderRepository.Table on s.OrderId equals o.Id
-                        where _addressRepository.Table.Any(a =>
-                            a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
-                            a.County.Contains(shippingCounty))
-                        select s;
+                            join o in _orderRepository.Table on s.OrderId equals o.Id
+                            where _addressRepository.Table.Any(a =>
+                                a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
+                                a.County.Contains(shippingCounty))
+                            select s;
 
                 if (!string.IsNullOrWhiteSpace(shippingCity))
                     query = from s in query
-                        join o in _orderRepository.Table on s.OrderId equals o.Id
-                        where _addressRepository.Table.Any(a =>
-                            a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
-                            a.City.Contains(shippingCity))
-                        select s;
+                            join o in _orderRepository.Table on s.OrderId equals o.Id
+                            where _addressRepository.Table.Any(a =>
+                                a.Id == (o.PickupInStore ? o.PickupAddressId : o.ShippingAddressId) &&
+                                a.City.Contains(shippingCity))
+                            select s;
 
                 if (loadNotShipped)
-                    query = query.Where(s => !s.ShippedDateUtc.HasValue);
+                    query = from s in query
+                            join o in _orderRepository.Table on s.OrderId equals o.Id
+                            where !s.ShippedDateUtc.HasValue && !o.PickupInStore
+                            select s;
+
+                if (loadNotReadyForPickup)
+                    query = from s in query
+                            join o in _orderRepository.Table on s.OrderId equals o.Id
+                            where !s.ReadyForPickupDateUtc.HasValue && o.PickupInStore
+                            select s;
 
                 if (loadNotDelivered)
                     query = query.Where(s => !s.DeliveryDateUtc.HasValue);
@@ -152,23 +159,23 @@ namespace Nop.Services.Shipping
                     query = query.Where(s => createdToUtc.Value >= s.CreatedOnUtc);
 
                 query = from s in query
-                    join o in _orderRepository.Table on s.OrderId equals o.Id
-                    where !o.Deleted
-                    select s;
+                        join o in _orderRepository.Table on s.OrderId equals o.Id
+                        where !o.Deleted
+                        select s;
 
                 query = query.Distinct();
 
                 if (vendorId > 0)
                 {
                     var queryVendorOrderItems = from orderItem in _orderItemRepository.Table
-                        join p in _productRepository.Table on orderItem.ProductId equals p.Id
-                        where p.VendorId == vendorId
-                        select orderItem.Id;
+                                                join p in _productRepository.Table on orderItem.ProductId equals p.Id
+                                                where p.VendorId == vendorId
+                                                select orderItem.Id;
 
                     query = from s in query
-                        join si in _siRepository.Table on s.Id equals si.ShipmentId
-                        where queryVendorOrderItems.Contains(si.OrderItemId)
-                        select s;
+                            join si in _siRepository.Table on s.Id equals si.ShipmentId
+                            where queryVendorOrderItems.Contains(si.OrderItemId)
+                            select s;
 
                     query = query.Distinct();
                 }
@@ -176,9 +183,9 @@ namespace Nop.Services.Shipping
                 if (warehouseId > 0)
                 {
                     query = from s in query
-                        join si in _siRepository.Table on s.Id equals si.ShipmentId
-                        where si.WarehouseId == warehouseId
-                        select s;
+                            join si in _siRepository.Table on s.Id equals si.ShipmentId
+                            where si.WarehouseId == warehouseId
+                            select s;
 
                     query = query.Distinct();
                 }
@@ -222,20 +229,24 @@ namespace Nop.Services.Shipping
         /// </summary>
         /// <param name="orderId">Order identifier</param>
         /// <param name="shipped">A value indicating whether to count only shipped or not shipped shipments; pass null to ignore</param>
+        /// <param name="readyForPickup">A value indicating whether to load only ready for pickup shipments; pass null to ignore</param>
         /// <param name="vendorId">Vendor identifier; pass 0 to ignore</param>
         /// <returns>
         /// A task that represents the asynchronous operation
         /// The task result contains the result
         /// </returns>
-        public virtual async Task<IList<Shipment>> GetShipmentsByOrderIdAsync(int orderId, bool? shipped = null, int vendorId = 0)
+        public virtual async Task<IList<Shipment>> GetShipmentsByOrderIdAsync(int orderId, bool? shipped = null, bool? readyForPickup = null, int vendorId = 0)
         {
             if (orderId == 0)
                 return new List<Shipment>();
 
             var shipments = _shipmentRepository.Table;
 
-            if (shipped.HasValue) 
+            if (shipped.HasValue)
                 shipments = shipments.Where(s => s.ShippedDateUtc.HasValue == shipped);
+
+            if (readyForPickup.HasValue)
+                shipments = shipments.Where(s => s.ReadyForPickupDateUtc.HasValue == readyForPickup);
 
             return await shipments.Where(shipment => shipment.OrderId == orderId).ToListAsync();
         }
@@ -259,7 +270,7 @@ namespace Nop.Services.Shipping
         {
             await _shipmentRepository.UpdateAsync(shipment);
         }
-        
+
         /// <summary>
         /// Gets a shipment items of shipment
         /// </summary>
@@ -284,6 +295,39 @@ namespace Nop.Services.Shipping
         public virtual async Task InsertShipmentItemAsync(ShipmentItem shipmentItem)
         {
             await _siRepository.InsertAsync(shipmentItem);
+        }
+
+        /// <summary>
+        /// Deletes a shipment item
+        /// </summary>
+        /// <param name="shipmentItem">Shipment Item</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task DeleteShipmentItemAsync(ShipmentItem shipmentItem)
+        {
+            await _siRepository.DeleteAsync(shipmentItem);
+        }
+
+        /// <summary>
+        /// Updates a shipment item
+        /// </summary>
+        /// <param name="shipmentItem">Shipment item</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task UpdateShipmentItemAsync(ShipmentItem shipmentItem)
+        {
+            await _siRepository.UpdateAsync(shipmentItem);
+        }
+
+        /// <summary>
+        /// Gets a shipment item
+        /// </summary>
+        /// <param name="shipmentItemId">Shipment item identifier</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the shipment item
+        /// </returns>
+        public virtual async Task<ShipmentItem> GetShipmentItemByIdAsync(int shipmentItemId)
+        {
+            return await _siRepository.GetByIdAsync(shipmentItemId);
         }
 
         /// <summary>
@@ -314,9 +358,9 @@ namespace Nop.Services.Shipping
             var query = _siRepository.Table;
 
             query = from si in query
-                join s in _shipmentRepository.Table on si.ShipmentId equals s.Id
-                join o in _orderRepository.Table on s.OrderId equals o.Id
-                where !o.Deleted && o.OrderStatusId != cancelledOrderStatusId
+                    join s in _shipmentRepository.Table on si.ShipmentId equals s.Id
+                    join o in _orderRepository.Table on s.OrderId equals o.Id
+                    where !o.Deleted && o.OrderStatusId != cancelledOrderStatusId
                     select si;
 
             query = query.Distinct();
@@ -326,17 +370,17 @@ namespace Nop.Services.Shipping
             if (ignoreShipped)
             {
                 query = from si in query
-                    join s in _shipmentRepository.Table on si.ShipmentId equals s.Id
-                    where !s.ShippedDateUtc.HasValue
-                    select si;
+                        join s in _shipmentRepository.Table on si.ShipmentId equals s.Id
+                        where !s.ShippedDateUtc.HasValue
+                        select si;
             }
 
             if (ignoreDelivered)
             {
                 query = from si in query
-                    join s in _shipmentRepository.Table on si.ShipmentId equals s.Id
-                    where !s.DeliveryDateUtc.HasValue
-                    select si;
+                        join s in _shipmentRepository.Table on si.ShipmentId equals s.Id
+                        where !s.DeliveryDateUtc.HasValue
+                        select si;
             }
 
             var queryProductOrderItems = from orderItem in _orderItemRepository.Table
@@ -362,18 +406,26 @@ namespace Nop.Services.Shipping
         public virtual async Task<IShipmentTracker> GetShipmentTrackerAsync(Shipment shipment)
         {
             var order = await _orderRepository.GetByIdAsync(shipment.OrderId, cache => default);
+            IShipmentTracker shipmentTracker = null;
 
-            if (!order.PickupInStore)
+            if (order.PickupInStore)
+            {
+                var pickupPointProvider = await _pickupPluginManager
+                    .LoadPluginBySystemNameAsync(order.ShippingRateComputationMethodSystemName);
+
+                if (pickupPointProvider != null)
+                    shipmentTracker = await pickupPointProvider.GetShipmentTrackerAsync();
+            }
+            else
             {
                 var shippingRateComputationMethod = await _shippingPluginManager
                     .LoadPluginBySystemNameAsync(order.ShippingRateComputationMethodSystemName);
 
-                return shippingRateComputationMethod?.ShipmentTracker;
+                if (shippingRateComputationMethod != null)
+                    shipmentTracker = await shippingRateComputationMethod.GetShipmentTrackerAsync();
             }
 
-            var pickupPointProvider = await _pickupPluginManager
-                .LoadPluginBySystemNameAsync(order.ShippingRateComputationMethodSystemName);
-            return pickupPointProvider?.ShipmentTracker;
+            return shipmentTracker;
         }
 
         #endregion

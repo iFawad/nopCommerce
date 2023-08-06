@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core.Domain.Localization;
@@ -27,21 +22,21 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Const
 
-        private const string FLAGS_PATH = @"images\flags";
+        protected const string FLAGS_PATH = @"images\flags";
 
         #endregion
 
         #region Fields
 
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly ILanguageModelFactory _languageModelFactory;
-        private readonly ILanguageService _languageService;
-        private readonly ILocalizationService _localizationService;
-        private readonly INopFileProvider _fileProvider;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly IStoreMappingService _storeMappingService;
-        private readonly IStoreService _storeService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ILanguageModelFactory _languageModelFactory;
+        protected readonly ILanguageService _languageService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly INopFileProvider _fileProvider;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IStoreMappingService _storeMappingService;
+        protected readonly IStoreService _storeService;
 
         #endregion
 
@@ -72,7 +67,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(Language language, LanguageModel model)
         {
             language.LimitedToStores = model.SelectedStoreIds.Any();
@@ -85,7 +79,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(language, store.Id);
                 }
                 else
@@ -160,6 +154,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await SaveStoreMappingsAsync(language, model);
 
                 _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.Added"));
+                _notificationService.WarningNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.NeedRestart"));
 
                 if (!continueEditing)
                     return RedirectToAction("List");
@@ -224,6 +219,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 //notification
                 _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.Updated"));
+                _notificationService.WarningNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.NeedRestart"));
 
                 if (!continueEditing)
                     return RedirectToAction("List");
@@ -266,12 +262,12 @@ namespace Nop.Web.Areas.Admin.Controllers
 
             //notification
             _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.Deleted"));
+            _notificationService.WarningNotification(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.NeedRestart"));
 
             return RedirectToAction("List");
         }
 
         [HttpPost]
-        /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task<JsonResult> GetAvailableFlagFileNames()
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageLanguages))
@@ -289,6 +285,21 @@ namespace Nop.Web.Areas.Admin.Controllers
             }).ToList();
 
             return Json(availableFlagFileNames);
+        }
+
+        //action displaying notification (warning) to a store owner that changed culture
+        public virtual async Task<IActionResult> LanguageCultureWarning(string currentCulture, string changedCulture)
+        {
+            if (currentCulture != changedCulture)
+            {
+                return Json(new
+                {
+                    Result = string.Format(await _localizationService.GetResourceAsync("Admin.Configuration.Languages.CLDR.Warning"),
+                        Url.Action("GeneralCommon", "Setting"))
+                });
+            }
+
+            return Json(new { Result = string.Empty });
         }
 
         #endregion
@@ -320,9 +331,9 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return AccessDeniedView();
 
             if (model.ResourceName != null)
-                model.ResourceName = model.ResourceName.Trim();
+                model.ResourceName = model.ResourceName;
             if (model.ResourceValue != null)
-                model.ResourceValue = model.ResourceValue.Trim();
+                model.ResourceValue = model.ResourceValue;
 
             if (!ModelState.IsValid)
             {
@@ -356,9 +367,9 @@ namespace Nop.Web.Areas.Admin.Controllers
                 return AccessDeniedView();
 
             if (model.ResourceName != null)
-                model.ResourceName = model.ResourceName.Trim();
+                model.ResourceName = model.ResourceName;
             if (model.ResourceValue != null)
-                model.ResourceValue = model.ResourceValue.Trim();
+                model.ResourceValue = model.ResourceValue;
 
             if (!ModelState.IsValid)
             {

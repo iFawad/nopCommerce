@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Nop.Web.Framework.Models;
+﻿using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Models.News
 {
@@ -21,6 +19,7 @@ namespace Nop.Web.Models.News
         public string Short { get; set; }
         public string Full { get; set; }
         public bool AllowComments { get; set; }
+        public bool PreventNotRegisteredUsersToLeaveComments { get; set; }
         public int NumberOfComments { get; set; }
         public DateTime CreatedOn { get; set; }
 

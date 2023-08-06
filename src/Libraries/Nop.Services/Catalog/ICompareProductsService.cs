@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core.Domain.Catalog;
+﻿using Nop.Core.Domain.Catalog;
 
 namespace Nop.Services.Catalog
 {
@@ -9,7 +7,6 @@ namespace Nop.Services.Catalog
     /// </summary>
     public partial interface ICompareProductsService
     {
-        //TODO: migrate to an extension method
         /// <summary>
         /// Clears a "compare products" list
         /// </summary>

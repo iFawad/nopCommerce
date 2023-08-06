@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.News;
 
 namespace Nop.Services.News
@@ -60,7 +57,6 @@ namespace Nop.Services.News
         /// <returns>A task that represents the asynchronous operation</returns>
         Task UpdateNewsAsync(NewsItem news);
 
-        //TODO: migrate to an extension method
         /// <summary>
         /// Get a value indicating whether a news item is available now (availability dates)
         /// </summary>

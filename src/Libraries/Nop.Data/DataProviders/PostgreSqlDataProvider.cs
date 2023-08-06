@@ -1,27 +1,21 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using LinqToDB;
 using LinqToDB.Common;
 using LinqToDB.Data;
 using LinqToDB.DataProvider;
 using LinqToDB.SqlQuery;
 using Nop.Core;
-using Nop.Core.Infrastructure;
 using Nop.Data.DataProviders.LinqToDB;
-using Nop.Data.Migrations;
 using Npgsql;
 
 namespace Nop.Data.DataProviders
 {
-    public class PostgreSqlDataProvider : BaseDataProvider, INopDataProvider
+    public partial class PostgreSqlDataProvider : BaseDataProvider, INopDataProvider
     {
         #region Fields
 
-        private static readonly Lazy<IDataProvider> _dataProvider = new(() => new LinqToDBPostgreSQLDataProvider(), true);
+        protected static readonly Lazy<IDataProvider> _dataProvider = new(() => new LinqToDBPostgreSQLDataProvider(), true);
 
         #endregion
 
@@ -40,7 +34,11 @@ namespace Nop.Data.DataProviders
             return dataContext;
         }
 
-        protected NpgsqlConnectionStringBuilder GetConnectionStringBuilder()
+        /// <summary>
+        /// Gets the connection string builder
+        /// </summary>
+        /// <returns>The connection string builder</returns>
+        protected static NpgsqlConnectionStringBuilder GetConnectionStringBuilder()
         {
             return new NpgsqlConnectionStringBuilder(GetCurrentConnectionString());
         }
@@ -53,7 +51,7 @@ namespace Nop.Data.DataProviders
         protected override DbConnection GetInternalDbConnection(string connectionString)
         {
             if (string.IsNullOrEmpty(connectionString))
-                throw new ArgumentException(nameof(connectionString));
+                throw new ArgumentNullException(nameof(connectionString));
 
             return new NpgsqlConnection(connectionString);
         }
@@ -64,18 +62,18 @@ namespace Nop.Data.DataProviders
         /// <param name="dataConnection">A database connection object</param>
         /// <typeparam name="TEntity">Entity type</typeparam>
         /// <returns>Returns the name of the sequence, or NULL if no sequence is associated with the column</returns>
-        private string GetSequenceName<TEntity>(DataConnection dataConnection) where TEntity : BaseEntity
+        protected virtual string GetSequenceName<TEntity>(DataConnection dataConnection) where TEntity : BaseEntity
         {
             if (dataConnection is null)
                 throw new ArgumentNullException(nameof(dataConnection));
 
-            var descriptor = GetEntityDescriptor<TEntity>();
+            var descriptor = GetEntityDescriptor(typeof(TEntity));
 
             if (descriptor is null)
                 throw new NopException($"Mapped entity descriptor is not found: {typeof(TEntity).Name}");
 
-            var tableName = descriptor.TableName;
-            var columnName = descriptor.Columns.FirstOrDefault(x => x.IsIdentity && x.IsPrimaryKey)?.ColumnName;
+            var tableName = descriptor.EntityName;
+            var columnName = descriptor.Fields.FirstOrDefault(x => x.IsIdentity && x.IsPrimaryKey)?.Name;
 
             if (string.IsNullOrEmpty(columnName))
                 throw new NopException("A table's primary key does not have an identity constraint");
@@ -133,7 +131,9 @@ namespace Nop.Data.DataProviders
                     throw new Exception("Unable to connect to the new database. Please try one more time");
 
                 if (!DatabaseExists())
+                {
                     Thread.Sleep(1000);
+                }
                 else
                 {
                     builder.Database = databaseName;
@@ -158,7 +158,7 @@ namespace Nop.Data.DataProviders
             try
             {
                 using var connection = GetInternalDbConnection(GetCurrentConnectionString());
-                
+
                 //just try to connect
                 connection.Open();
 
@@ -181,26 +181,17 @@ namespace Nop.Data.DataProviders
         {
             try
             {
-                await using var connection = GetInternalDbConnection(await GetCurrentConnectionStringAsync());
-                
+                await using var connection = GetInternalDbConnection(GetCurrentConnectionString());
+
                 //just try to connect
                 await connection.OpenAsync();
-                
+
                 return true;
             }
             catch
             {
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Initialize database
-        /// </summary>
-        public void InitializeDatabase()
-        {
-            var migrationManager = EngineContext.Current.Resolve<IMigrationManager>();
-            migrationManager.ApplyUpMigrations(typeof(NopDbStartup).Assembly);
         }
 
         /// <summary>
@@ -211,16 +202,16 @@ namespace Nop.Data.DataProviders
         /// A task that represents the asynchronous operation
         /// The task result contains the integer identity; null if cannot get the result
         /// </returns>
-        public virtual async Task<int?> GetTableIdentAsync<TEntity>() where TEntity : BaseEntity
+        public virtual Task<int?> GetTableIdentAsync<TEntity>() where TEntity : BaseEntity
         {
-            using var currentConnection = await CreateDataConnectionAsync();
+            using var currentConnection = CreateDataConnection();
 
             var seqName = GetSequenceName<TEntity>(currentConnection);
 
             var result = currentConnection.Query<int>($"SELECT COALESCE(last_value + CASE WHEN is_called THEN 1 ELSE 0 END, 1) as Value FROM {seqName};")
                 .FirstOrDefault();
 
-            return result;
+            return Task.FromResult<int?>(result);
         }
 
         /// <summary>
@@ -235,7 +226,7 @@ namespace Nop.Data.DataProviders
             if (!currentIdent.HasValue || ident <= currentIdent.Value)
                 return;
 
-            using var currentConnection = await CreateDataConnectionAsync();
+            using var currentConnection = CreateDataConnection();
 
             var seqName = GetSequenceName<TEntity>(currentConnection);
 
@@ -265,7 +256,7 @@ namespace Nop.Data.DataProviders
                 entity.Id = dataContext.InsertWithInt32Identity(entity);
             }
             // Ignore when we try insert foreign entity via InsertWithInt32IdentityAsync method
-            catch (global::LinqToDB.SqlQuery.SqlException ex) when (ex.Message.StartsWith("Identity field must be defined for"))
+            catch (SqlException ex) when (ex.Message.StartsWith("Identity field must be defined for"))
             {
                 dataContext.Insert(entity);
             }
@@ -284,13 +275,13 @@ namespace Nop.Data.DataProviders
         /// </returns>
         public override async Task<TEntity> InsertEntityAsync<TEntity>(TEntity entity)
         {
-            using var dataContext = await CreateDataConnectionAsync();
+            using var dataContext = CreateDataConnection();
             try
             {
                 entity.Id = await dataContext.InsertWithInt32IdentityAsync(entity);
             }
             // Ignore when we try insert foreign entity via InsertWithInt32IdentityAsync method
-            catch (global::LinqToDB.SqlQuery.SqlException ex) when (ex.Message.StartsWith("Identity field must be defined for"))
+            catch (SqlException ex) when (ex.Message.StartsWith("Identity field must be defined for"))
             {
                 await dataContext.InsertAsync(entity);
             }
@@ -314,7 +305,7 @@ namespace Nop.Data.DataProviders
         /// <returns>A task that represents the asynchronous operation</returns>
         public virtual async Task ReIndexTablesAsync()
         {
-            using var currentConnection = await CreateDataConnectionAsync();
+            using var currentConnection = CreateDataConnection();
             await currentConnection.ExecuteAsync($"REINDEX DATABASE \"{currentConnection.Connection.Database}\";");
         }
 
@@ -335,7 +326,7 @@ namespace Nop.Data.DataProviders
             {
                 Host = nopConnectionString.ServerName,
                 //Cast DatabaseName to lowercase to avoid case-sensitivity problems
-                Database = nopConnectionString.DatabaseName.ToLower(),
+                Database = nopConnectionString.DatabaseName.ToLowerInvariant(),
                 Username = nopConnectionString.Username,
                 Password = nopConnectionString.Password,
             };

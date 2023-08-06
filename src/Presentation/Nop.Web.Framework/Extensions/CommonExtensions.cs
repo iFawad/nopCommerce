@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using Humanizer;
 using Humanizer.Localisation;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -39,7 +36,7 @@ namespace Nop.Web.Framework.Extensions
             var ts = new TimeSpan(DateTime.UtcNow.Ticks - source.Ticks);
             var delta = ts.TotalSeconds;
 
-            CultureInfo culture = null;
+            CultureInfo culture;
             try
             {
                 culture = new CultureInfo(languageCode);

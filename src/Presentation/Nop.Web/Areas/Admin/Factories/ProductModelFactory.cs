@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Net;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Orders;
@@ -16,6 +14,7 @@ using Nop.Core.Domain.Tax;
 using Nop.Core.Domain.Vendors;
 using Nop.Services.Catalog;
 using Nop.Services.Common;
+using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Discounts;
@@ -28,6 +27,7 @@ using Nop.Services.Shipping;
 using Nop.Services.Stores;
 using Nop.Web.Areas.Admin.Infrastructure.Mapper.Extensions;
 using Nop.Web.Areas.Admin.Models.Catalog;
+using Nop.Web.Areas.Admin.Models.Common;
 using Nop.Web.Areas.Admin.Models.Orders;
 using Nop.Web.Framework.Extensions;
 using Nop.Web.Framework.Factories;
@@ -42,41 +42,45 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly CatalogSettings _catalogSettings;
-        private readonly CurrencySettings _currencySettings;
-        private readonly IAclSupportedModelFactory _aclSupportedModelFactory;
-        private readonly IAddressService _addressService;
-        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
-        private readonly ICategoryService _categoryService;
-        private readonly ICurrencyService _currencyService;
-        private readonly ICustomerService _customerService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IDiscountService _discountService;
-        private readonly IDiscountSupportedModelFactory _discountSupportedModelFactory;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedModelFactory _localizedModelFactory;
-        private readonly IManufacturerService _manufacturerService;
-        private readonly IMeasureService _measureService;
-        private readonly IOrderService _orderService;
-        private readonly IPictureService _pictureService;
-        private readonly IProductAttributeFormatter _productAttributeFormatter;
-        private readonly IProductAttributeParser _productAttributeParser;
-        private readonly IProductAttributeService _productAttributeService;
-        private readonly IProductService _productService;
-        private readonly IProductTagService _productTagService;
-        private readonly IProductTemplateService _productTemplateService;
-        private readonly ISettingModelFactory _settingModelFactory;
-        private readonly IShipmentService _shipmentService;
-        private readonly IShippingService _shippingService;
-        private readonly IShoppingCartService _shoppingCartService;
-        private readonly ISpecificationAttributeService _specificationAttributeService;
-        private readonly IStoreMappingSupportedModelFactory _storeMappingSupportedModelFactory;
-        private readonly IStoreService _storeService;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IWorkContext _workContext;
-        private readonly MeasureSettings _measureSettings;
-        private readonly TaxSettings _taxSettings;
-        private readonly VendorSettings _vendorSettings;
+        protected readonly CatalogSettings _catalogSettings;
+        protected readonly CurrencySettings _currencySettings;
+        protected readonly IAclSupportedModelFactory _aclSupportedModelFactory;
+        protected readonly IAddressService _addressService;
+        protected readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        protected readonly ICategoryService _categoryService;
+        protected readonly ICurrencyService _currencyService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IDiscountService _discountService;
+        protected readonly IDiscountSupportedModelFactory _discountSupportedModelFactory;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedModelFactory _localizedModelFactory;
+        protected readonly IManufacturerService _manufacturerService;
+        protected readonly IMeasureService _measureService;
+        protected readonly IOrderService _orderService;
+        protected readonly IPictureService _pictureService;
+        protected readonly IProductAttributeFormatter _productAttributeFormatter;
+        protected readonly IProductAttributeParser _productAttributeParser;
+        protected readonly IProductAttributeService _productAttributeService;
+        protected readonly IProductService _productService;
+        protected readonly IProductTagService _productTagService;
+        protected readonly IProductTemplateService _productTemplateService;
+        protected readonly ISettingModelFactory _settingModelFactory;
+        protected readonly ISettingService _settingService;
+        protected readonly IShipmentService _shipmentService;
+        protected readonly IShippingService _shippingService;
+        protected readonly IShoppingCartService _shoppingCartService;
+        protected readonly ISpecificationAttributeService _specificationAttributeService;
+        protected readonly IStoreMappingSupportedModelFactory _storeMappingSupportedModelFactory;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IStoreService _storeService;
+        protected readonly IUrlRecordService _urlRecordService;
+        protected readonly IVideoService _videoService;
+        protected readonly IWorkContext _workContext;
+        protected readonly MeasureSettings _measureSettings;
+        protected readonly NopHttpClient _nopHttpClient;
+        protected readonly TaxSettings _taxSettings;
+        protected readonly VendorSettings _vendorSettings;
 
         #endregion
 
@@ -106,15 +110,19 @@ namespace Nop.Web.Areas.Admin.Factories
             IProductTagService productTagService,
             IProductTemplateService productTemplateService,
             ISettingModelFactory settingModelFactory,
+            ISettingService settingService,
             IShipmentService shipmentService,
             IShippingService shippingService,
             IShoppingCartService shoppingCartService,
             ISpecificationAttributeService specificationAttributeService,
             IStoreMappingSupportedModelFactory storeMappingSupportedModelFactory,
+            IStoreContext storeContext,
             IStoreService storeService,
             IUrlRecordService urlRecordService,
+            IVideoService videoService,
             IWorkContext workContext,
             MeasureSettings measureSettings,
+            NopHttpClient nopHttpClient,
             TaxSettings taxSettings,
             VendorSettings vendorSettings)
         {
@@ -133,7 +141,6 @@ namespace Nop.Web.Areas.Admin.Factories
             _localizedModelFactory = localizedModelFactory;
             _manufacturerService = manufacturerService;
             _measureService = measureService;
-            _measureSettings = measureSettings;
             _orderService = orderService;
             _pictureService = pictureService;
             _productAttributeFormatter = productAttributeFormatter;
@@ -143,14 +150,19 @@ namespace Nop.Web.Areas.Admin.Factories
             _productTagService = productTagService;
             _productTemplateService = productTemplateService;
             _settingModelFactory = settingModelFactory;
+            _settingService = settingService;
             _shipmentService = shipmentService;
             _shippingService = shippingService;
             _shoppingCartService = shoppingCartService;
             _specificationAttributeService = specificationAttributeService;
             _storeMappingSupportedModelFactory = storeMappingSupportedModelFactory;
+            _storeContext = storeContext;
             _storeService = storeService;
             _urlRecordService = urlRecordService;
+            _videoService = videoService;
             _workContext = workContext;
+            _measureSettings = measureSettings;
+            _nopHttpClient = nopHttpClient;
             _taxSettings = taxSettings;
             _vendorSettings = vendorSettings;
         }
@@ -191,7 +203,7 @@ namespace Nop.Web.Areas.Admin.Factories
             model.Id = product.Id;
             model.Name = string.Format(await _localizationService.GetResourceAsync("Admin.Catalog.Products.Copy.Name.New"), product.Name);
             model.Published = true;
-            model.CopyImages = true;
+            model.CopyMultimedia = true;
 
             return model;
         }
@@ -475,6 +487,28 @@ namespace Nop.Web.Areas.Admin.Factories
         }
 
         /// <summary>
+        /// Prepare product video search model
+        /// </summary>
+        /// <param name="searchModel">Product video search model</param>
+        /// <param name="product">Product</param>
+        /// <returns>Product video search model</returns>
+        protected virtual ProductVideoSearchModel PrepareProductVideoSearchModel(ProductVideoSearchModel searchModel, Product product)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            if (product == null)
+                throw new ArgumentNullException(nameof(product));
+
+            searchModel.ProductId = product.Id;
+
+            //prepare page parameters
+            searchModel.SetGridPageSize();
+
+            return searchModel;
+        }
+
+        /// <summary>
         /// Prepare product order search model
         /// </summary>
         /// <param name="searchModel">Product order search model</param>
@@ -659,6 +693,20 @@ namespace Nop.Web.Areas.Admin.Factories
             searchModel.IsLoggedInAsVendor = await _workContext.GetCurrentVendorAsync() != null;
             searchModel.AllowVendorsToImportProducts = _vendorSettings.AllowVendorsToImportProducts;
 
+            var licenseCheckModel = new LicenseCheckModel();
+            try
+            {
+                var result = await _nopHttpClient.GetLicenseCheckDetailsAsync();
+                if (!string.IsNullOrEmpty(result))
+                {
+                    licenseCheckModel = JsonConvert.DeserializeObject<LicenseCheckModel>(result);
+                    if (licenseCheckModel.DisplayWarning == false && licenseCheckModel.BlockPages == false)
+                        await _settingService.SetSettingAsync($"{nameof(AdminAreaSettings)}.{nameof(AdminAreaSettings.CheckLicense)}", false);
+                }
+            }
+            catch { }
+            searchModel.LicenseCheckModel = licenseCheckModel;
+
             //prepare available categories
             await _baseAdminModelFactory.PrepareCategoriesAsync(searchModel.AvailableCategories);
 
@@ -717,8 +765,9 @@ namespace Nop.Web.Areas.Admin.Factories
 
             //get parameters to filter comments
             var overridePublished = searchModel.SearchPublishedId == 0 ? null : (bool?)(searchModel.SearchPublishedId == 1);
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                searchModel.SearchVendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
+                searchModel.SearchVendorId = currentVendor.Id;
             var categoryIds = new List<int> { searchModel.SearchCategoryId };
             if (searchModel.SearchIncludeSubCategories && searchModel.SearchCategoryId > 0)
             {
@@ -776,7 +825,7 @@ namespace Nop.Web.Areas.Admin.Factories
         /// </returns>
         public virtual async Task<ProductModel> PrepareProductModelAsync(ProductModel model, Product product, bool excludeProperties = false)
         {
-            Action<ProductLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ProductLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (product != null)
             {
@@ -795,7 +844,11 @@ namespace Nop.Web.Areas.Admin.Factories
                 }
 
                 model.LastStockQuantity = product.StockQuantity;
-                model.ProductTags = string.Join(", ", (await _productTagService.GetAllProductTagsByProductIdAsync(product.Id)).Select(tag => tag.Name));
+
+                model.SelectedProductTags = (await _productTagService.GetAllProductTagsByProductIdAsync(product.Id)).Select(tag => tag.Name).ToList();
+                model.AvailableProductTags = (await _productTagService.GetAllProductTagsAsync())
+                    .Select(pt => new SelectListItem { Text = pt.Name, Value = pt.Name }).ToList();
+
                 model.ProductAttributesExist = (await _productAttributeService.GetAllProductAttributesAsync()).Any();
 
                 model.CanCreateCombinations = await (await _productAttributeService
@@ -817,6 +870,7 @@ namespace Nop.Web.Areas.Admin.Factories
                 PrepareCrossSellProductSearchModel(model.CrossSellProductSearchModel, product);
                 PrepareAssociatedProductSearchModel(model.AssociatedProductSearchModel, product);
                 PrepareProductPictureSearchModel(model.ProductPictureSearchModel, product);
+                PrepareProductVideoSearchModel(model.ProductVideoSearchModel, product);
                 PrepareProductSpecificationAttributeSearchModel(model.ProductSpecificationAttributeSearchModel, product);
                 PrepareProductOrderSearchModel(model.ProductOrderSearchModel, product);
                 PrepareTierPriceSearchModel(model.TierPriceSearchModel, product);
@@ -936,7 +990,7 @@ namespace Nop.Web.Areas.Admin.Factories
             }
 
             //prepare model discounts
-            var availableDiscounts = await _discountService.GetAllDiscountsAsync(DiscountType.AssignedToSkus, showHidden: true);
+            var availableDiscounts = await _discountService.GetAllDiscountsAsync(DiscountType.AssignedToSkus, showHidden: true, isActive: null);
             await _discountSupportedModelFactory.PrepareModelDiscountsAsync(model, product, availableDiscounts, excludeProperties);
 
             //prepare model customer roles
@@ -944,22 +998,6 @@ namespace Nop.Web.Areas.Admin.Factories
 
             //prepare model stores
             await _storeMappingSupportedModelFactory.PrepareModelStoresAsync(model, product, excludeProperties);
-
-            var productTags = await _productTagService.GetAllProductTagsAsync();
-            var productTagsSb = new StringBuilder();
-            productTagsSb.Append("var initialProductTags = [");
-            for (var i = 0; i < productTags.Count; i++)
-            {
-                var tag = productTags[i];
-                productTagsSb.Append("'");
-                productTagsSb.Append(JavaScriptEncoder.Default.Encode(tag.Name));
-                productTagsSb.Append("'");
-                if (i != productTags.Count - 1)
-                    productTagsSb.Append(",");
-            }
-            productTagsSb.Append("]");
-
-            model.InitialProductTags = productTagsSb.ToString();
 
             return model;
         }
@@ -1014,8 +1052,9 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(searchModel));
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                searchModel.SearchVendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
+                searchModel.SearchVendorId = currentVendor.Id;
 
             //get products
             var products = await _productService.SearchProductsAsync(showHidden: true,
@@ -1131,8 +1170,9 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(searchModel));
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                searchModel.SearchVendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
+                searchModel.SearchVendorId = currentVendor.Id;
 
             //get products
             var products = await _productService.SearchProductsAsync(showHidden: true,
@@ -1253,8 +1293,9 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(searchModel));
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                searchModel.SearchVendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
+                searchModel.SearchVendorId = currentVendor.Id;
 
             //get products
             var products = await _productService.SearchProductsAsync(showHidden: true,
@@ -1299,10 +1340,11 @@ namespace Nop.Web.Areas.Admin.Factories
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
 
+            var vendor = await _workContext.GetCurrentVendorAsync();
             //get associated products
             var associatedProducts = (await _productService.GetAssociatedProductsAsync(showHidden: true,
                 parentGroupedProductId: product.Id,
-                vendorId: (await _workContext.GetCurrentVendorAsync())?.Id ?? 0)).ToPagedList(searchModel);
+                vendorId: vendor?.Id ?? 0)).ToPagedList(searchModel);
 
             //prepare grid model
             var model = new AssociatedProductListModel().PrepareToGrid(searchModel, associatedProducts, () =>
@@ -1369,8 +1411,9 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(searchModel));
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                searchModel.SearchVendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
+                searchModel.SearchVendorId = currentVendor.Id;
 
             //get products
             var products = await _productService.SearchProductsAsync(showHidden: true,
@@ -1452,6 +1495,47 @@ namespace Nop.Web.Areas.Admin.Factories
         }
 
         /// <summary>
+        /// Prepare paged product video list model
+        /// </summary>
+        /// <param name="searchModel">Product video search model</param>
+        /// <param name="product">Product</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the product video list model
+        /// </returns>
+        public virtual async Task<ProductVideoListModel> PrepareProductVideoListModelAsync(ProductVideoSearchModel searchModel, Product product)
+        {
+            if (searchModel == null)
+                throw new ArgumentNullException(nameof(searchModel));
+
+            if (product == null)
+                throw new ArgumentNullException(nameof(product));
+
+            //get product videos
+            var productVideos = (await _productService.GetProductVideosByProductIdAsync(product.Id)).ToPagedList(searchModel);
+
+            //prepare grid model
+            var model = await new ProductVideoListModel().PrepareToGridAsync(searchModel, productVideos, () =>
+            {
+                return productVideos.SelectAwait(async productVideo =>
+                {
+                    //fill in model values from the entity
+                    var productVideoModel = productVideo.ToModel<ProductVideoModel>();
+
+                    //fill in additional values (not existing in the entity)
+                    var video = (await _videoService.GetVideoByIdAsync(productVideo.VideoId))
+                        ?? throw new Exception("Video cannot be loaded");
+
+                    productVideoModel.VideoUrl = video.VideoUrl;
+
+                    return productVideoModel;
+                });
+            });
+
+            return model;
+        }
+
+        /// <summary>
         /// Prepare paged product specification attribute list model
         /// </summary>
         /// <param name="searchModel">Product specification attribute search model</param>
@@ -1491,6 +1575,7 @@ namespace Nop.Web.Areas.Admin.Factories
 
                     productSpecificationAttributeModel.AttributeId = specAttribute.Id;
                     productSpecificationAttributeModel.AttributeName = await GetSpecificationAttributeNameAsync(specAttribute);
+                    var currentLanguage = await _workContext.GetWorkingLanguageAsync();
 
                     switch (attribute.AttributeType)
                     {
@@ -1499,11 +1584,11 @@ namespace Nop.Web.Areas.Admin.Factories
                             productSpecificationAttributeModel.SpecificationAttributeOptionId = specAttributeOption.Id;
                             break;
                         case SpecificationAttributeType.CustomText:
-                            productSpecificationAttributeModel.ValueRaw = WebUtility.HtmlEncode(await _localizationService.GetLocalizedAsync(attribute, x => x.CustomValue, (await _workContext.GetWorkingLanguageAsync())?.Id));
+                            productSpecificationAttributeModel.ValueRaw = WebUtility.HtmlEncode(await _localizationService.GetLocalizedAsync(attribute, x => x.CustomValue, currentLanguage?.Id));
                             break;
                         case SpecificationAttributeType.CustomHtmlText:
                             productSpecificationAttributeModel.ValueRaw = await _localizationService
-                                .GetLocalizedAsync(attribute, x => x.CustomValue, (await _workContext.GetWorkingLanguageAsync())?.Id);
+                                .GetLocalizedAsync(attribute, x => x.CustomValue, currentLanguage?.Id);
                             break;
                         case SpecificationAttributeType.Hyperlink:
                             productSpecificationAttributeModel.ValueRaw = attribute.CustomValue;
@@ -1552,7 +1637,8 @@ namespace Nop.Web.Areas.Admin.Factories
             }
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null && (await _productService.GetProductByIdAsync(attribute.ProductId)).VendorId != (await _workContext.GetCurrentVendorAsync()).Id)
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null && (await _productService.GetProductByIdAsync(attribute.ProductId)).VendorId != currentVendor.Id)
                 throw new UnauthorizedAccessException("This is not your product");
 
             var specAttributeOption = await _specificationAttributeService.GetSpecificationAttributeOptionByIdAsync(attribute.SpecificationAttributeOptionId);
@@ -1596,7 +1682,7 @@ namespace Nop.Web.Areas.Admin.Factories
                 default:
                     throw new ArgumentOutOfRangeException(nameof(attribute.AttributeType));
             }
-            
+
             model.Locales = await _localizedModelFactory.PrepareLocalizedModelsAsync(
                 async (AddSpecificationAttributeLocalizedModel locale, int languageId) =>
                 {
@@ -1687,7 +1773,7 @@ namespace Nop.Web.Areas.Admin.Factories
         /// </returns>
         public virtual async Task<ProductTagModel> PrepareProductTagModelAsync(ProductTagModel model, ProductTag productTag, bool excludeProperties = false)
         {
-            Action<ProductTagLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ProductTagLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (productTag != null)
             {
@@ -1866,6 +1952,9 @@ namespace Nop.Web.Areas.Admin.Factories
                 warehouseId: searchModel.WarehouseId,
                 pageIndex: searchModel.Page - 1, pageSize: searchModel.PageSize);
 
+            var currentCustomer = await _workContext.GetCurrentCustomerAsync();
+            var currentStore = await _storeContext.GetCurrentStoreAsync();
+
             //prepare grid model
             var model = await new StockQuantityHistoryListModel().PrepareToGridAsync(searchModel, stockQuantityHistory, () =>
             {
@@ -1883,7 +1972,7 @@ namespace Nop.Web.Areas.Admin.Factories
                     if (combination != null)
                     {
                         stockQuantityHistoryModel.AttributeCombination = await _productAttributeFormatter
-                            .FormatAttributesAsync(product, combination.AttributesXml, (await _workContext.GetCurrentCustomerAsync()), renderGiftCardAttributes: false);
+                            .FormatAttributesAsync(product, combination.AttributesXml, currentCustomer, currentStore, renderGiftCardAttributes: false);
                     }
 
                     stockQuantityHistoryModel.WarehouseName = historyEntry.WarehouseId.HasValue
@@ -1969,7 +2058,7 @@ namespace Nop.Web.Areas.Admin.Factories
         public virtual async Task<ProductAttributeMappingModel> PrepareProductAttributeMappingModelAsync(ProductAttributeMappingModel model,
             Product product, ProductAttributeMapping productAttributeMapping, bool excludeProperties = false)
         {
-            Action<ProductAttributeMappingLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ProductAttributeMappingLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (product == null)
                 throw new ArgumentNullException(nameof(product));
@@ -2078,7 +2167,9 @@ namespace Nop.Web.Areas.Admin.Factories
                         productAttributeValueModel.AssociatedProductName = (await _productService.GetProductByIdAsync(value.AssociatedProductId))?.Name ?? string.Empty;
                     }
 
-                    var pictureThumbnailUrl = await _pictureService.GetPictureUrlAsync(value.PictureId, 75, false);
+                    var valuePicture = (await _productAttributeService.GetProductAttributeValuePicturesAsync(value.Id)).FirstOrDefault();
+                    var pictureThumbnailUrl = await _pictureService.GetPictureUrlAsync(valuePicture?.PictureId ?? 0, 75, false);
+
                     //little hack here. Grid is rendered wrong way with <img> without "src" attribute
                     if (string.IsNullOrEmpty(pictureThumbnailUrl))
                         pictureThumbnailUrl = await _pictureService.GetDefaultPictureUrlAsync(targetSize: 1);
@@ -2109,7 +2200,7 @@ namespace Nop.Web.Areas.Admin.Factories
             if (productAttributeMapping == null)
                 throw new ArgumentNullException(nameof(productAttributeMapping));
 
-            Action<ProductAttributeValueLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ProductAttributeValueLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (productAttributeValue != null)
             {
@@ -2133,7 +2224,8 @@ namespace Nop.Web.Areas.Admin.Factories
                     Quantity = productAttributeValue.Quantity,
                     IsPreSelected = productAttributeValue.IsPreSelected,
                     DisplayOrder = productAttributeValue.DisplayOrder,
-                    PictureId = productAttributeValue.PictureId
+                    PictureIds = (await _productAttributeService.GetProductAttributeValuePicturesAsync(productAttributeValue.Id))
+                        .Select(c => c.PictureId).ToList(),
                 };
 
                 model.AssociatedProductName = (await _productService.GetProductByIdAsync(productAttributeValue.AssociatedProductId))?.Name;
@@ -2223,8 +2315,9 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(searchModel));
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                searchModel.SearchVendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
+                searchModel.SearchVendorId = currentVendor.Id;
 
             //get products
             var products = await _productService.SearchProductsAsync(showHidden: true,
@@ -2276,6 +2369,8 @@ namespace Nop.Web.Areas.Admin.Factories
                 .GetAllProductAttributeCombinationsAsync(product.Id)).ToPagedList(searchModel);
 
             var currentCustomer = await _workContext.GetCurrentCustomerAsync();
+            var currentStore = await _storeContext.GetCurrentStoreAsync();
+
             //prepare grid model
             var model = await new ProductAttributeCombinationListModel().PrepareToGridAsync(searchModel, productAttributeCombinations, () =>
             {
@@ -2286,8 +2381,11 @@ namespace Nop.Web.Areas.Admin.Factories
 
                     //fill in additional values (not existing in the entity)
                     productAttributeCombinationModel.AttributesXml = await _productAttributeFormatter
-                        .FormatAttributesAsync(product, combination.AttributesXml, currentCustomer, "<br />", true, true, true, false);
-                    var pictureThumbnailUrl = await _pictureService.GetPictureUrlAsync(combination.PictureId, 75, false);
+                        .FormatAttributesAsync(product, combination.AttributesXml, currentCustomer, currentStore, "<br />", true, true, true, false);
+
+                    var combinationPicture = (await _productAttributeService.GetProductAttributeCombinationPicturesAsync(combination.Id)).FirstOrDefault();
+                    var pictureThumbnailUrl = await _pictureService.GetPictureUrlAsync(combinationPicture?.PictureId ?? 0, 75, false);
+                    
                     //little hack here. Grid is rendered wrong way with <img> without "src" attribute
                     if (string.IsNullOrEmpty(pictureThumbnailUrl))
                         pictureThumbnailUrl = await _pictureService.GetDefaultPictureUrlAsync(targetSize: 1);
@@ -2336,7 +2434,8 @@ namespace Nop.Web.Areas.Admin.Factories
                     ManufacturerPartNumber = productAttributeCombination.ManufacturerPartNumber,
                     NotifyAdminForQuantityBelow = productAttributeCombination.NotifyAdminForQuantityBelow,
                     OverriddenPrice = productAttributeCombination.OverriddenPrice,
-                    PictureId = productAttributeCombination.PictureId,
+                    PictureIds = (await _productAttributeService.GetProductAttributeCombinationPicturesAsync(productAttributeCombination.Id))
+                        .Select(c => c.PictureId).ToList(),
                     ProductId = productAttributeCombination.ProductId,
                     Sku = productAttributeCombination.Sku,
                     StockQuantity = productAttributeCombination.StockQuantity,

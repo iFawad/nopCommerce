@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Nop.Core.Domain.Customers;
+﻿using Nop.Core.Domain.Customers;
 using Nop.Services.Caching;
 
 namespace Nop.Plugin.Tax.Avalara.Services.Caching
@@ -7,7 +6,7 @@ namespace Nop.Plugin.Tax.Avalara.Services.Caching
     /// <summary>
     /// Represents a customer cache event consumer
     /// </summary>
-    public partial class CustomerCacheEventConsumer : CacheEventConsumer<Customer>
+    public class CustomerCacheEventConsumer : CacheEventConsumer<Customer>
     {
         #region Methods
 

@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
+using Nop.Plugin.Payments.Manual.Components;
 using Nop.Plugin.Payments.Manual.Models;
 using Nop.Plugin.Payments.Manual.Validators;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
+using Nop.Services.Orders;
 using Nop.Services.Payments;
 using Nop.Services.Plugins;
 
@@ -22,24 +20,24 @@ namespace Nop.Plugin.Payments.Manual
     {
         #region Fields
 
-        private readonly ILocalizationService _localizationService;
-        private readonly IPaymentService _paymentService;
-        private readonly ISettingService _settingService;
-        private readonly IWebHelper _webHelper;
-        private readonly ManualPaymentSettings _manualPaymentSettings;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IOrderTotalCalculationService _orderTotalCalculationService;
+        protected readonly ISettingService _settingService;
+        protected readonly IWebHelper _webHelper;
+        protected readonly ManualPaymentSettings _manualPaymentSettings;
 
         #endregion
 
         #region Ctor
 
         public ManualPaymentProcessor(ILocalizationService localizationService,
-            IPaymentService paymentService,
+            IOrderTotalCalculationService orderTotalCalculationService,
             ISettingService settingService,
             IWebHelper webHelper,
             ManualPaymentSettings manualPaymentSettings)
         {
             _localizationService = localizationService;
-            _paymentService = paymentService;
+            _orderTotalCalculationService = orderTotalCalculationService;
             _settingService = settingService;
             _webHelper = webHelper;
             _manualPaymentSettings = manualPaymentSettings;
@@ -118,7 +116,7 @@ namespace Nop.Plugin.Payments.Manual
         /// </returns>
         public async Task<decimal> GetAdditionalHandlingFeeAsync(IList<ShoppingCartItem> cart)
         {
-            return await _paymentService.CalculateAdditionalFeeAsync(cart,
+            return await _orderTotalCalculationService.CalculatePaymentAdditionalFeeAsync(cart,
                 _manualPaymentSettings.AdditionalFee, _manualPaymentSettings.AdditionalFeePercentage);
         }
 
@@ -284,12 +282,12 @@ namespace Nop.Plugin.Payments.Manual
         }
 
         /// <summary>
-        /// Gets a name of a view component for displaying plugin in public store ("payment info" checkout step)
+        /// Gets a type of a view component for displaying plugin in public store ("payment info" checkout step)
         /// </summary>
-        /// <returns>View component name</returns>
-        public string GetPublicViewComponentName()
+        /// <returns>View component type</returns>
+        public Type GetPublicViewComponent()
         {
-            return "PaymentManual";
+            return typeof(PaymentManualViewComponent);
         }
 
         /// <summary>
@@ -306,7 +304,7 @@ namespace Nop.Plugin.Payments.Manual
             await _settingService.SaveSettingAsync(settings);
 
             //locales
-            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
+            await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Plugins.Payments.Manual.Instructions"] = "This payment method stores credit card information in database (it's not sent to any third-party processor). In order to store credit card information, you must be PCI compliant.",
                 ["Plugins.Payments.Manual.Fields.AdditionalFee"] = "Additional fee",

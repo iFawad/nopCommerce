@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Nop.Core;
@@ -34,8 +32,8 @@ namespace Nop.Web.Framework.Mvc.Filters
         {
             #region Fields
 
-            private readonly IWebHelper _webHelper;
-            private readonly SeoSettings _seoSettings;
+            protected readonly IWebHelper _webHelper;
+            protected readonly SeoSettings _seoSettings;
 
             #endregion
 
@@ -84,8 +82,7 @@ namespace Nop.Web.Framework.Mvc.Filters
             /// Called early in the filter pipeline to confirm request is authorized
             /// </summary>
             /// <param name="context">Authorization filter context</param>
-            /// <returns>A task that represents the asynchronous operation</returns>
-            private async Task CheckWwwRequirementAsync(AuthorizationFilterContext context)
+            private void CheckWwwRequirement(AuthorizationFilterContext context)
             {
                 if (context == null)
                     throw new ArgumentNullException(nameof(context));
@@ -94,7 +91,7 @@ namespace Nop.Web.Framework.Mvc.Filters
                 if (!context.HttpContext.Request.Method.Equals(WebRequestMethods.Http.Get, StringComparison.InvariantCultureIgnoreCase))
                     return;
 
-                if (!await DataSettingsManager.IsDatabaseInstalledAsync())
+                if (!DataSettingsManager.IsDatabaseInstalled())
                     return;
 
                 //ignore this rule for localhost
@@ -131,9 +128,10 @@ namespace Nop.Web.Framework.Mvc.Filters
             /// </summary>
             /// <param name="context">Authorization filter context</param>
             /// <returns>A task that represents the asynchronous operation</returns>
-            public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
+            public Task OnAuthorizationAsync(AuthorizationFilterContext context)
             {
-                await CheckWwwRequirementAsync(context);
+                CheckWwwRequirement(context);
+                return Task.CompletedTask;
             }
 
             #endregion

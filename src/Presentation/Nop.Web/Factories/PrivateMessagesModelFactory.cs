@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Forums;
 using Nop.Services.Customers;
 using Nop.Services.Forums;
 using Nop.Services.Helpers;
+using Nop.Services.Localization;
+using Nop.Web.Infrastructure;
 using Nop.Web.Models.Common;
 using Nop.Web.Models.PrivateMessages;
 
@@ -19,13 +18,14 @@ namespace Nop.Web.Factories
     {
         #region Fields
 
-        private readonly CustomerSettings _customerSettings;
-        private readonly ForumSettings _forumSettings;
-        private readonly ICustomerService _customerService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IForumService _forumService;
-        private readonly IStoreContext _storeContext;
-        private readonly IWorkContext _workContext;
+        protected readonly CustomerSettings _customerSettings;
+        protected readonly ForumSettings _forumSettings;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IForumService _forumService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
@@ -36,6 +36,7 @@ namespace Nop.Web.Factories
             ICustomerService customerService,
             IDateTimeHelper dateTimeHelper,
             IForumService forumService,
+            ILocalizationService localizationService,
             IStoreContext storeContext,
             IWorkContext workContext)
         {
@@ -44,6 +45,7 @@ namespace Nop.Web.Factories
             _customerService = customerService;
             _dateTimeHelper = dateTimeHelper;
             _forumService = forumService;
+            _localizationService = localizationService;
             _storeContext = storeContext;
             _workContext = workContext;
         }
@@ -118,13 +120,15 @@ namespace Nop.Web.Factories
             var pageSize = _forumSettings.PrivateMessagesPageSize;
 
             var messages = new List<PrivateMessageModel>();
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var list = await _forumService.GetAllPrivateMessagesAsync(store.Id,
+                0, customer.Id, null, null, false, string.Empty, page, pageSize);
 
-            var list = await _forumService.GetAllPrivateMessagesAsync((await _storeContext.GetCurrentStoreAsync()).Id,
-                0, (await _workContext.GetCurrentCustomerAsync()).Id, null, null, false, string.Empty, page, pageSize);
             foreach (var pm in list)
                 messages.Add(await PreparePrivateMessageModelAsync(pm));
 
-            var pagerModel = new PagerModel
+            var pagerModel = new PagerModel(_localizationService)
             {
                 PageSize = list.PageSize,
                 TotalRecords = list.TotalCount,
@@ -132,7 +136,7 @@ namespace Nop.Web.Factories
                 ShowTotalSummary = false,
                 RouteActionName = "PrivateMessagesPaged",
                 UseRouteLinks = true,
-                RouteValues = new PrivateMessageRouteValues { pageNumber = page, tab = tab }
+                RouteValues = new PrivateMessageRouteValues { PageNumber = page, Tab = tab }
             };
 
             var model = new PrivateMessageListModel
@@ -163,13 +167,14 @@ namespace Nop.Web.Factories
             var pageSize = _forumSettings.PrivateMessagesPageSize;
 
             var messages = new List<PrivateMessageModel>();
-
-            var list = await _forumService.GetAllPrivateMessagesAsync((await _storeContext.GetCurrentStoreAsync()).Id,
-                (await _workContext.GetCurrentCustomerAsync()).Id, 0, null, false, null, string.Empty, page, pageSize);
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var list = await _forumService.GetAllPrivateMessagesAsync(store.Id,
+                customer.Id, 0, null, false, null, string.Empty, page, pageSize);
             foreach (var pm in list)
                 messages.Add(await PreparePrivateMessageModelAsync(pm));
 
-            var pagerModel = new PagerModel
+            var pagerModel = new PagerModel(_localizationService)
             {
                 PageSize = list.PageSize,
                 TotalRecords = list.TotalCount,
@@ -177,7 +182,7 @@ namespace Nop.Web.Factories
                 ShowTotalSummary = false,
                 RouteActionName = "PrivateMessagesPaged",
                 UseRouteLinks = true,
-                RouteValues = new PrivateMessageRouteValues { pageNumber = page, tab = tab }
+                RouteValues = new PrivateMessageRouteValues { PageNumber = page, Tab = tab }
             };
 
             var model = new PrivateMessageListModel
@@ -213,8 +218,9 @@ namespace Nop.Web.Factories
             if (replyToPM == null)
                 return model;
 
-            if (replyToPM.ToCustomerId == (await _workContext.GetCurrentCustomerAsync()).Id ||
-                replyToPM.FromCustomerId == (await _workContext.GetCurrentCustomerAsync()).Id)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (replyToPM.ToCustomerId == customer.Id ||
+                replyToPM.FromCustomerId == customer.Id)
             {
                 model.ReplyToMessageId = replyToPM.Id;
                 model.Subject = $"Re: {replyToPM.Subject}";
@@ -255,6 +261,18 @@ namespace Nop.Web.Factories
             };
 
             return model;
+        }
+
+        #endregion
+
+        #region Nested class
+
+        /// <summary>
+        /// record that has a slug and page for route values. Used for Private Messages pagination
+        /// </summary>
+        public partial record PrivateMessageRouteValues : BaseRouteValues
+        {
+            public string Tab { get; set; }
         }
 
         #endregion

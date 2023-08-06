@@ -1,5 +1,4 @@
-﻿using System;
-using Nop.Core.Domain.Catalog;
+﻿using Nop.Core.Domain.Catalog;
 using Nop.Web.Framework.Models;
 using Nop.Web.Models.Media;
 
@@ -10,7 +9,7 @@ namespace Nop.Web.Models.Catalog
         public ProductOverviewModel()
         {
             ProductPrice = new ProductPriceModel();
-            DefaultPictureModel = new PictureModel();
+            PictureModels = new List<PictureModel>();
             ProductSpecificationModel = new ProductSpecificationModel();
             ReviewOverviewModel = new ProductReviewOverviewModel();
         }
@@ -28,25 +27,26 @@ namespace Nop.Web.Models.Catalog
 
         //price
         public ProductPriceModel ProductPrice { get; set; }
-        //picture
-        public PictureModel DefaultPictureModel { get; set; }
+        //pictures
+        public IList<PictureModel> PictureModels { get; set; }
         //specification attributes
-
         public ProductSpecificationModel ProductSpecificationModel { get; set; }
         //price
         public ProductReviewOverviewModel ReviewOverviewModel { get; set; }
 
-		#region Nested Classes
+        #region Nested Classes
 
         public partial record ProductPriceModel : BaseNopModel
         {
             public string OldPrice { get; set; }
+            public decimal? OldPriceValue { get; set; }
             public string Price { get; set; }
-            public decimal PriceValue { get; set; }
+            public decimal? PriceValue { get; set; }
             /// <summary>
             /// PAngV baseprice (used in Germany)
             /// </summary>
             public string BasePricePAngV { get; set; }
+            public decimal? BasePricePAngVValue { get; set; }
 
             public bool DisableBuyButton { get; set; }
             public bool DisableWishlistButton { get; set; }
@@ -65,6 +65,6 @@ namespace Nop.Web.Models.Catalog
             public bool DisplayTaxShippingInfo { get; set; }
         }
 
-		#endregion
+        #endregion
     }
 }

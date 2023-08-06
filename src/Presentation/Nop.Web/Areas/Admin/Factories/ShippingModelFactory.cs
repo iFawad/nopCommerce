@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core.Domain.Shipping;
+﻿using Nop.Core.Domain.Shipping;
 using Nop.Services.Common;
 using Nop.Services.Directory;
 using Nop.Services.Localization;
@@ -24,16 +20,16 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly IAddressModelFactory _addressModelFactory;
-        private readonly IAddressService _addressService;
-        private readonly ICountryService _countryService;
-        private readonly IDateRangeService _dateRangeService;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedModelFactory _localizedModelFactory;
-        private readonly IPickupPluginManager _pickupPluginManager;
-        private readonly IShippingPluginManager _shippingPluginManager;
-        private readonly IShippingService _shippingService;
-        private readonly IStateProvinceService _stateProvinceService;
+        protected readonly IAddressModelFactory _addressModelFactory;
+        protected readonly IAddressService _addressService;
+        protected readonly ICountryService _countryService;
+        protected readonly IDateRangeService _dateRangeService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedModelFactory _localizedModelFactory;
+        protected readonly IPickupPluginManager _pickupPluginManager;
+        protected readonly IShippingPluginManager _shippingPluginManager;
+        protected readonly IShippingService _shippingService;
+        protected readonly IStateProvinceService _stateProvinceService;
 
         #endregion
 
@@ -271,7 +267,7 @@ namespace Nop.Web.Areas.Admin.Factories
         public virtual async Task<ShippingMethodModel> PrepareShippingMethodModelAsync(ShippingMethodModel model,
             ShippingMethod shippingMethod, bool excludeProperties = false)
         {
-            Action<ShippingMethodLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ShippingMethodLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (shippingMethod != null)
             {
@@ -351,7 +347,7 @@ namespace Nop.Web.Areas.Admin.Factories
         /// </returns>
         public virtual async Task<DeliveryDateModel> PrepareDeliveryDateModelAsync(DeliveryDateModel model, DeliveryDate deliveryDate, bool excludeProperties = false)
         {
-            Action<DeliveryDateLocalizedModel, int> localizedModelConfiguration = null;
+            Func<DeliveryDateLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (deliveryDate != null)
             {
@@ -411,7 +407,7 @@ namespace Nop.Web.Areas.Admin.Factories
         public virtual async Task<ProductAvailabilityRangeModel> PrepareProductAvailabilityRangeModelAsync(ProductAvailabilityRangeModel model,
             ProductAvailabilityRange productAvailabilityRange, bool excludeProperties = false)
         {
-            Action<ProductAvailabilityRangeLocalizedModel, int> localizedModelConfiguration = null;
+            Func<ProductAvailabilityRangeLocalizedModel, int, Task> localizedModelConfiguration = null;
 
             if (productAvailabilityRange != null)
             {

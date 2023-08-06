@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Messages;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
@@ -22,16 +17,16 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedEntityService _localizedEntityService;
-        private readonly IMessageTemplateModelFactory _messageTemplateModelFactory;
-        private readonly IMessageTemplateService _messageTemplateService;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly IStoreMappingService _storeMappingService;
-        private readonly IStoreService _storeService;
-        private readonly IWorkflowMessageService _workflowMessageService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedEntityService _localizedEntityService;
+        protected readonly IMessageTemplateModelFactory _messageTemplateModelFactory;
+        protected readonly IMessageTemplateService _messageTemplateService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IStoreMappingService _storeMappingService;
+        protected readonly IStoreService _storeService;
+        protected readonly IWorkflowMessageService _workflowMessageService;
 
         #endregion Fields
 
@@ -64,7 +59,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(MessageTemplate mt, MessageTemplateModel model)
         {
             foreach (var localized in model.Locales)
@@ -91,7 +85,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(MessageTemplate messageTemplate, MessageTemplateModel model)
         {
             messageTemplate.LimitedToStores = model.SelectedStoreIds.Any();
@@ -104,7 +97,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(messageTemplate, store.Id);
                 }
                 else

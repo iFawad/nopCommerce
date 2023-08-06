@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Blogs;
 
 namespace Nop.Services.Blogs
@@ -46,7 +43,7 @@ namespace Nop.Services.Blogs
         /// The task result contains the blog posts
         /// </returns>
         Task<IPagedList<BlogPost>> GetAllBlogPostsAsync(int storeId = 0, int languageId = 0,
-            DateTime? dateFrom = null, DateTime? dateTo = null, 
+            DateTime? dateFrom = null, DateTime? dateTo = null,
             int pageIndex = 0, int pageSize = int.MaxValue, bool showHidden = false, string title = null);
 
         /// <summary>
@@ -114,7 +111,6 @@ namespace Nop.Services.Blogs
         /// </returns>
         Task<IList<string>> ParseTagsAsync(BlogPost blogPost);
 
-        //TODO: migrate to an extension method
         /// <summary>
         /// Get a value indicating whether a blog post is available now (availability dates)
         /// </summary>

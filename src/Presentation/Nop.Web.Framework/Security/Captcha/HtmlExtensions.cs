@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Html;
+﻿using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
 using Nop.Core.Domain.Security;
@@ -28,7 +26,7 @@ namespace Nop.Web.Framework.Security.Captcha
         /// </returns>
         private static async Task<string> GetReCaptchaLanguageAsync(CaptchaSettings captchaSettings)
         {
-            var language = (captchaSettings.ReCaptchaDefaultLanguage ?? string.Empty).ToLower();
+            var language = (captchaSettings.ReCaptchaDefaultLanguage ?? string.Empty).ToLowerInvariant();
             if (captchaSettings.AutomaticallyChooseLanguage)
             {
                 //this list got from this site: https://developers.google.com/recaptcha/docs/language
@@ -40,7 +38,7 @@ namespace Nop.Web.Framework.Security.Captcha
 
                 var currentLanguage = await workContext.GetWorkingLanguageAsync();
                 var twoLetterIsoCode = currentLanguage != null
-                    ? languageService.GetTwoLetterIsoLanguageName(currentLanguage).ToLower()
+                    ? languageService.GetTwoLetterIsoLanguageName(currentLanguage).ToLowerInvariant()
                     : string.Empty;
 
                 language = supportedLanguageCodes.Contains(twoLetterIsoCode) ? twoLetterIsoCode : language;
@@ -90,7 +88,7 @@ namespace Nop.Web.Framework.Security.Captcha
             var language = await GetReCaptchaLanguageAsync(captchaSettings);
 
             //prepare theme
-            var theme = (captchaSettings.ReCaptchaTheme ?? string.Empty).ToLower();
+            var theme = (captchaSettings.ReCaptchaTheme ?? string.Empty).ToLowerInvariant();
             theme = theme switch
             {
                 "blackglass" or "dark" => "dark",
@@ -122,11 +120,12 @@ namespace Nop.Web.Framework.Security.Captcha
         /// </summary>
         /// <param name="helper">HTML helper</param>
         /// <param name="captchaSettings">Captcha settings</param>
+        /// <param name="actionName">Action name</param>
         /// <returns>
         /// A task that represents the asynchronous operation
         /// The task result contains the result
         /// </returns>
-        public static async Task<IHtmlContent> GenerateReCaptchaV3Async(this IHtmlHelper helper, CaptchaSettings captchaSettings)
+        public static async Task<IHtmlContent> GenerateReCaptchaV3Async(this IHtmlHelper helper, CaptchaSettings captchaSettings, string actionName = null)
         {
             //prepare language
             var language = await GetReCaptchaLanguageAsync(captchaSettings);
@@ -138,18 +137,25 @@ namespace Nop.Web.Framework.Security.Captcha
             var publicKey = captchaSettings.ReCaptchaPublicKey ?? string.Empty;
 
             //prepare reCAPTCHA script
-            var actionName = helper.ViewContext.RouteData.Values["action"].ToString();
+            if (string.IsNullOrEmpty(actionName))
+                actionName = helper.ViewContext.RouteData.Values["action"].ToString();
+
             var scriptCallback = $@"
                 var onloadCallback{id} = function() {{
                     var form = $('input[id=""g-recaptcha-response_{id}""]').closest('form');
                     var btn = $(form.find(':submit')[0]);
+
+                    var actionBtn = btn.data('action');
+                    if (actionBtn == null) {{
+                        actionBtn = '{actionName}';
+                    }}
 
                     var loaded = false;
                     var isBusy = false;
                     btn.on('click', function (e) {{
                         if (!isBusy) {{
                             isBusy = true;
-                            grecaptcha.execute('{publicKey}', {{ 'action': '{actionName}' }}).then(function(token) {{
+                            grecaptcha.execute('{publicKey}', {{ 'action': actionBtn }}).then(function(token) {{
                                 $('#g-recaptcha-response_{id}', form).val(token);
                                 loaded = true;
                                 btn.click();

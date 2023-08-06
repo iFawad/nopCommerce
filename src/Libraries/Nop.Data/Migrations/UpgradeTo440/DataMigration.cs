@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using FluentMigrator;
+﻿using FluentMigrator;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Logging;
@@ -9,11 +8,10 @@ using Nop.Data.Mapping;
 
 namespace Nop.Data.Migrations.UpgradeTo440
 {
-    [NopMigration("2020-06-10 00:00:00", "4.40.0", UpdateMigrationType.Data)]
-    [SkipMigrationOnInstall]
+    [NopUpdateMigration("2020-06-10 00:00:00", "4.40", UpdateMigrationType.Data)]
     public class DataMigration : Migration
     {
-        private readonly INopDataProvider _dataProvider;
+        protected readonly INopDataProvider _dataProvider;
 
         public DataMigration(INopDataProvider dataProvider)
         {
@@ -26,7 +24,7 @@ namespace Nop.Data.Migrations.UpgradeTo440
         public override void Up()
         {
             // new permission
-            if (!_dataProvider.GetTable<PermissionRecord>().Any(pr => string.Compare(pr.SystemName, "AccessProfiling", true) == 0))
+            if (!_dataProvider.GetTable<PermissionRecord>().Any(pr => string.Compare(pr.SystemName, "AccessProfiling", StringComparison.InvariantCultureIgnoreCase) == 0))
             {
                 var profilingPermission = _dataProvider.InsertEntity(
                     new PermissionRecord
@@ -53,7 +51,7 @@ namespace Nop.Data.Migrations.UpgradeTo440
 
             var activityLogTypeTable = _dataProvider.GetTable<ActivityLogType>();
 
-            if (!activityLogTypeTable.Any(alt => string.Compare(alt.SystemKeyword, "AddNewSpecAttributeGroup", true) == 0))
+            if (!activityLogTypeTable.Any(alt => string.Compare(alt.SystemKeyword, "AddNewSpecAttributeGroup", StringComparison.InvariantCultureIgnoreCase) == 0))
                 _dataProvider.InsertEntity(
                     new ActivityLogType
                     {
@@ -63,7 +61,7 @@ namespace Nop.Data.Migrations.UpgradeTo440
                     }
                 );
 
-            if (!activityLogTypeTable.Any(alt => string.Compare(alt.SystemKeyword, "EditSpecAttributeGroup", true) == 0))
+            if (!activityLogTypeTable.Any(alt => string.Compare(alt.SystemKeyword, "EditSpecAttributeGroup", StringComparison.InvariantCultureIgnoreCase) == 0))
                 _dataProvider.InsertEntity(
                     new ActivityLogType
                     {
@@ -73,7 +71,7 @@ namespace Nop.Data.Migrations.UpgradeTo440
                     }
                 );
 
-            if (!activityLogTypeTable.Any(alt => string.Compare(alt.SystemKeyword, "DeleteSpecAttributeGroup", true) == 0))
+            if (!activityLogTypeTable.Any(alt => string.Compare(alt.SystemKeyword, "DeleteSpecAttributeGroup", StringComparison.InvariantCultureIgnoreCase) == 0))
                 _dataProvider.InsertEntity(
                     new ActivityLogType
                     {
@@ -83,7 +81,7 @@ namespace Nop.Data.Migrations.UpgradeTo440
                     }
                 );
             //<MFA #475>
-            if (!_dataProvider.GetTable<PermissionRecord>().Any(pr => string.Compare(pr.SystemName, "ManageMultifactorAuthenticationMethods", true) == 0))
+            if (!_dataProvider.GetTable<PermissionRecord>().Any(pr => string.Compare(pr.SystemName, "ManageMultifactorAuthenticationMethods", StringComparison.InvariantCultureIgnoreCase) == 0))
             {
                 var multiFactorAuthenticationPermission = _dataProvider.InsertEntity(
                     new PermissionRecord
@@ -138,7 +136,7 @@ namespace Nop.Data.Migrations.UpgradeTo440
             var categoryTableName = NameCompatibilityManager.GetTableName(typeof(Category));
             var manufacturerTableName = NameCompatibilityManager.GetTableName(typeof(Manufacturer));
             var vendorTableName = NameCompatibilityManager.GetTableName(typeof(Vendor));
-            
+
             //remove column
             var priceRangesColumnName = "PriceRanges";
 
@@ -156,7 +154,7 @@ namespace Nop.Data.Migrations.UpgradeTo440
                 Alter.Table(categoryTableName)
                     .AddColumn(priceRangeFilteringColumnName).AsBoolean().NotNullable().SetExistingRowsTo(true);
             }
-            
+
             if (!Schema.Table(manufacturerTableName).Column(priceRangeFilteringColumnName).Exists())
             {
                 Alter.Table(manufacturerTableName)

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Core.Domain.Blogs;
 using Nop.Core.Domain.Customers;
@@ -26,19 +22,19 @@ namespace Nop.Web.Factories
     {
         #region Fields
 
-        private readonly BlogSettings _blogSettings;
-        private readonly CaptchaSettings _captchaSettings;
-        private readonly CustomerSettings _customerSettings;
-        private readonly IBlogService _blogService;
-        private readonly ICustomerService _customerService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IGenericAttributeService _genericAttributeService;
-        private readonly IPictureService _pictureService;
-        private readonly IStaticCacheManager _staticCacheManager;
-        private readonly IStoreContext _storeContext;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IWorkContext _workContext;
-        private readonly MediaSettings _mediaSettings;
+        protected readonly BlogSettings _blogSettings;
+        protected readonly CaptchaSettings _captchaSettings;
+        protected readonly CustomerSettings _customerSettings;
+        protected readonly IBlogService _blogService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IGenericAttributeService _genericAttributeService;
+        protected readonly IPictureService _pictureService;
+        protected readonly IStaticCacheManager _staticCacheManager;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IUrlRecordService _urlRecordService;
+        protected readonly IWorkContext _workContext;
+        protected readonly MediaSettings _mediaSettings;
 
         #endregion
 
@@ -74,7 +70,7 @@ namespace Nop.Web.Factories
         }
 
         #endregion
-        
+
         #region Methods
 
         /// <summary>
@@ -101,12 +97,18 @@ namespace Nop.Web.Factories
             model.Body = blogPost.Body;
             model.BodyOverview = blogPost.BodyOverview;
             model.AllowComments = blogPost.AllowComments;
+
+            model.PreventNotRegisteredUsersToLeaveComments =
+                await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()) &&
+                !_blogSettings.AllowNotRegisteredUsersToLeaveComments;
+
             model.CreatedOn = await _dateTimeHelper.ConvertToUserTimeAsync(blogPost.StartDateUtc ?? blogPost.CreatedOnUtc, DateTimeKind.Utc);
             model.Tags = await _blogService.ParseTagsAsync(blogPost);
             model.AddNewComment.DisplayCaptcha = _captchaSettings.Enabled && _captchaSettings.ShowOnBlogCommentPage;
 
             //number of blog comments
-            var storeId = _blogSettings.ShowBlogCommentsPerStore ? (await _storeContext.GetCurrentStoreAsync()).Id : 0;
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var storeId = _blogSettings.ShowBlogCommentsPerStore ? store.Id : 0;
 
             model.NumberOfComments = await _blogService.GetBlogCommentsCountAsync(blogPost, storeId, true);
 
@@ -178,10 +180,11 @@ namespace Nop.Web.Factories
         public virtual async Task<BlogPostTagListModel> PrepareBlogPostTagListModelAsync()
         {
             var model = new BlogPostTagListModel();
+            var store = await _storeContext.GetCurrentStoreAsync();
 
             //get tags
             var tags = (await _blogService
-                .GetAllBlogPostTagsAsync((await _storeContext.GetCurrentStoreAsync()).Id, (await _workContext.GetWorkingLanguageAsync()).Id))
+                .GetAllBlogPostTagsAsync(store.Id, (await _workContext.GetWorkingLanguageAsync()).Id))
                 .OrderByDescending(x => x.BlogPostCount)
                 .Take(_blogSettings.NumberOfTags);
 
@@ -204,13 +207,15 @@ namespace Nop.Web.Factories
         /// </returns>
         public virtual async Task<List<BlogPostYearModel>> PrepareBlogPostYearModelAsync()
         {
-            var cacheKey = _staticCacheManager.PrepareKeyForDefaultCache(NopModelCacheDefaults.BlogMonthsModelKey, await _workContext.GetWorkingLanguageAsync(), await _storeContext.GetCurrentStoreAsync());
+            var store = await _storeContext.GetCurrentStoreAsync();
+            var currentLanguage = await _workContext.GetWorkingLanguageAsync();
+            var cacheKey = _staticCacheManager.PrepareKeyForDefaultCache(NopModelCacheDefaults.BlogMonthsModelKey, currentLanguage, store);
             var cachedModel = await _staticCacheManager.GetAsync(cacheKey, async () =>
             {
                 var model = new List<BlogPostYearModel>();
 
-                var blogPosts = await _blogService.GetAllBlogPostsAsync((await _storeContext.GetCurrentStoreAsync()).Id,
-                    (await _workContext.GetWorkingLanguageAsync()).Id);
+                var blogPosts = await _blogService.GetAllBlogPostsAsync(store.Id,
+                    currentLanguage.Id);
                 if (blogPosts.Any())
                 {
                     var months = new SortedDictionary<DateTime, int>();
@@ -262,7 +267,7 @@ namespace Nop.Web.Factories
 
             return cachedModel;
         }
-        
+
         /// <summary>
         /// Prepare blog comment model
         /// </summary>

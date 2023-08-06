@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Data;
 
@@ -13,7 +11,7 @@ namespace Nop.Services.Installation
     {
         #region Fields
 
-        private readonly RequestDelegate _next;
+        protected readonly RequestDelegate _next;
 
         #endregion
 
@@ -37,7 +35,7 @@ namespace Nop.Services.Installation
         public async Task InvokeAsync(HttpContext context, IWebHelper webHelper)
         {
             //whether database is installed
-            if (!await DataSettingsManager.IsDatabaseInstalledAsync())
+            if (!DataSettingsManager.IsDatabaseInstalled())
             {
                 var installUrl = $"{webHelper.GetStoreLocation()}{NopInstallationDefaults.InstallPath}";
                 if (!webHelper.GetThisPageUrl(false).StartsWith(installUrl, StringComparison.InvariantCultureIgnoreCase))

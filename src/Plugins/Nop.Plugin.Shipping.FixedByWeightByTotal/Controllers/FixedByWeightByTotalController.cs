@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
@@ -32,21 +29,21 @@ namespace Nop.Plugin.Shipping.FixedByWeightByTotal.Controllers
     {
         #region Fields
 
-        private readonly CurrencySettings _currencySettings;
-        private readonly FixedByWeightByTotalSettings _fixedByWeightByTotalSettings;
-        private readonly ICountryService _countryService;
-        private readonly ICurrencyService _currencyService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IMeasureService _measureService;
-        private readonly IPermissionService _permissionService;
-        private readonly ISettingService _settingService;
-        private readonly IShippingByWeightByTotalService _shippingByWeightService;
-        private readonly IShippingService _shippingService;
-        private readonly IStateProvinceService _stateProvinceService;
-        private readonly IStoreService _storeService;
-        private readonly IGenericAttributeService _genericAttributeService;
-        private readonly IWorkContext _workContext;
-        private readonly MeasureSettings _measureSettings;
+        protected readonly CurrencySettings _currencySettings;
+        protected readonly FixedByWeightByTotalSettings _fixedByWeightByTotalSettings;
+        protected readonly ICountryService _countryService;
+        protected readonly ICurrencyService _currencyService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IMeasureService _measureService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly ISettingService _settingService;
+        protected readonly IShippingByWeightByTotalService _shippingByWeightService;
+        protected readonly IShippingService _shippingService;
+        protected readonly IStateProvinceService _stateProvinceService;
+        protected readonly IStoreService _storeService;
+        protected readonly IGenericAttributeService _genericAttributeService;
+        protected readonly IWorkContext _workContext;
+        protected readonly MeasureSettings _measureSettings;
 
         #endregion
 
@@ -124,9 +121,9 @@ namespace Nop.Plugin.Shipping.FixedByWeightByTotal.Controllers
             //show configuration tour
             if (showtour)
             {
-                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.HideConfigurationStepsAttribute);
-
-                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CloseConfigurationStepsAttribute);
+                var customer = await _workContext.GetCurrentCustomerAsync();
+                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.HideConfigurationStepsAttribute);
+                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.CloseConfigurationStepsAttribute);
 
                 if (!hideCard && !closeCard)
                     ViewBag.ShowTour = true;
@@ -149,7 +146,6 @@ namespace Nop.Plugin.Shipping.FixedByWeightByTotal.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> SaveMode(bool value)
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageShippingSettings))

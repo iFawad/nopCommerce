@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Directory;
@@ -27,19 +22,19 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly IAddressService _addressService;
-        private readonly ICountryModelFactory _countryModelFactory;
-        private readonly ICountryService _countryService;
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly IExportManager _exportManager;
-        private readonly IImportManager _importManager;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedEntityService _localizedEntityService;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly IStateProvinceService _stateProvinceService;
-        private readonly IStoreMappingService _storeMappingService;
-        private readonly IStoreService _storeService;
+        protected readonly IAddressService _addressService;
+        protected readonly ICountryModelFactory _countryModelFactory;
+        protected readonly ICountryService _countryService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly IExportManager _exportManager;
+        protected readonly IImportManager _importManager;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedEntityService _localizedEntityService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IStateProvinceService _stateProvinceService;
+        protected readonly IStoreMappingService _storeMappingService;
+        protected readonly IStoreService _storeService;
 
         #endregion
 
@@ -78,7 +73,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(Country country, CountryModel model)
         {
             foreach (var localized in model.Locales)
@@ -90,7 +84,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(StateProvince stateProvince, StateProvinceModel model)
         {
             foreach (var localized in model.Locales)
@@ -102,7 +95,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(Country country, CountryModel model)
         {
             country.LimitedToStores = model.SelectedStoreIds.Any();
@@ -115,7 +107,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(country, store.Id);
                 }
                 else
@@ -196,7 +188,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("List");
-                
+
                 return RedirectToAction("Edit", new { id = country.Id });
             }
 
@@ -253,7 +245,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("List");
-                
+
                 return RedirectToAction("Edit", new { id = country.Id });
             }
 
@@ -303,8 +295,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCountries))
                 return AccessDeniedView();
 
-            if (selectedIds == null)
-                return Json(new { Result = true });
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
             var countries = await _countryService.GetCountriesByIdsAsync(selectedIds.ToArray());
             foreach (var country in countries)
@@ -322,8 +314,8 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageCountries))
                 return AccessDeniedView();
 
-            if (selectedIds == null)
-                return Json(new { Result = true });
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
             var countries = await _countryService.GetCountriesByIdsAsync(selectedIds.ToArray());
             foreach (var country in countries)

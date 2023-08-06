@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core.Domain.Orders;
+﻿using Nop.Core.Domain.Orders;
 
 namespace Nop.Services.Payments
 {
@@ -155,18 +153,6 @@ namespace Nop.Services.Payments
         string GetMaskedCreditCardNumber(string creditCardNumber);
 
         /// <summary>
-        /// Calculate payment method fee
-        /// </summary>
-        /// <param name="cart">Shopping cart</param>
-        /// <param name="fee">Fee value</param>
-        /// <param name="usePercentage">Is fee amount specified as percentage or fixed value?</param>
-        /// <returns>
-        /// A task that represents the asynchronous operation
-        /// The task result contains the result
-        /// </returns>
-        Task<decimal> CalculateAdditionalFeeAsync(IList<ShoppingCartItem> cart, decimal fee, bool usePercentage);
-
-        /// <summary>
         /// Serialize CustomValues of ProcessPaymentRequest
         /// </summary>
         /// <param name="request">Request</param>
@@ -184,6 +170,6 @@ namespace Nop.Services.Payments
         /// Generate an order GUID
         /// </summary>
         /// <param name="processPaymentRequest">Process payment request</param>
-        void GenerateOrderGuid(ProcessPaymentRequest processPaymentRequest);
+        Task GenerateOrderGuidAsync(ProcessPaymentRequest processPaymentRequest);
     }
 }

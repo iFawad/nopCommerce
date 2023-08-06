@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Caching;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Common;
@@ -11,6 +7,7 @@ using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
+using Nop.Core.Domain.Stores;
 using Nop.Core.Infrastructure;
 using Nop.Data;
 using Nop.Services.Customers;
@@ -38,9 +35,11 @@ namespace Nop.Services.Catalog
         protected readonly ILocalizationService _localizationService;
         protected readonly IProductAttributeParser _productAttributeParser;
         protected readonly IProductAttributeService _productAttributeService;
+        protected readonly IRepository<Category> _categoryRepository;
         protected readonly IRepository<CrossSellProduct> _crossSellProductRepository;
         protected readonly IRepository<DiscountProductMapping> _discountProductMappingRepository;
         protected readonly IRepository<LocalizedProperty> _localizedPropertyRepository;
+        protected readonly IRepository<Manufacturer> _manufacturerRepository;
         protected readonly IRepository<Product> _productRepository;
         protected readonly IRepository<ProductAttributeCombination> _productAttributeCombinationRepository;
         protected readonly IRepository<ProductAttributeMapping> _productAttributeMappingRepository;
@@ -52,12 +51,13 @@ namespace Nop.Services.Catalog
         protected readonly IRepository<ProductReviewHelpfulness> _productReviewHelpfulnessRepository;
         protected readonly IRepository<ProductSpecificationAttribute> _productSpecificationAttributeRepository;
         protected readonly IRepository<ProductTag> _productTagRepository;
+        protected readonly IRepository<ProductVideo> _productVideoRepository;
         protected readonly IRepository<ProductWarehouseInventory> _productWarehouseInventoryRepository;
         protected readonly IRepository<RelatedProduct> _relatedProductRepository;
         protected readonly IRepository<Shipment> _shipmentRepository;
         protected readonly IRepository<StockQuantityHistory> _stockQuantityHistoryRepository;
         protected readonly IRepository<TierPrice> _tierPriceRepository;
-        protected readonly IRepository<Warehouse> _warehouseRepository;
+        protected readonly ISearchPluginManager _searchPluginManager;
         protected readonly IStaticCacheManager _staticCacheManager;
         protected readonly IStoreMappingService _storeMappingService;
         protected readonly IStoreService _storeService;
@@ -77,9 +77,11 @@ namespace Nop.Services.Catalog
             ILocalizationService localizationService,
             IProductAttributeParser productAttributeParser,
             IProductAttributeService productAttributeService,
+            IRepository<Category> categoryRepository,
             IRepository<CrossSellProduct> crossSellProductRepository,
             IRepository<DiscountProductMapping> discountProductMappingRepository,
             IRepository<LocalizedProperty> localizedPropertyRepository,
+            IRepository<Manufacturer> manufacturerRepository,
             IRepository<Product> productRepository,
             IRepository<ProductAttributeCombination> productAttributeCombinationRepository,
             IRepository<ProductAttributeMapping> productAttributeMappingRepository,
@@ -91,12 +93,13 @@ namespace Nop.Services.Catalog
             IRepository<ProductReviewHelpfulness> productReviewHelpfulnessRepository,
             IRepository<ProductSpecificationAttribute> productSpecificationAttributeRepository,
             IRepository<ProductTag> productTagRepository,
+            IRepository<ProductVideo> productVideoRepository,
             IRepository<ProductWarehouseInventory> productWarehouseInventoryRepository,
             IRepository<RelatedProduct> relatedProductRepository,
             IRepository<Shipment> shipmentRepository,
             IRepository<StockQuantityHistory> stockQuantityHistoryRepository,
             IRepository<TierPrice> tierPriceRepository,
-            IRepository<Warehouse> warehouseRepository,
+            ISearchPluginManager searchPluginManager,
             IStaticCacheManager staticCacheManager,
             IStoreService storeService,
             IStoreMappingService storeMappingService,
@@ -112,9 +115,11 @@ namespace Nop.Services.Catalog
             _localizationService = localizationService;
             _productAttributeParser = productAttributeParser;
             _productAttributeService = productAttributeService;
+            _categoryRepository = categoryRepository;
             _crossSellProductRepository = crossSellProductRepository;
             _discountProductMappingRepository = discountProductMappingRepository;
             _localizedPropertyRepository = localizedPropertyRepository;
+            _manufacturerRepository = manufacturerRepository;
             _productRepository = productRepository;
             _productAttributeCombinationRepository = productAttributeCombinationRepository;
             _productAttributeMappingRepository = productAttributeMappingRepository;
@@ -126,12 +131,13 @@ namespace Nop.Services.Catalog
             _productReviewHelpfulnessRepository = productReviewHelpfulnessRepository;
             _productSpecificationAttributeRepository = productSpecificationAttributeRepository;
             _productTagRepository = productTagRepository;
+            _productVideoRepository = productVideoRepository;
             _productWarehouseInventoryRepository = productWarehouseInventoryRepository;
             _relatedProductRepository = relatedProductRepository;
             _shipmentRepository = shipmentRepository;
             _stockQuantityHistoryRepository = stockQuantityHistoryRepository;
             _tierPriceRepository = tierPriceRepository;
-            _warehouseRepository = warehouseRepository;
+            _searchPluginManager = searchPluginManager;
             _staticCacheManager = staticCacheManager;
             _storeMappingService = storeMappingService;
             _storeService = storeService;
@@ -151,19 +157,21 @@ namespace Nop.Services.Catalog
         /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task ApplyLowStockActivityAsync(Product product, int totalStock)
         {
-            var stockDec = product.MinStockQuantity >= totalStock;
-            var stockInc = _catalogSettings.PublishBackProductWhenCancellingOrders && product.MinStockQuantity < totalStock;
+            var isMinimumStockReached = totalStock <= product.MinStockQuantity;
+
+            if (!isMinimumStockReached && !_catalogSettings.PublishBackProductWhenCancellingOrders)
+                return;
 
             switch (product.LowStockActivity)
             {
                 case LowStockActivity.DisableBuyButton:
-                    product.DisableBuyButton = stockDec && !stockInc;
-                    product.DisableWishlistButton = stockDec && !stockInc;
+                    product.DisableBuyButton = isMinimumStockReached;
+                    product.DisableWishlistButton = isMinimumStockReached;
                     await UpdateProductAsync(product);
                     break;
 
                 case LowStockActivity.Unpublish:
-                    product.Published = !stockDec && stockInc;
+                    product.Published = !isMinimumStockReached;
                     await UpdateProductAsync(product);
                     break;
 
@@ -230,22 +238,6 @@ namespace Nop.Services.Catalog
 
             string stockMessage;
 
-            /*TODO implement #5510
-            if (_catalogSettings.AttributeValueOutOfStockDisplayType == AttributeValueOutOfStockDisplayType.AlwaysDisplay)
-            {
-                //let's check whether all required attributes are already selected
-                //if some attribute is not selected, then return a "Products.Availability.SelectRequiredAttributes" locale 
-            }
-            else
-            {
-                //let's check whether all required attributes that could be selected are already selected
-
-                //note that it's possible that some required attribute is not selected yet, but its values are already disabled (not available)
-                //hence a customer cannot select it. in this case proceed to the logic below
-
-                //otherwise, return a "Products.Availability.SelectRequiredAttributes" locale
-            }*/
-
             var combination = await _productAttributeParser.FindProductAttributeCombinationAsync(product, attributesXml);
             if (combination != null)
             {
@@ -253,26 +245,42 @@ namespace Nop.Services.Catalog
                 var stockQuantity = combination.StockQuantity;
                 if (stockQuantity > 0)
                 {
-                    stockMessage = product.DisplayStockQuantity
+                    if (product.MinStockQuantity >= stockQuantity && product.LowStockActivity == LowStockActivity.Nothing)
+                    {
+                        stockMessage = product.DisplayStockQuantity
+                        ?
+                        //display "low stock" with stock quantity
+                        string.Format(await _localizationService.GetResourceAsync("Products.Availability.LowStockWithQuantity"), stockQuantity)
+                        :
+                        //display "low stock" without stock quantity
+                        await _localizationService.GetResourceAsync("Products.Availability.LowStock");
+                    }
+                    else
+                    {
+                        stockMessage = product.DisplayStockQuantity
                         ?
                         //display "in stock" with stock quantity
                         string.Format(await _localizationService.GetResourceAsync("Products.Availability.InStockWithQuantity"), stockQuantity)
                         :
                         //display "in stock" without stock quantity
                         await _localizationService.GetResourceAsync("Products.Availability.InStock");
-                }
-                else if (combination.AllowOutOfStockOrders)
-                {
-                    stockMessage = await _localizationService.GetResourceAsync("Products.Availability.InStock");
+                    }
                 }
                 else
                 {
-                    var productAvailabilityRange = await
-                        _dateRangeService.GetProductAvailabilityRangeByIdAsync(product.ProductAvailabilityRangeId);
-                    stockMessage = productAvailabilityRange == null
-                        ? await _localizationService.GetResourceAsync("Products.Availability.OutOfStock")
-                        : string.Format(await _localizationService.GetResourceAsync("Products.Availability.AvailabilityRange"),
-                            await _localizationService.GetLocalizedAsync(productAvailabilityRange, range => range.Name));
+                    if (combination.AllowOutOfStockOrders)
+                    {
+                        stockMessage = await _localizationService.GetResourceAsync("Products.Availability.InStock");
+                    }
+                    else
+                    {
+                        var productAvailabilityRange = await
+                            _dateRangeService.GetProductAvailabilityRangeByIdAsync(product.ProductAvailabilityRangeId);
+                        stockMessage = productAvailabilityRange == null
+                            ? await _localizationService.GetResourceAsync("Products.Availability.OutOfStock")
+                            : string.Format(await _localizationService.GetResourceAsync("Products.Availability.AvailabilityRange"),
+                                await _localizationService.GetLocalizedAsync(productAvailabilityRange, range => range.Name));
+                    }
                 }
             }
             else
@@ -280,6 +288,28 @@ namespace Nop.Services.Catalog
                 //no combination configured
                 if (product.AllowAddingOnlyExistingAttributeCombinations)
                 {
+                    var allIds = (await _productAttributeService.GetProductAttributeMappingsByProductIdAsync(product.Id)).Where(pa => pa.IsRequired).Select(pa => pa.Id).ToList();
+                    var exIds = (await _productAttributeParser.ParseProductAttributeMappingsAsync(attributesXml)).Select(pa => pa.Id).ToList();
+
+                    var selectedIds = allIds.Intersect(exIds).ToList();
+
+                    if (selectedIds.Count() != allIds.Count)
+                        if (_catalogSettings.AttributeValueOutOfStockDisplayType == AttributeValueOutOfStockDisplayType.AlwaysDisplay)
+                            return await _localizationService.GetResourceAsync("Products.Availability.SelectRequiredAttributes");
+                        else
+                        {
+                            var combinations = await _productAttributeService.GetAllProductAttributeCombinationsAsync(product.Id);
+
+                            combinations = combinations.Where(p => p.StockQuantity >= 0 || p.AllowOutOfStockOrders).ToList();
+
+                            var attributes = await combinations.SelectAwait(async c => await _productAttributeParser.ParseProductAttributeMappingsAsync(c.AttributesXml)).ToListAsync();
+
+                            var flag = attributes.SelectMany(a => a).Any(a => selectedIds.Contains(a.Id));
+
+                            if (flag)
+                                return await _localizationService.GetResourceAsync("Products.Availability.SelectRequiredAttributes");
+                        }
+
                     var productAvailabilityRange = await
                         _dateRangeService.GetProductAvailabilityRangeByIdAsync(product.ProductAvailabilityRangeId);
                     stockMessage = productAvailabilityRange == null
@@ -311,15 +341,29 @@ namespace Nop.Services.Catalog
 
             var stockMessage = string.Empty;
             var stockQuantity = await GetTotalStockQuantityAsync(product);
+
             if (stockQuantity > 0)
             {
-                stockMessage = product.DisplayStockQuantity
-                    ?
-                    //display "in stock" with stock quantity
-                    string.Format(await _localizationService.GetResourceAsync("Products.Availability.InStockWithQuantity"), stockQuantity)
-                    :
-                    //display "in stock" without stock quantity
-                    await _localizationService.GetResourceAsync("Products.Availability.InStock");
+                if (product.MinStockQuantity >= stockQuantity && product.LowStockActivity == LowStockActivity.Nothing)
+                {
+                    stockMessage = product.DisplayStockQuantity
+                        ?
+                        //display "low stock" with stock quantity
+                        string.Format(await _localizationService.GetResourceAsync("Products.Availability.LowStockWithQuantity"), stockQuantity)
+                        :
+                        //display "low stock" without stock quantity
+                        await _localizationService.GetResourceAsync("Products.Availability.LowStock");
+                }
+                else
+                {
+                    stockMessage = product.DisplayStockQuantity
+                        ?
+                        //display "in stock" with stock quantity
+                        string.Format(await _localizationService.GetResourceAsync("Products.Availability.InStockWithQuantity"), stockQuantity)
+                        :
+                        //display "in stock" without stock quantity
+                        await _localizationService.GetResourceAsync("Products.Availability.InStock");
+                }
             }
             else
             {
@@ -450,12 +494,12 @@ namespace Nop.Services.Catalog
                 return new List<CrossSellProduct>();
 
             var query = from csp in _crossSellProductRepository.Table
-                join p in _productRepository.Table on csp.ProductId2 equals p.Id
-                where productIds.Contains(csp.ProductId1) &&
-                      !p.Deleted &&
-                      (showHidden || p.Published)
-                orderby csp.Id
-                select csp;
+                        join p in _productRepository.Table on csp.ProductId2 equals p.Id
+                        where productIds.Contains(csp.ProductId1) &&
+                              !p.Deleted &&
+                              (showHidden || p.Published)
+                        orderby csp.Id
+                        select csp;
             var crossSellProducts = await query.ToListAsync();
 
             return crossSellProducts;
@@ -609,6 +653,8 @@ namespace Nop.Services.Catalog
                 var query = from p in _productRepository.Table
                             join pc in _productCategoryRepository.Table on p.Id equals pc.ProductId
                             where p.Published && !p.Deleted && p.VisibleIndividually &&
+                                (!p.AvailableStartDateTimeUtc.HasValue || p.AvailableStartDateTimeUtc.Value < DateTime.UtcNow) &&
+                                (!p.AvailableEndDateTimeUtc.HasValue || p.AvailableEndDateTimeUtc.Value > DateTime.UtcNow) &&
                                 pc.IsFeaturedProduct && categoryId == pc.CategoryId
                             select p;
 
@@ -654,6 +700,8 @@ namespace Nop.Services.Catalog
                 var query = from p in _productRepository.Table
                             join pm in _productManufacturerRepository.Table on p.Id equals pm.ProductId
                             where p.Published && !p.Deleted && p.VisibleIndividually &&
+                                (!p.AvailableStartDateTimeUtc.HasValue || p.AvailableStartDateTimeUtc.Value < DateTime.UtcNow) &&
+                                (!p.AvailableEndDateTimeUtc.HasValue || p.AvailableEndDateTimeUtc.Value > DateTime.UtcNow) &&
                                 pm.IsFeaturedProduct && manufacturerId == pm.ManufacturerId
                             select p;
 
@@ -663,9 +711,7 @@ namespace Nop.Services.Catalog
                 //apply ACL constraints
                 query = await _aclService.ApplyAcl(query, customerRoleIds);
 
-                featuredProducts = query.ToList();
-
-                return featuredProducts.Select(p => p.Id).ToList();
+                return query.Select(p => p.Id).ToList();
             });
 
             if (featuredProducts.Count == 0 && featuredProductIds.Count > 0)
@@ -678,29 +724,30 @@ namespace Nop.Services.Catalog
         /// Gets products which marked as new
         /// </summary>
         /// <param name="storeId">Store identifier; 0 if you want to get all records</param>
+        /// <param name="pageIndex">Page index</param>
+        /// <param name="pageSize">Page size</param>
         /// <returns>
         /// A task that represents the asynchronous operation
         /// The task result contains the list of new products
         /// </returns>
-        public virtual async Task<IList<Product>> GetProductsMarkedAsNewAsync(int storeId = 0)
+        public virtual async Task<IPagedList<Product>> GetProductsMarkedAsNewAsync(int storeId = 0, int pageIndex = 0, int pageSize = int.MaxValue)
         {
-            return await _productRepository.GetAllAsync(async query =>
-            {
-                //apply store mapping constraints
-                query = await _storeMappingService.ApplyStoreMapping(query, storeId);
-
-                //apply ACL constraints
-                var customer = await _workContext.GetCurrentCustomerAsync();
-                query = await _aclService.ApplyAcl(query, customer);
-
-                query = from p in query
+            var query = from p in _productRepository.Table
                         where p.Published && p.VisibleIndividually && p.MarkAsNew && !p.Deleted &&
-                        LinqToDB.Sql.Between(DateTime.UtcNow, p.MarkAsNewStartDateTimeUtc ?? DateTime.MinValue, p.MarkAsNewEndDateTimeUtc ?? DateTime.MaxValue)
+                            DateTime.UtcNow >= (p.MarkAsNewStartDateTimeUtc ?? DateTime.MinValue) &&
+                            DateTime.UtcNow <= (p.MarkAsNewEndDateTimeUtc ?? DateTime.MaxValue)
                         select p;
 
-                return query.Take(_catalogSettings.NewProductsNumber)
-                    .OrderBy(ProductSortingEnum.CreatedOn);
-            });
+            //apply store mapping constraints
+            query = await _storeMappingService.ApplyStoreMapping(query, storeId);
+
+            //apply ACL constraints
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            query = await _aclService.ApplyAcl(query, customer);
+
+            query = query.OrderByDescending(p => p.CreatedOnUtc);
+
+            return await query.ToPagedListAsync(pageIndex, pageSize);
         }
 
         /// <summary>
@@ -814,29 +861,37 @@ namespace Nop.Services.Catalog
             else if (overridePublished.HasValue)
                 productsQuery = productsQuery.Where(p => p.Published == overridePublished.Value);
 
-            //apply store mapping constraints
-            productsQuery = await _storeMappingService.ApplyStoreMapping(productsQuery, storeId);
+            var customer = await _workContext.GetCurrentCustomerAsync();
 
-            //apply ACL constraints
+            if (!showHidden || storeId > 0)
+            {
+                //apply store mapping constraints
+                productsQuery = await _storeMappingService.ApplyStoreMapping(productsQuery, storeId);
+            }
+
             if (!showHidden)
             {
-                var customer = await _workContext.GetCurrentCustomerAsync();
+                //apply ACL constraints
                 productsQuery = await _aclService.ApplyAcl(productsQuery, customer);
             }
 
             productsQuery =
                 from p in productsQuery
                 where !p.Deleted &&
+                    (!visibleIndividuallyOnly || p.VisibleIndividually) &&
                     (vendorId == 0 || p.VendorId == vendorId) &&
                     (
                         warehouseId == 0 ||
                         (
                             !p.UseMultipleWarehouses ? p.WarehouseId == warehouseId :
-                                _productWarehouseInventoryRepository.Table.Any(pwi => pwi.Id == warehouseId && pwi.ProductId == p.Id)
+                                _productWarehouseInventoryRepository.Table.Any(pwi => pwi.WarehouseId == warehouseId && pwi.ProductId == p.Id)
                         )
                     ) &&
                     (productType == null || p.ProductTypeId == (int)productType) &&
-                    (showHidden == false || LinqToDB.Sql.Between(DateTime.UtcNow, p.AvailableStartDateTimeUtc ?? DateTime.MinValue, p.AvailableEndDateTimeUtc ?? DateTime.MaxValue)) &&
+                    (showHidden ||
+                            DateTime.UtcNow >= (p.AvailableStartDateTimeUtc ?? DateTime.MinValue) &&
+                            DateTime.UtcNow <= (p.AvailableEndDateTimeUtc ?? DateTime.MaxValue)
+                    ) &&
                     (priceMin == null || p.Price >= priceMin) &&
                     (priceMax == null || p.Price <= priceMax)
                 select p;
@@ -846,11 +901,18 @@ namespace Nop.Services.Catalog
                 var langs = await _languageService.GetAllLanguagesAsync(showHidden: true);
 
                 //Set a flag which will to points need to search in localized properties. If showHidden doesn't set to true should be at least two published languages.
-                var searchLocalizedValue = languageId > 0 && langs.Count() >= 2 && (showHidden || langs.Count(l => l.Published) >= 2);
-
+                var searchLocalizedValue = languageId > 0 && langs.Count >= 2 && (showHidden || langs.Count(l => l.Published) >= 2);
                 IQueryable<int> productsByKeywords;
 
-                productsByKeywords =
+                var activeSearchProvider = await _searchPluginManager.LoadPrimaryPluginAsync(customer, storeId);
+
+                if (activeSearchProvider is not null)
+                {
+                    productsByKeywords = (await activeSearchProvider.SearchProductsAsync(keywords, searchLocalizedValue)).AsQueryable();
+                }
+                else
+                {
+                    productsByKeywords =
                         from p in _productRepository.Table
                         where p.Name.Contains(keywords) ||
                             (searchDescriptions &&
@@ -858,6 +920,22 @@ namespace Nop.Services.Catalog
                             (searchManufacturerPartNumber && p.ManufacturerPartNumber == keywords) ||
                             (searchSku && p.Sku == keywords)
                         select p.Id;
+
+                    if (searchLocalizedValue)
+                    {
+                        productsByKeywords = productsByKeywords.Union(
+                            from lp in _localizedPropertyRepository.Table
+                            let checkName = lp.LocaleKey == nameof(Product.Name) &&
+                                            lp.LocaleValue.Contains(keywords)
+                            let checkShortDesc = searchDescriptions &&
+                                            lp.LocaleKey == nameof(Product.ShortDescription) &&
+                                            lp.LocaleValue.Contains(keywords)
+                            where
+                                lp.LocaleKeyGroup == nameof(Product) && lp.LanguageId == languageId && (checkName || checkShortDesc)
+
+                            select lp.EntityId);
+                    }
+                }
 
                 //search by SKU for ProductAttributeCombination
                 if (searchSku)
@@ -868,12 +946,84 @@ namespace Nop.Services.Catalog
                         select pac.ProductId);
                 }
 
+                //search by category name if admin allows
+                if (_catalogSettings.AllowCustomersToSearchWithCategoryName)
+                {
+                    var categoryQuery = _categoryRepository.Table;
+
+                    if (!showHidden)
+                        categoryQuery = categoryQuery.Where(p => p.Published);
+                    else if (overridePublished.HasValue)
+                        categoryQuery = categoryQuery.Where(p => p.Published == overridePublished.Value);
+
+                    if (!showHidden || storeId > 0)
+                        categoryQuery = await _storeMappingService.ApplyStoreMapping(categoryQuery, storeId);
+
+                    if (!showHidden)
+                        categoryQuery = await _aclService.ApplyAcl(categoryQuery, customer);
+
+                    productsByKeywords = productsByKeywords.Union(
+                        from pc in _productCategoryRepository.Table
+                        join c in categoryQuery on pc.CategoryId equals c.Id
+                        where c.Name.Contains(keywords) && !c.Deleted
+                        select pc.ProductId
+                    );
+
+                    if (searchLocalizedValue)
+                    {
+                        productsByKeywords = productsByKeywords.Union(
+                        from pc in _productCategoryRepository.Table
+                        join lp in _localizedPropertyRepository.Table on pc.CategoryId equals lp.EntityId
+                        where lp.LocaleKeyGroup == nameof(Category) &&
+                              lp.LocaleKey == nameof(Category.Name) &&
+                              lp.LocaleValue.Contains(keywords) &&
+                              lp.LanguageId == languageId
+                        select pc.ProductId);
+                    }
+                }
+
+                //search by manufacturer name if admin allows
+                if (_catalogSettings.AllowCustomersToSearchWithManufacturerName)
+                {
+                    var manufacturerQuery = _manufacturerRepository.Table;
+
+                    if (!showHidden)
+                        manufacturerQuery = manufacturerQuery.Where(p => p.Published);
+                    else if (overridePublished.HasValue)
+                        manufacturerQuery = manufacturerQuery.Where(p => p.Published == overridePublished.Value);
+
+                    if (!showHidden || storeId > 0)
+                        manufacturerQuery = await _storeMappingService.ApplyStoreMapping(manufacturerQuery, storeId);
+
+                    if (!showHidden)
+                        manufacturerQuery = await _aclService.ApplyAcl(manufacturerQuery, customer);
+
+                    productsByKeywords = productsByKeywords.Union(
+                        from pm in _productManufacturerRepository.Table
+                        join m in manufacturerQuery on pm.ManufacturerId equals m.Id
+                        where m.Name.Contains(keywords) && !m.Deleted
+                        select pm.ProductId
+                    );
+
+                    if (searchLocalizedValue)
+                    {
+                        productsByKeywords = productsByKeywords.Union(
+                        from pm in _productManufacturerRepository.Table
+                        join lp in _localizedPropertyRepository.Table on pm.ManufacturerId equals lp.EntityId
+                        where lp.LocaleKeyGroup == nameof(Manufacturer) &&
+                              lp.LocaleKey == nameof(Manufacturer.Name) &&
+                              lp.LocaleValue.Contains(keywords) &&
+                              lp.LanguageId == languageId
+                        select pm.ProductId);
+                    }
+                }
+
                 if (searchProductTags)
                 {
                     productsByKeywords = productsByKeywords.Union(
                         from pptm in _productTagMappingRepository.Table
                         join pt in _productTagRepository.Table on pptm.ProductTagId equals pt.Id
-                        where pt.Name == keywords
+                        where pt.Name.Contains(keywords)
                         select pptm.ProductId
                     );
 
@@ -884,34 +1034,15 @@ namespace Nop.Services.Catalog
                         join lp in _localizedPropertyRepository.Table on pptm.ProductTagId equals lp.EntityId
                         where lp.LocaleKeyGroup == nameof(ProductTag) &&
                               lp.LocaleKey == nameof(ProductTag.Name) &&
-                              lp.LocaleValue.Contains(keywords)
-                        select lp.EntityId);
+                              lp.LocaleValue.Contains(keywords) &&
+                              lp.LanguageId == languageId
+                        select pptm.ProductId);
                     }
-                }
-
-                if (searchLocalizedValue)
-                {
-                    productsByKeywords = productsByKeywords.Union(
-                                from lp in _localizedPropertyRepository.Table
-                                let checkName = lp.LocaleKey == nameof(Product.Name) &&
-                                                lp.LocaleValue.Contains(keywords)
-                                let checkShortDesc = searchDescriptions &&
-                                                lp.LocaleKey == nameof(Product.ShortDescription) &&
-                                                lp.LocaleValue.Contains(keywords)
-                                let checkProductTags = searchProductTags &&
-                                                lp.LocaleKeyGroup == nameof(ProductTag) &&
-                                                lp.LocaleKey == nameof(ProductTag.Name) &&
-                                                lp.LocaleValue.Contains(keywords)
-                                where
-                                    (lp.LocaleKeyGroup == nameof(Product) && lp.LanguageId == languageId) && (checkName || checkShortDesc) ||
-                                    checkProductTags
-
-                                select lp.EntityId);
                 }
 
                 productsQuery =
                     from p in productsQuery
-                    from pbk in LinqToDB.LinqExtensions.InnerJoin(productsByKeywords, pbk => pbk == p.Id)
+                    join pbk in productsByKeywords on p.Id equals pbk
                     select p;
             }
 
@@ -926,11 +1057,17 @@ namespace Nop.Services.Catalog
                         from pc in _productCategoryRepository.Table
                         where (!excludeFeaturedProducts || !pc.IsFeaturedProduct) &&
                             categoryIds.Contains(pc.CategoryId)
-                        select pc;
+                        group pc by pc.ProductId into pc
+                        select new
+                        {
+                            ProductId = pc.Key,
+                            DisplayOrder = pc.First().DisplayOrder
+                        };
 
                     productsQuery =
                         from p in productsQuery
-                        where productCategoryQuery.Any(pc => pc.ProductId == p.Id)
+                        join pc in productCategoryQuery on p.Id equals pc.ProductId
+                        orderby pc.DisplayOrder, p.Name
                         select p;
                 }
             }
@@ -946,11 +1083,17 @@ namespace Nop.Services.Catalog
                         from pm in _productManufacturerRepository.Table
                         where (!excludeFeaturedProducts || !pm.IsFeaturedProduct) &&
                             manufacturerIds.Contains(pm.ManufacturerId)
-                        select pm;
+                        group pm by pm.ProductId into pm
+                        select new
+                        {
+                            ProductId = pm.Key,
+                            DisplayOrder = pm.First().DisplayOrder
+                        };
 
                     productsQuery =
                         from p in productsQuery
-                        where productManufacturerQuery.Any(pm => pm.ProductId == p.Id)
+                        join pm in productManufacturerQuery on p.Id equals pm.ProductId
+                        orderby pm.DisplayOrder, p.Name
                         select p;
                 }
             }
@@ -987,8 +1130,8 @@ namespace Nop.Services.Catalog
                         select p;
                 }
             }
-            
-            return await productsQuery.OrderBy(orderBy).ToPagedListAsync(pageIndex, pageSize);
+
+            return await productsQuery.OrderBy(_localizedPropertyRepository, await _workContext.GetWorkingLanguageAsync(), orderBy).ToPagedListAsync(pageIndex, pageSize);
         }
 
         /// <summary>
@@ -1001,7 +1144,7 @@ namespace Nop.Services.Catalog
         /// A task that represents the asynchronous operation
         /// The task result contains the products
         /// </returns>
-        public virtual async Task<IPagedList<Product>> GetProductsByProductAtributeIdAsync(int productAttributeId,
+        public virtual async Task<IPagedList<Product>> GetProductsByProductAttributeIdAsync(int productAttributeId,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
             var query = from p in _productRepository.Table
@@ -1077,10 +1220,10 @@ namespace Nop.Services.Catalog
             var approvedTotalReviews = 0;
             var notApprovedTotalReviews = 0;
 
-            var reviews = await _productReviewRepository.Table
+            var reviews = _productReviewRepository.Table
                 .Where(r => r.ProductId == product.Id)
-                .ToListAsync();
-            foreach (var pr in reviews)
+                .ToAsyncEnumerable();
+            await foreach (var pr in reviews)
                 if (pr.IsApproved)
                 {
                     approvedRatingSum += pr.Rating;
@@ -1329,14 +1472,16 @@ namespace Nop.Services.Catalog
 
             var result = new List<int>();
             if (!string.IsNullOrWhiteSpace(product.AllowedQuantities))
-                product.AllowedQuantities
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                    .ToList()
-                    .ForEach(qtyStr =>
-                    {
-                        if (int.TryParse(qtyStr.Trim(), out var qty))
-                            result.Add(qty);
-                    });
+            {
+                var quantities = product.AllowedQuantities
+                   .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                   .ToList();
+                foreach (var qtyStr in quantities)
+                {
+                    if (int.TryParse(qtyStr.Trim(), out var qty))
+                        result.Add(qty);
+                }
+            }
 
             return result.ToArray();
         }
@@ -1559,21 +1704,22 @@ namespace Nop.Services.Catalog
         {
             product.LimitedToStores = limitedToStoresIds.Any();
 
-            var existingStoreMappings = await _storeMappingService.GetStoreMappingsAsync(product);
+            var limitedToStoresIdsSet = limitedToStoresIds.ToHashSet();
+            var existingStoreMappingsByStoreId = (await _storeMappingService.GetStoreMappingsAsync(product))
+                .ToDictionary(sm => sm.StoreId);
             var allStores = await _storeService.GetAllStoresAsync();
             foreach (var store in allStores)
             {
-                if (limitedToStoresIds.Contains(store.Id))
+                if (limitedToStoresIdsSet.Contains(store.Id))
                 {
                     //new store
-                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
+                    if (!existingStoreMappingsByStoreId.ContainsKey(store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(product, store.Id);
                 }
                 else
                 {
                     //remove store
-                    var storeMappingToDelete = existingStoreMappings.FirstOrDefault(sm => sm.StoreId == store.Id);
-                    if (storeMappingToDelete != null)
+                    if (existingStoreMappingsByStoreId.TryGetValue(store.Id, out var storeMappingToDelete))
                         await _storeMappingService.DeleteStoreMappingAsync(storeMappingToDelete);
                 }
             }
@@ -1619,6 +1765,29 @@ namespace Nop.Services.Catalog
         {
             return await _productRepository.Table
                 .AnyAsync(p => productIds.Contains(p.Id) && p.IsRecurring);
+        }
+
+        /// <summary>
+        /// Returns a list of sku of not existing products
+        /// </summary>
+        /// <param name="productSku">The sku of the products to check</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the list of sku not existing products
+        /// </returns>
+        public virtual async Task<string[]> GetNotExistingProductsAsync(string[] productSku)
+        {
+            if (productSku == null)
+                throw new ArgumentNullException(nameof(productSku));
+
+            var query = _productRepository.Table;
+            var queryFilter = productSku.Distinct().ToArray();
+            //filtering by SKU
+            var filter = await query.Select(p => p.Sku)
+                .Where(p => queryFilter.Contains(p))
+                .ToListAsync();
+
+            return queryFilter.Except(filter).ToArray();
         }
 
         #endregion
@@ -1670,6 +1839,7 @@ namespace Nop.Services.Catalog
                 //send email notification
                 if (quantityToChange < 0 && totalStock < product.NotifyAdminForQuantityBelow)
                 {
+                    //do not inject IWorkflowMessageService via constructor because it'll cause circular references
                     var workflowMessageService = EngineContext.Current.Resolve<IWorkflowMessageService>();
                     await workflowMessageService.SendQuantityBelowStoreOwnerNotificationAsync(product, _localizationSettings.DefaultAdminLanguageId);
                 }
@@ -1698,6 +1868,7 @@ namespace Nop.Services.Catalog
                     //send email notification
                     if (quantityToChange < 0 && combination.StockQuantity < combination.NotifyAdminForQuantityBelow)
                     {
+                        //do not inject IWorkflowMessageService via constructor because it'll cause circular references
                         var workflowMessageService = EngineContext.Current.Resolve<IWorkflowMessageService>();
                         await workflowMessageService.SendQuantityBelowStoreOwnerNotificationAsync(combination, _localizationSettings.DefaultAdminLanguageId);
                     }
@@ -1882,10 +2053,7 @@ namespace Nop.Services.Catalog
         /// <returns>Related product</returns>
         public virtual RelatedProduct FindRelatedProduct(IList<RelatedProduct> source, int productId1, int productId2)
         {
-            foreach (var relatedProduct in source)
-                if (relatedProduct.ProductId1 == productId1 && relatedProduct.ProductId2 == productId2)
-                    return relatedProduct;
-            return null;
+            return source.FirstOrDefault(rp => rp.ProductId1 == productId1 && rp.ProductId2 == productId2);
         }
 
         #endregion
@@ -1948,45 +2116,21 @@ namespace Nop.Services.Catalog
         /// A task that represents the asynchronous operation
         /// The task result contains the cross-sells
         /// </returns>
-        public virtual async Task<IList<Product>> GetCrosssellProductsByShoppingCartAsync(IList<ShoppingCartItem> cart, int numberOfProducts)
+        public virtual async Task<IList<Product>> GetCrossSellProductsByShoppingCartAsync(IList<ShoppingCartItem> cart, int numberOfProducts)
         {
             var result = new List<Product>();
 
-            if (numberOfProducts == 0)
+            if (numberOfProducts == 0 || cart?.Any() != true)
                 return result;
 
-            if (cart == null || !cart.Any())
-                return result;
-
-            var cartProductIds = new List<int>();
-            foreach (var sci in cart)
-            {
-                var prodId = sci.ProductId;
-                if (!cartProductIds.Contains(prodId))
-                    cartProductIds.Add(prodId);
-            }
-
-            var productIds = cart.Select(sci => sci.ProductId).ToArray();
-            var crossSells = await GetCrossSellProductsByProductIdsAsync(productIds);
-            foreach (var crossSell in crossSells)
-            {
-                //validate that this product is not added to result yet
-                //validate that this product is not in the cart
-                if (result.Find(p => p.Id == crossSell.ProductId2) != null || cartProductIds.Contains(crossSell.ProductId2))
-                    continue;
-
-                var productToAdd = await GetProductByIdAsync(crossSell.ProductId2);
-                //validate product
-                if (productToAdd == null || productToAdd.Deleted || !productToAdd.Published)
-                    continue;
-
-                //add a product to result
-                result.Add(productToAdd);
-                if (result.Count >= numberOfProducts)
-                    return result;
-            }
-
-            return result;
+            var cartProductIds = cart.Select(sci => sci.ProductId).ToHashSet();
+            return await (await GetCrossSellProductsByProductIdsAsync(cartProductIds.ToArray()))
+                .Select(cs => cs.ProductId2)
+                .Except(cartProductIds)
+                .SelectAwait(async cs => await GetProductByIdAsync(cs))
+                .Where(p => p != null && !p.Deleted && p.Published)
+                .Take(numberOfProducts)
+                .ToListAsync();
         }
 
         /// <summary>
@@ -1998,10 +2142,7 @@ namespace Nop.Services.Catalog
         /// <returns>Cross-sell product</returns>
         public virtual CrossSellProduct FindCrossSellProduct(IList<CrossSellProduct> source, int productId1, int productId2)
         {
-            foreach (var crossSellProduct in source)
-                if (crossSellProduct.ProductId1 == productId1 && crossSellProduct.ProductId2 == productId2)
-                    return crossSellProduct;
-            return null;
+            return source.FirstOrDefault(csp => csp.ProductId1 == productId1 && csp.ProductId2 == productId2);
         }
 
         #endregion
@@ -2013,9 +2154,9 @@ namespace Nop.Services.Catalog
         /// </summary>
         /// <param name="product">Product</param>
         /// <param name="customer">Customer</param>
-        /// <param name="storeId">Store identifier</param>
+        /// <param name="store">Store</param>
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task<IList<TierPrice>> GetTierPricesAsync(Product product, Customer customer, int storeId)
+        public virtual async Task<IList<TierPrice>> GetTierPricesAsync(Product product, Customer customer, Store store)
         {
             if (product is null)
                 throw new ArgumentNullException(nameof(product));
@@ -2029,7 +2170,7 @@ namespace Nop.Services.Catalog
             //get actual tier prices
             return (await GetTierPricesByProductAsync(product.Id))
                 .OrderBy(price => price.Quantity)
-                .FilterByStore(storeId)
+                .FilterByStore(store)
                 .FilterByCustomerRole(await _customerService.GetCustomerRoleIdsAsync(customer))
                 .FilterByDate()
                 .RemoveDuplicatedQuantities()
@@ -2045,7 +2186,9 @@ namespace Nop.Services.Catalog
         {
             var query = _tierPriceRepository.Table.Where(tp => tp.ProductId == productId);
 
-            return await _staticCacheManager.GetAsync(_staticCacheManager.PrepareKeyForDefaultCache(NopCatalogDefaults.TierPricesByProductCacheKey, productId), async () => await query.ToListAsync());
+            return await _staticCacheManager.GetAsync(
+                _staticCacheManager.PrepareKeyForDefaultCache(NopCatalogDefaults.TierPricesByProductCacheKey, productId),
+                async () => await query.ToListAsync());
         }
 
         /// <summary>
@@ -2096,13 +2239,13 @@ namespace Nop.Services.Catalog
         /// </summary>
         /// <param name="product">Product</param>
         /// <param name="customer">Customer</param>
-        /// <param name="storeId">Store identifier</param>
+        /// <param name="store">Store</param>
         /// <param name="quantity">Quantity</param>
         /// <returns>
         /// A task that represents the asynchronous operation
-        /// The task result contains the ier price
+        /// The task result contains the tier price
         /// </returns>
-        public virtual async Task<TierPrice> GetPreferredTierPriceAsync(Product product, Customer customer, int storeId, int quantity)
+        public virtual async Task<TierPrice> GetPreferredTierPriceAsync(Product product, Customer customer, Store store, int quantity)
         {
             if (product is null)
                 throw new ArgumentNullException(nameof(product));
@@ -2114,7 +2257,7 @@ namespace Nop.Services.Catalog
                 return null;
 
             //get the most suitable tier price based on the passed quantity
-            return (await GetTierPricesAsync(product, customer, storeId))?.LastOrDefault(price => quantity >= price.Quantity);
+            return (await GetTierPricesAsync(product, customer, store))?.LastOrDefault(price => quantity >= price.Quantity);
         }
 
         #endregion
@@ -2233,6 +2376,73 @@ namespace Nop.Services.Catalog
 
         #endregion
 
+        #region Product videos
+
+        /// <summary>
+        /// Deletes a product video
+        /// </summary>
+        /// <param name="productVideo">Product video</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task DeleteProductVideoAsync(ProductVideo productVideo)
+        {
+            await _productVideoRepository.DeleteAsync(productVideo);
+        }
+
+        /// <summary>
+        /// Gets a product videos by product identifier
+        /// </summary>
+        /// <param name="productId">The product identifier</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the product videos
+        /// </returns>
+        public virtual async Task<IList<ProductVideo>> GetProductVideosByProductIdAsync(int productId)
+        {
+            var query = from pvm in _productVideoRepository.Table
+                        where pvm.ProductId == productId
+                        orderby pvm.DisplayOrder, pvm.Id
+                        select pvm;
+
+            var productVideos = await query.ToListAsync();
+
+            return productVideos;
+        }
+
+        /// <summary>
+        /// Gets a product video
+        /// </summary>
+        /// <param name="productPictureId">Product video identifier</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the product video
+        /// </returns>
+        public virtual async Task<ProductVideo> GetProductVideoByIdAsync(int productVideoId)
+        {
+            return await _productVideoRepository.GetByIdAsync(productVideoId, cache => default);
+        }
+
+        /// <summary>
+        /// Inserts a product video
+        /// </summary>
+        /// <param name="productVideo">Product picture</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task InsertProductVideoAsync(ProductVideo productVideo)
+        {
+            await _productVideoRepository.InsertAsync(productVideo);
+        }
+
+        /// <summary>
+        /// Updates a product video
+        /// </summary>
+        /// <param name="productVideo">Product video</param>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public virtual async Task UpdateProductVideoAsync(ProductVideo productVideo)
+        {
+            await _productVideoRepository.UpdateAsync(productVideo);
+        }
+
+        #endregion
+
         #region Product reviews
 
         /// <summary>
@@ -2243,7 +2453,7 @@ namespace Nop.Services.Catalog
         /// <param name="fromUtc">Item creation from; null to load all records</param>
         /// <param name="toUtc">Item item creation to; null to load all records</param>
         /// <param name="message">Search title or review text; null to load all records</param>
-        /// <param name="storeId">The store identifier; pass 0 to load all records</param>
+        /// <param name="storeId">The store identifier, where a review has been created; pass 0 to load all records</param>
         /// <param name="productId">The product identifier; pass 0 to load all records</param>
         /// <param name="vendorId">The vendor identifier (limit to products of this vendor); pass 0 to load all records</param>
         /// <param name="showHidden">A value indicating whether to show hidden records</param>
@@ -2284,7 +2494,7 @@ namespace Nop.Services.Catalog
                     query = query.Where(pr => toUtc.Value >= pr.CreatedOnUtc);
                 if (!string.IsNullOrEmpty(message))
                     query = query.Where(pr => pr.Title.Contains(message) || pr.ReviewText.Contains(message));
-                if (storeId > 0 && (showHidden || _catalogSettings.ShowProductReviewsPerStore))
+                if (storeId > 0)
                     query = query.Where(pr => pr.StoreId == storeId);
                 if (productId > 0)
                     query = query.Where(pr => pr.ProductId == productId);
@@ -2374,8 +2584,9 @@ namespace Nop.Services.Catalog
             if (productReview is null)
                 throw new ArgumentNullException(nameof(productReview));
 
-            var prh = await _productReviewHelpfulnessRepository.Table
-                .SingleOrDefaultAwaitAsync(async h => h.ProductReviewId == productReview.Id && h.CustomerId == (await _workContext.GetCurrentCustomerAsync()).Id);
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var prh = _productReviewHelpfulnessRepository.Table
+                .SingleOrDefault(h => h.ProductReviewId == productReview.Id && h.CustomerId == customer.Id);
 
             if (prh is null)
             {
@@ -2383,7 +2594,7 @@ namespace Nop.Services.Catalog
                 prh = new ProductReviewHelpfulness
                 {
                     ProductReviewId = productReview.Id,
-                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    CustomerId = customer.Id,
                     WasHelpful = helpfulness,
                 };
 
@@ -2437,8 +2648,10 @@ namespace Nop.Services.Catalog
         /// </returns>
         public virtual async Task<bool> CanAddReviewAsync(int productId, int storeId = 0)
         {
+            var customer = await _workContext.GetCurrentCustomerAsync();
+
             if (_catalogSettings.OneReviewPerProductFromCustomer)
-                return (await GetAllProductReviewsAsync(customerId: (await _workContext.GetCurrentCustomerAsync()).Id, productId: productId, storeId: storeId)).TotalCount == 0;
+                return (await GetAllProductReviewsAsync(customerId: customer.Id, productId: productId, storeId: storeId)).TotalCount == 0;
 
             return true;
         }
@@ -2455,19 +2668,6 @@ namespace Nop.Services.Catalog
         public virtual async Task<IList<ProductWarehouseInventory>> GetAllProductWarehouseInventoryRecordsAsync(int productId)
         {
             return await _productWarehouseInventoryRepository.GetAllAsync(query => query.Where(pwi => pwi.ProductId == productId));
-        }
-
-        /// <summary>
-        /// Gets a warehouse by identifier
-        /// </summary>
-        /// <param name="warehouseId">Warehouse identifier</param>
-        /// <returns>
-        /// A task that represents the asynchronous operation
-        /// The task result contains the result
-        /// </returns>
-        public virtual async Task<Warehouse> GetWarehousesByIdAsync(int warehouseId)
-        {
-            return await _warehouseRepository.GetByIdAsync(warehouseId, cache => default);
         }
 
         /// <summary>
@@ -2598,13 +2798,15 @@ namespace Nop.Services.Catalog
                 where dcm.DiscountId == discount.Id
                 select new { product = p, dcm };
 
-            foreach (var pdcm in await mappingsWithProducts.ToListAsync())
+            var mappingsToDelete = new List<DiscountProductMapping>();
+            await foreach (var pdcm in mappingsWithProducts.ToAsyncEnumerable())
             {
-                await _discountProductMappingRepository.DeleteAsync(pdcm.dcm);
+                mappingsToDelete.Add(pdcm.dcm);
 
                 //update "HasDiscountsApplied" property
                 await UpdateHasDiscountsAppliedAsync(pdcm.product);
             }
+            await _discountProductMappingRepository.DeleteAsync(mappingsToDelete);
         }
 
         /// <summary>

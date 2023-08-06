@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Nop.Core.Domain.Discounts;
+﻿using Nop.Core.Domain.Discounts;
 using Nop.Services.Caching;
 
 namespace Nop.Services.Discounts.Caching
@@ -19,6 +18,7 @@ namespace Nop.Services.Discounts.Caching
             await RemoveAsync(NopDiscountDefaults.DiscountRequirementsByDiscountCacheKey, entity);
             await RemoveByPrefixAsync(NopDiscountDefaults.CategoryIdsByDiscountPrefix, entity);
             await RemoveByPrefixAsync(NopDiscountDefaults.ManufacturerIdsByDiscountPrefix, entity);
+            await RemoveByPrefixAsync(NopDiscountDefaults.AppliedDiscountsCachePrefix);
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Messages;
@@ -22,18 +20,18 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly EmailAccountSettings _emailAccountSettings;
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly IEmailAccountModelFactory _emailAccountModelFactory;
-        private readonly IEmailAccountService _emailAccountService;
-        private readonly IEmailSender _emailSender;
-        private readonly ILocalizationService _localizationService;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly ISettingService _settingService;
-        private readonly IGenericAttributeService _genericAttributeService;
-        private readonly IWorkContext _workContext;
-        private readonly IStoreContext _storeContext;
+        protected readonly EmailAccountSettings _emailAccountSettings;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly IEmailAccountModelFactory _emailAccountModelFactory;
+        protected readonly IEmailAccountService _emailAccountService;
+        protected readonly IEmailSender _emailSender;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly ISettingService _settingService;
+        protected readonly IGenericAttributeService _genericAttributeService;
+        protected readonly IWorkContext _workContext;
+        protected readonly IStoreContext _storeContext;
 
         #endregion
 
@@ -81,9 +79,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             //show configuration tour
             if (showtour)
             {
-                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.HideConfigurationStepsAttribute);
-
-                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CloseConfigurationStepsAttribute);
+                var customer = await _workContext.GetCurrentCustomerAsync();
+                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.HideConfigurationStepsAttribute);
+                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.CloseConfigurationStepsAttribute);
 
                 if (!hideCard && !closeCard)
                     ViewBag.ShowTour = true;
@@ -176,9 +174,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             //show configuration tour
             if (showtour)
             {
-                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.HideConfigurationStepsAttribute);
-
-                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(await _workContext.GetCurrentCustomerAsync(), NopCustomerDefaults.CloseConfigurationStepsAttribute);
+                var customer = await _workContext.GetCurrentCustomerAsync();
+                var hideCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.HideConfigurationStepsAttribute);
+                var closeCard = await _genericAttributeService.GetAttributeAsync<bool>(customer, NopCustomerDefaults.CloseConfigurationStepsAttribute);
 
                 if (!hideCard && !closeCard)
                     ViewBag.ShowTour = true;
@@ -263,12 +261,14 @@ namespace Nop.Web.Areas.Admin.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.SendTestEmailTo))
                     throw new NopException("Enter test email address");
-
-                var subject = (await _storeContext.GetCurrentStoreAsync()).Name + ". Testing email functionality.";
+                var store = await _storeContext.GetCurrentStoreAsync();
+                var subject = store.Name + ". Testing email functionality.";
                 var body = "Email works fine.";
                 await _emailSender.SendEmailAsync(emailAccount, subject, body, emailAccount.Email, emailAccount.DisplayName, model.SendTestEmailTo, null);
 
                 _notificationService.SuccessNotification(await _localizationService.GetResourceAsync("Admin.Configuration.EmailAccounts.SendTestEmail.Success"));
+
+                return RedirectToAction("Edit", new { id = emailAccount.Id });
             }
             catch (Exception exc)
             {

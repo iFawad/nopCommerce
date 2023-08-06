@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain;
 using Nop.Core.Domain.Customers;
 using Nop.Services.Common;
@@ -16,13 +13,13 @@ namespace Nop.Web.Framework.Themes
     {
         #region Fields
 
-        private readonly IGenericAttributeService _genericAttributeService;
-        private readonly IStoreContext _storeContext;
-        private readonly IThemeProvider _themeProvider;
-        private readonly IWorkContext _workContext;
-        private readonly StoreInformationSettings _storeInformationSettings;
+        protected readonly IGenericAttributeService _genericAttributeService;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IThemeProvider _themeProvider;
+        protected readonly IWorkContext _workContext;
+        protected readonly StoreInformationSettings _storeInformationSettings;
 
-        private string _cachedThemeName;
+        protected string _cachedThemeName;
 
         #endregion
 
@@ -65,11 +62,13 @@ namespace Nop.Web.Framework.Themes
             var themeName = string.Empty;
 
             //whether customers are allowed to select a theme
+            var customer = await _workContext.GetCurrentCustomerAsync();
             if (_storeInformationSettings.AllowCustomerToSelectTheme &&
-                await _workContext.GetCurrentCustomerAsync() != null)
+                customer != null)
             {
-                themeName = await _genericAttributeService.GetAttributeAsync<string>(await _workContext.GetCurrentCustomerAsync(),
-                    NopCustomerDefaults.WorkingThemeNameAttribute, (await _storeContext.GetCurrentStoreAsync()).Id);
+                var store = await _storeContext.GetCurrentStoreAsync();
+                themeName = await _genericAttributeService.GetAttributeAsync<string>(customer,
+                    NopCustomerDefaults.WorkingThemeNameAttribute, store.Id);
             }
 
             //if not, try to get default store theme
@@ -97,14 +96,16 @@ namespace Nop.Web.Framework.Themes
         public virtual async Task SetWorkingThemeNameAsync(string workingThemeName)
         {
             //whether customers are allowed to select a theme
+            var customer = await _workContext.GetCurrentCustomerAsync();
             if (!_storeInformationSettings.AllowCustomerToSelectTheme ||
-                await _workContext.GetCurrentCustomerAsync() == null)
+                customer == null)
                 return;
 
             //save selected by customer theme system name
-            await _genericAttributeService.SaveAttributeAsync(await _workContext.GetCurrentCustomerAsync(),
+            var store = await _storeContext.GetCurrentStoreAsync();
+            await _genericAttributeService.SaveAttributeAsync(customer,
                 NopCustomerDefaults.WorkingThemeNameAttribute, workingThemeName,
-                (await _storeContext.GetCurrentStoreAsync()).Id);
+                store.Id);
 
             //clear cache
             _cachedThemeName = null;

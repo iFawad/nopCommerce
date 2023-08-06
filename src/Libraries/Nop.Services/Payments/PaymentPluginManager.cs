@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core.Domain.Customers;
+﻿using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Payments;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
@@ -17,8 +13,8 @@ namespace Nop.Services.Payments
     {
         #region Fields
 
-        private readonly ISettingService _settingService;
-        private readonly PaymentSettings _paymentSettings;
+        protected readonly ISettingService _settingService;
+        protected readonly PaymentSettings _paymentSettings;
 
         #endregion
 
@@ -47,7 +43,7 @@ namespace Nop.Services.Payments
         /// A task that represents the asynchronous operation
         /// The task result contains the list of active payment methods
         /// </returns>
-        public virtual async Task<IList<IPaymentMethod>> LoadActivePluginsAsyncAsync(Customer customer = null, int storeId = 0,
+        public virtual async Task<IList<IPaymentMethod>> LoadActivePluginsAsync(Customer customer = null, int storeId = 0,
             int countryId = 0)
         {
             var paymentMethods = await LoadActivePluginsAsync(_paymentSettings.ActivePaymentMethodSystemNames, customer, storeId);
@@ -86,7 +82,7 @@ namespace Nop.Services.Payments
         }
 
         /// <summary>
-        /// Get countries in which the passed payment method is now allowed
+        /// Get countries in which the passed payment method is not allowed
         /// </summary>
         /// <param name="paymentMethod">Payment method</param>
         /// <returns>
@@ -104,7 +100,7 @@ namespace Nop.Services.Payments
         }
 
         /// <summary>
-        /// Save countries in which the passed payment method is now allowed
+        /// Save countries in which the passed payment method is not allowed
         /// </summary>
         /// <param name="paymentMethod">Payment method</param>
         /// <param name="countryIds">List of country identifiers</param>

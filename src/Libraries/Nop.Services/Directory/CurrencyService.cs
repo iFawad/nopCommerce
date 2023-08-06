@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Directory;
 using Nop.Data;
 using Nop.Services.Stores;
@@ -16,10 +12,10 @@ namespace Nop.Services.Directory
     {
         #region Fields
 
-        private readonly CurrencySettings _currencySettings;
-        private readonly IExchangeRatePluginManager _exchangeRatePluginManager;
-        private readonly IRepository<Currency> _currencyRepository;
-        private readonly IStoreMappingService _storeMappingService;
+        protected readonly CurrencySettings _currencySettings;
+        protected readonly IExchangeRatePluginManager _exchangeRatePluginManager;
+        protected readonly IRepository<Currency> _currencyRepository;
+        protected readonly IStoreMappingService _storeMappingService;
 
         #endregion
 
@@ -37,7 +33,7 @@ namespace Nop.Services.Directory
         }
 
         #endregion
-        
+
         #region Methods
 
         #region Currency
@@ -79,7 +75,7 @@ namespace Nop.Services.Directory
                 return null;
 
             return (await GetAllCurrenciesAsync(true))
-                .FirstOrDefault(c => c.CurrencyCode.ToLower() == currencyCode.ToLower());
+                .FirstOrDefault(c => c.CurrencyCode.ToLowerInvariant() == currencyCode.ToLowerInvariant());
         }
 
         /// <summary>
@@ -185,7 +181,7 @@ namespace Nop.Services.Directory
 
             var primaryStoreCurrency = await GetCurrencyByIdAsync(_currencySettings.PrimaryStoreCurrencyId);
             var result = await ConvertCurrencyAsync(amount, sourceCurrencyCode, primaryStoreCurrency);
-            
+
             return result;
         }
 
@@ -202,7 +198,7 @@ namespace Nop.Services.Directory
         {
             var primaryStoreCurrency = await GetCurrencyByIdAsync(_currencySettings.PrimaryStoreCurrencyId);
             var result = await ConvertCurrencyAsync(amount, primaryStoreCurrency, targetCurrencyCode);
-            
+
             return result;
         }
 
@@ -259,7 +255,7 @@ namespace Nop.Services.Directory
             var exchangeRate = sourceCurrencyCode.Rate;
             if (exchangeRate == decimal.Zero)
                 throw new NopException($"Exchange rate not found for currency [{sourceCurrencyCode.Name}]");
-            result = result / exchangeRate;
+            result /= exchangeRate;
 
             return result;
         }
@@ -289,7 +285,7 @@ namespace Nop.Services.Directory
             var exchangeRate = targetCurrencyCode.Rate;
             if (exchangeRate == decimal.Zero)
                 throw new NopException($"Exchange rate not found for currency [{targetCurrencyCode.Name}]");
-            result = result * exchangeRate;
+            result *= exchangeRate;
 
             return result;
         }

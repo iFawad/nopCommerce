@@ -1,5 +1,5 @@
 ﻿using Nop.Core.Caching;
-using Nop.Services.Tasks;
+using Nop.Services.ScheduleTasks;
 
 namespace Nop.Services.Caching
 {
@@ -10,7 +10,7 @@ namespace Nop.Services.Caching
     {
         #region Fields
 
-        private readonly IStaticCacheManager _staticCacheManager;
+        protected readonly IStaticCacheManager _staticCacheManager;
 
         #endregion
 

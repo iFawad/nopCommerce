@@ -1,10 +1,8 @@
 ﻿using System.Collections.Specialized;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Nop.Core;
-using Nop.Core.Infrastructure;
 
 namespace Nop.Web.Framework
 {
@@ -13,8 +11,8 @@ namespace Nop.Web.Framework
     /// </summary>
     public partial class RemotePost
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IWebHelper _webHelper;
+        protected readonly IHttpContextAccessor _httpContextAccessor;
+        protected readonly IWebHelper _webHelper;
 
         /// <summary>
         /// Gets or sets a remote URL
@@ -49,14 +47,6 @@ namespace Nop.Web.Framework
         /// <summary>
         /// Creates a new instance of the RemotePost class
         /// </summary>
-        public RemotePost()
-            : this(EngineContext.Current.Resolve<IHttpContextAccessor>(), EngineContext.Current.Resolve<IWebHelper>())
-        {
-        }
-
-        /// <summary>
-        /// Creates a new instance of the RemotePost class
-        /// </summary>
         /// <param name="httpContextAccessor">HTTP Context accessor</param>
         /// <param name="webHelper">Web helper</param>
         public RemotePost(IHttpContextAccessor httpContextAccessor, IWebHelper webHelper)
@@ -79,7 +69,7 @@ namespace Nop.Web.Framework
         {
             Params.Add(name, value);
         }
-        
+
         /// <summary>
         /// Post
         /// </summary>
@@ -130,19 +120,14 @@ namespace Nop.Web.Framework
             var httpContext = _httpContextAccessor.HttpContext;
             var response = httpContext.Response;
 
-            //change headers before the content is written to body
-            response.OnStarting(() =>
-            {
-                response.ContentType = "text/html; charset=utf-8";
-                response.ContentLength = data.Length;
-
-                return Task.CompletedTask;
-            });
-
+            //post
             response.Clear();
+            response.ContentType = "text/html; charset=utf-8";
+            response.ContentLength = data.Length;
+
             response.Body
-                .WriteAsync(data, 0, data.Length)
-                .Wait();
+                 .WriteAsync(data, 0, data.Length)
+                 .Wait();
 
             //store a value indicating whether POST has been done
             _webHelper.IsPostBeingDone = true;

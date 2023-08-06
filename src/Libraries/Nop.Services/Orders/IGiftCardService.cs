@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 
@@ -85,7 +82,6 @@ namespace Nop.Services.Orders
         /// </returns>
         Task<IList<GiftCard>> GetActiveGiftCardsAppliedByCustomerAsync(Customer customer);
 
-        //TODO: migrate to an extension method
         /// <summary>
         /// Generate new gift card code
         /// </summary>

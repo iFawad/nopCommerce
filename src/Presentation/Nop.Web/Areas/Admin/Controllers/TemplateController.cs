@@ -1,9 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Topics;
 using Nop.Services.Catalog;
+using Nop.Services.Localization;
 using Nop.Services.Security;
 using Nop.Services.Topics;
 using Nop.Web.Areas.Admin.Factories;
@@ -18,18 +17,20 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly ICategoryTemplateService _categoryTemplateService;
-        private readonly IManufacturerTemplateService _manufacturerTemplateService;
-        private readonly IPermissionService _permissionService;
-        private readonly IProductTemplateService _productTemplateService;
-        private readonly ITemplateModelFactory _templateModelFactory;
-        private readonly ITopicTemplateService _topicTemplateService;
+        protected readonly ICategoryTemplateService _categoryTemplateService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IManufacturerTemplateService _manufacturerTemplateService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IProductTemplateService _productTemplateService;
+        protected readonly ITemplateModelFactory _templateModelFactory;
+        protected readonly ITopicTemplateService _topicTemplateService;
 
         #endregion
 
         #region Ctor
 
         public TemplateController(ICategoryTemplateService categoryTemplateService,
+            ILocalizationService localizationService,
             IManufacturerTemplateService manufacturerTemplateService,
             IPermissionService permissionService,
             IProductTemplateService productTemplateService,
@@ -37,6 +38,7 @@ namespace Nop.Web.Areas.Admin.Controllers
             ITopicTemplateService topicTemplateService)
         {
             _categoryTemplateService = categoryTemplateService;
+            _localizationService = localizationService;
             _manufacturerTemplateService = manufacturerTemplateService;
             _permissionService = permissionService;
             _productTemplateService = productTemplateService;
@@ -114,6 +116,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
 
+            if ((await _categoryTemplateService.GetAllCategoryTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
+
             //try to get a category template with the specified id
             var template = await _categoryTemplateService.GetCategoryTemplateByIdAsync(id)
                 ?? throw new ArgumentException("No template found with the specified id");
@@ -180,6 +185,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
 
+            if ((await _manufacturerTemplateService.GetAllManufacturerTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
+
             //try to get a manufacturer template with the specified id
             var template = await _manufacturerTemplateService.GetManufacturerTemplateByIdAsync(id)
                 ?? throw new ArgumentException("No template found with the specified id");
@@ -192,7 +200,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         #endregion
 
         #region Product templates
-                
+
         [HttpPost]
         public virtual async Task<IActionResult> ProductTemplates(ProductTemplateSearchModel searchModel)
         {
@@ -246,6 +254,9 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
 
+            if ((await _productTemplateService.GetAllProductTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
+
             //try to get a product template with the specified id
             var template = await _productTemplateService.GetProductTemplateByIdAsync(id)
                 ?? throw new ArgumentException("No template found with the specified id");
@@ -258,7 +269,7 @@ namespace Nop.Web.Areas.Admin.Controllers
         #endregion
 
         #region Topic templates
-        
+
         [HttpPost]
         public virtual async Task<IActionResult> TopicTemplates(TopicTemplateSearchModel searchModel)
         {
@@ -311,6 +322,9 @@ namespace Nop.Web.Areas.Admin.Controllers
         {
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageMaintenance))
                 return AccessDeniedView();
+
+            if ((await _topicTemplateService.GetAllTopicTemplatesAsync()).Count == 1)
+                return ErrorJson(await _localizationService.GetResourceAsync("Admin.System.Templates.NotDeleteOnlyOne"));
 
             //try to get a topic template with the specified id
             var template = await _topicTemplateService.GetTopicTemplateByIdAsync(id)

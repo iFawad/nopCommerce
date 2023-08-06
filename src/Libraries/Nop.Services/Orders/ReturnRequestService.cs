@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
+using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
 using Nop.Data;
-using Nop.Data.Extensions;
 
 namespace Nop.Services.Orders
 {
@@ -16,9 +12,11 @@ namespace Nop.Services.Orders
     {
         #region Fields
 
-        private readonly IRepository<ReturnRequest> _returnRequestRepository;
-        private readonly IRepository<ReturnRequestAction> _returnRequestActionRepository;
-        private readonly IRepository<ReturnRequestReason> _returnRequestReasonRepository;
+        protected readonly IRepository<ReturnRequest> _returnRequestRepository;
+        protected readonly IRepository<ReturnRequestAction> _returnRequestActionRepository;
+        protected readonly IRepository<ReturnRequestReason> _returnRequestReasonRepository;
+        protected readonly IRepository<OrderItem> _orderItemRepository;
+        protected readonly IRepository<Product> _productRepository;
 
         #endregion
 
@@ -26,11 +24,15 @@ namespace Nop.Services.Orders
 
         public ReturnRequestService(IRepository<ReturnRequest> returnRequestRepository,
             IRepository<ReturnRequestAction> returnRequestActionRepository,
-            IRepository<ReturnRequestReason> returnRequestReasonRepository)
+            IRepository<ReturnRequestReason> returnRequestReasonRepository,
+            IRepository<OrderItem> orderItemRepository,
+            IRepository<Product> productRepository)
         {
             _returnRequestRepository = returnRequestRepository;
             _returnRequestActionRepository = returnRequestActionRepository;
             _returnRequestReasonRepository = returnRequestReasonRepository;
+            _orderItemRepository = orderItemRepository;
+            _productRepository = productRepository;
         }
 
         #endregion
@@ -111,6 +113,53 @@ namespace Nop.Services.Orders
         }
 
         /// <summary>
+        /// Gets the return request availability
+        /// </summary>
+        /// <param name="orderId">The order identifier</param>
+        /// <returns>The <see cref="Task"/> containing the <see cref="ReturnRequestAvailability"/></returns>
+        public virtual async Task<ReturnRequestAvailability> GetReturnRequestAvailabilityAsync(int orderId)
+        {
+            var result = new ReturnRequestAvailability();
+
+            if (orderId > 0)
+            {
+                var cancelledStatusId = (int)ReturnRequestStatus.Cancelled;
+                var requestedOrderItemsForReturn =
+                    from rr in _returnRequestRepository.Table
+                    where rr.ReturnRequestStatusId != cancelledStatusId
+                    group rr by new
+                    {
+                        rr.OrderItemId
+                    } into g
+                    select new
+                    {
+                        OrderItemId = g.Key.OrderItemId,
+                        RequestedQuantityForReturn = g.Sum(rr => rr.Quantity)
+                    };
+
+                var query =
+                    from oi in _orderItemRepository.Table
+                    join roi in requestedOrderItemsForReturn
+                        on oi.Id equals roi.OrderItemId into alreadyRequestedForReturn
+                    from aroi in alreadyRequestedForReturn.DefaultIfEmpty()
+                    join p in _productRepository.Table
+                        on oi.ProductId equals p.Id
+                    where !p.NotReturnable && oi.OrderId == orderId
+                    select new ReturnableOrderItem
+                    {
+                        AvailableQuantityForReturn = aroi != null
+                            ? Math.Max(oi.Quantity - aroi.RequestedQuantityForReturn, 0)
+                            : oi.Quantity,
+                        OrderItem = oi
+                    };
+
+                result.ReturnableOrderItems = await query.ToListAsync();
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Delete a return request action
         /// </summary>
         /// <param name="returnRequestAction">Return request action</param>
@@ -132,8 +181,8 @@ namespace Nop.Services.Orders
             return await _returnRequestActionRepository.GetAllAsync(query =>
             {
                 return from rra in query
-                    orderby rra.DisplayOrder, rra.Id
-                    select rra;
+                       orderby rra.DisplayOrder, rra.Id
+                       select rra;
             }, cache => default);
         }
 
@@ -212,8 +261,8 @@ namespace Nop.Services.Orders
             return await _returnRequestReasonRepository.GetAllAsync(query =>
             {
                 return from rra in query
-                    orderby rra.DisplayOrder, rra.Id
-                    select rra;
+                       orderby rra.DisplayOrder, rra.Id
+                       select rra;
             }, cache => default);
         }
 

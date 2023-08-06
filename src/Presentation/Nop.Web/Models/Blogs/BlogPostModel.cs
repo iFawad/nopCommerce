@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Nop.Web.Framework.Models;
+﻿using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Models.Blogs
 {
@@ -22,6 +20,7 @@ namespace Nop.Web.Models.Blogs
         public string Body { get; set; }
         public string BodyOverview { get; set; }
         public bool AllowComments { get; set; }
+        public bool PreventNotRegisteredUsersToLeaveComments { get; set; }
         public int NumberOfComments { get; set; }
         public DateTime CreatedOn { get; set; }
 

@@ -1,16 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core.Domain.Blogs;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Html;
 using Nop.Services.Blogs;
 using Nop.Services.Customers;
 using Nop.Services.Helpers;
+using Nop.Services.Html;
 using Nop.Services.Localization;
 using Nop.Services.Seo;
 using Nop.Services.Stores;
@@ -29,16 +26,17 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly CatalogSettings _catalogSettings;
-        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
-        private readonly IBlogService _blogService;
-        private readonly ICustomerService _customerService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly ILanguageService _languageService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IStoreMappingSupportedModelFactory _storeMappingSupportedModelFactory;
-        private readonly IStoreService _storeService;
-        private readonly IUrlRecordService _urlRecordService;
+        protected readonly CatalogSettings _catalogSettings;
+        protected readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        protected readonly IBlogService _blogService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IHtmlFormatter _htmlFormatter;
+        protected readonly ILanguageService _languageService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IStoreMappingSupportedModelFactory _storeMappingSupportedModelFactory;
+        protected readonly IStoreService _storeService;
+        protected readonly IUrlRecordService _urlRecordService;
 
         #endregion
 
@@ -49,6 +47,7 @@ namespace Nop.Web.Areas.Admin.Factories
             IBlogService blogService,
             ICustomerService customerService,
             IDateTimeHelper dateTimeHelper,
+            IHtmlFormatter htmlFormatter,
             ILanguageService languageService,
             ILocalizationService localizationService,
             IStoreMappingSupportedModelFactory storeMappingSupportedModelFactory,
@@ -60,6 +59,7 @@ namespace Nop.Web.Areas.Admin.Factories
             _blogService = blogService;
             _customerService = customerService;
             _dateTimeHelper = dateTimeHelper;
+            _htmlFormatter = htmlFormatter;
             _languageService = languageService;
             _localizationService = localizationService;
             _storeMappingSupportedModelFactory = storeMappingSupportedModelFactory;
@@ -68,7 +68,7 @@ namespace Nop.Web.Areas.Admin.Factories
         }
 
         #endregion
-        
+
         #region Methods
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Nop.Web.Areas.Admin.Factories
 
             return blogContentModel;
         }
-        
+
         /// <summary>
         /// Prepare paged blog post list model
         /// </summary>
@@ -178,13 +178,13 @@ namespace Nop.Web.Areas.Admin.Factories
             for (var i = 0; i < blogTags.Count; i++)
             {
                 var tag = blogTags[i];
-                blogTagsSb.Append("'");
+                blogTagsSb.Append('\'');
                 blogTagsSb.Append(JavaScriptEncoder.Default.Encode(tag.Name));
-                blogTagsSb.Append("'");
+                blogTagsSb.Append('\'');
                 if (i != blogTags.Count - 1)
-                    blogTagsSb.Append(",");
+                    blogTagsSb.Append(',');
             }
-            blogTagsSb.Append("]");
+            blogTagsSb.Append(']');
 
             model.InitialBlogTags = blogTagsSb.ToString();
 
@@ -287,7 +287,7 @@ namespace Nop.Web.Areas.Admin.Factories
                     }
                     //fill in additional values (not existing in the entity)
                     commentModel.CreatedOn = await _dateTimeHelper.ConvertToUserTimeAsync(blogComment.CreatedOnUtc, DateTimeKind.Utc);
-                    commentModel.Comment = HtmlHelper.FormatText(blogComment.CommentText, false, true, false, false, false, false);
+                    commentModel.Comment = _htmlFormatter.FormatText(blogComment.CommentText, false, true, false, false, false, false);
                     commentModel.StoreName = storeNames.ContainsKey(blogComment.StoreId) ? storeNames[blogComment.StoreId] : "Deleted";
 
                     return commentModel;
@@ -296,7 +296,7 @@ namespace Nop.Web.Areas.Admin.Factories
 
             return model;
         }
-        
+
         /// <summary>
         /// Prepare blog post search model
         /// </summary>

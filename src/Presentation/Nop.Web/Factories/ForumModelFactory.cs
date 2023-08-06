@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Forums;
 using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Security;
-using Nop.Core.Html;
 using Nop.Services.Common;
 using Nop.Services.Customers;
 using Nop.Services.Directory;
 using Nop.Services.Forums;
 using Nop.Services.Helpers;
+using Nop.Services.Html;
 using Nop.Services.Localization;
 using Nop.Services.Media;
 using Nop.Web.Framework.Extensions;
+using Nop.Web.Infrastructure;
 using Nop.Web.Models.Boards;
 using Nop.Web.Models.Common;
 
@@ -29,18 +26,19 @@ namespace Nop.Web.Factories
     {
         #region Fields
 
-        private readonly CaptchaSettings _captchaSettings;
-        private readonly CustomerSettings _customerSettings;
-        private readonly ForumSettings _forumSettings;
-        private readonly ICountryService _countryService;
-        private readonly ICustomerService _customerService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly IForumService _forumService;
-        private readonly IGenericAttributeService _genericAttributeService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IPictureService _pictureService;
-        private readonly IWorkContext _workContext;
-        private readonly MediaSettings _mediaSettings;
+        protected readonly CaptchaSettings _captchaSettings;
+        protected readonly CustomerSettings _customerSettings;
+        protected readonly ForumSettings _forumSettings;
+        protected readonly IBBCodeHelper _bbCodeHelper;
+        protected readonly ICountryService _countryService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IForumService _forumService;
+        protected readonly IGenericAttributeService _genericAttributeService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IPictureService _pictureService;
+        protected readonly IWorkContext _workContext;
+        protected readonly MediaSettings _mediaSettings;
 
         #endregion
 
@@ -49,6 +47,7 @@ namespace Nop.Web.Factories
         public ForumModelFactory(CaptchaSettings captchaSettings,
             CustomerSettings customerSettings,
             ForumSettings forumSettings,
+            IBBCodeHelper bbCodeHelper,
             ICountryService countryService,
             ICustomerService customerService,
             IDateTimeHelper dateTimeHelper,
@@ -62,6 +61,7 @@ namespace Nop.Web.Factories
             _captchaSettings = captchaSettings;
             _customerSettings = customerSettings;
             _forumSettings = forumSettings;
+            _bbCodeHelper = bbCodeHelper;
             _countryService = countryService;
             _customerService = customerService;
             _dateTimeHelper = dateTimeHelper;
@@ -137,7 +137,7 @@ namespace Nop.Web.Factories
 
             return forumsList;
         }
-        
+
         #endregion
 
         #region Methods
@@ -278,12 +278,13 @@ namespace Nop.Web.Factories
 
             model.AllowPostVoting = _forumSettings.AllowPostVoting;
 
-            //subscription                
-            if (await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()))
+            //subscription
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (await _forumService.IsCustomerAllowedToSubscribeAsync(customer))
             {
                 model.WatchForumText = await _localizationService.GetResourceAsync("Forum.WatchForum");
 
-                var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id, forum.Id, 0, 0, 1)).FirstOrDefault();
+                var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id, forum.Id, 0, 0, 1)).FirstOrDefault();
                 if (forumSubscription != null)
                 {
                     model.WatchForumText = await _localizationService.GetResourceAsync("Forum.UnwatchForum");
@@ -299,7 +300,7 @@ namespace Nop.Web.Factories
                 var topicModel = await PrepareForumTopicRowModelAsync(topic);
                 model.ForumTopics.Add(topicModel);
             }
-            model.IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync());
+            model.IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(customer);
             model.ForumFeedsEnabled = _forumSettings.ForumFeedsEnabled;
             model.PostsPageSize = _forumSettings.PostsPageSize;
             return model;
@@ -324,23 +325,24 @@ namespace Nop.Web.Factories
                 page - 1, _forumSettings.PostsPageSize);
 
             //prepare model
+            var currentCustomer = await _workContext.GetCurrentCustomerAsync();
             var model = new ForumTopicPageModel
             {
                 Id = forumTopic.Id,
                 Subject = forumTopic.Subject,
                 SeName = await _forumService.GetTopicSeNameAsync(forumTopic),
 
-                IsCustomerAllowedToEditTopic = await _forumService.IsCustomerAllowedToEditTopicAsync(await _workContext.GetCurrentCustomerAsync(), forumTopic),
-                IsCustomerAllowedToDeleteTopic = await _forumService.IsCustomerAllowedToDeleteTopicAsync(await _workContext.GetCurrentCustomerAsync(), forumTopic),
-                IsCustomerAllowedToMoveTopic = await _forumService.IsCustomerAllowedToMoveTopicAsync(await _workContext.GetCurrentCustomerAsync(), forumTopic),
-                IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync())
+                IsCustomerAllowedToEditTopic = await _forumService.IsCustomerAllowedToEditTopicAsync(currentCustomer, forumTopic),
+                IsCustomerAllowedToDeleteTopic = await _forumService.IsCustomerAllowedToDeleteTopicAsync(currentCustomer, forumTopic),
+                IsCustomerAllowedToMoveTopic = await _forumService.IsCustomerAllowedToMoveTopicAsync(currentCustomer, forumTopic),
+                IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(currentCustomer)
             };
 
             if (model.IsCustomerAllowedToSubscribe)
             {
                 model.WatchTopicText = await _localizationService.GetResourceAsync("Forum.WatchTopic");
 
-                var forumTopicSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id, 0, forumTopic.Id, 0, 1)).FirstOrDefault();
+                var forumTopicSubscription = (await _forumService.GetAllSubscriptionsAsync(currentCustomer.Id, 0, forumTopic.Id, 0, 1)).FirstOrDefault();
                 if (forumTopicSubscription != null)
                 {
                     model.WatchTopicText = await _localizationService.GetResourceAsync("Forum.UnwatchTopic");
@@ -354,7 +356,7 @@ namespace Nop.Web.Factories
                 var customer = await _customerService.GetCustomerByIdAsync(post.CustomerId);
 
                 var customerIsGuest = await _customerService.IsGuestAsync(customer);
-                var customerIsModerator = customerIsGuest ? false : await _customerService.IsForumModeratorAsync(customer);
+                var customerIsModerator = !customerIsGuest && await _customerService.IsForumModeratorAsync(customer);
 
                 var forumPostModel = new ForumPostModel
                 {
@@ -362,8 +364,8 @@ namespace Nop.Web.Factories
                     ForumTopicId = post.TopicId,
                     ForumTopicSeName = await _forumService.GetTopicSeNameAsync(forumTopic),
                     FormattedText = _forumService.FormatPostText(post),
-                    IsCurrentCustomerAllowedToEditPost = await _forumService.IsCustomerAllowedToEditPostAsync(await _workContext.GetCurrentCustomerAsync(), post),
-                    IsCurrentCustomerAllowedToDeletePost = await _forumService.IsCustomerAllowedToDeletePostAsync(await _workContext.GetCurrentCustomerAsync(), post),
+                    IsCurrentCustomerAllowedToEditPost = await _forumService.IsCustomerAllowedToEditPostAsync(currentCustomer, post),
+                    IsCurrentCustomerAllowedToDeletePost = await _forumService.IsCustomerAllowedToDeletePostAsync(currentCustomer, post),
                     CustomerId = post.CustomerId,
                     AllowViewingProfiles = _customerSettings.AllowViewingProfiles && !customerIsGuest,
                     CustomerName = await _customerService.FormatUsernameAsync(customer),
@@ -399,8 +401,7 @@ namespace Nop.Web.Factories
                 forumPostModel.ShowCustomersLocation = _customerSettings.ShowCustomersLocation && !customerIsGuest;
                 if (_customerSettings.ShowCustomersLocation)
                 {
-                    var countryId = await _genericAttributeService.GetAttributeAsync<Customer, int>(post.CustomerId, NopCustomerDefaults.CountryIdAttribute);
-                    var country = await _countryService.GetCountryByIdAsync(countryId);
+                    var country = await _countryService.GetCountryByIdAsync(customer.CountryId);
                     forumPostModel.CustomerLocation = country != null ? await _localizationService.GetLocalizedAsync(country, x => x.Name) : string.Empty;
                 }
 
@@ -409,7 +410,7 @@ namespace Nop.Web.Factories
                 {
                     forumPostModel.AllowPostVoting = true;
                     forumPostModel.VoteCount = post.VoteCount;
-                    var postVote = await _forumService.GetPostVoteAsync(post.Id, await _workContext.GetCurrentCustomerAsync());
+                    var postVote = await _forumService.GetPostVoteAsync(post.Id, currentCustomer);
                     if (postVote != null)
                         forumPostModel.VoteIsUp = postVote.IsUp;
                 }
@@ -428,7 +429,7 @@ namespace Nop.Web.Factories
         /// <param name="forumTopic">Forum topic</param>
         /// <returns>
         /// A task that represents the asynchronous operation
-        /// The task result contains the opic move model
+        /// The task result contains the topic move model
         /// </returns>
         public virtual async Task<TopicMoveModel> PrepareTopicMoveAsync(ForumTopic forumTopic)
         {
@@ -460,14 +461,15 @@ namespace Nop.Web.Factories
             if (model == null)
                 throw new ArgumentNullException(nameof(model));
 
+            var customer = await _workContext.GetCurrentCustomerAsync();
             model.IsEdit = false;
             model.ForumId = forum.Id;
             model.ForumName = forum.Name;
             model.ForumSeName = await _forumService.GetForumSeNameAsync(forum);
             model.ForumEditor = _forumSettings.ForumEditor;
-            model.IsCustomerAllowedToSetTopicPriority = await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(await _workContext.GetCurrentCustomerAsync());
+            model.IsCustomerAllowedToSetTopicPriority = await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(customer);
             model.TopicPriorities = await ForumTopicTypesListAsync();
-            model.IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync());
+            model.IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(customer);
             model.DisplayCaptcha = _captchaSettings.Enabled && _captchaSettings.ShowOnForum;
         }
 
@@ -490,6 +492,7 @@ namespace Nop.Web.Factories
             if (forum == null)
                 throw new ArgumentException("forum cannot be loaded");
 
+            var customer = await _workContext.GetCurrentCustomerAsync();
             model.IsEdit = true;
             model.Id = forumTopic.Id;
             model.TopicPriorities = await ForumTopicTypesListAsync();
@@ -498,8 +501,8 @@ namespace Nop.Web.Factories
             model.ForumId = forum.Id;
             model.ForumEditor = _forumSettings.ForumEditor;
             model.DisplayCaptcha = _captchaSettings.Enabled && _captchaSettings.ShowOnForum;
-            model.IsCustomerAllowedToSetTopicPriority = await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(await _workContext.GetCurrentCustomerAsync());
-            model.IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync());
+            model.IsCustomerAllowedToSetTopicPriority = await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(customer);
+            model.IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(customer);
 
             if (!excludeProperties)
             {
@@ -510,7 +513,7 @@ namespace Nop.Web.Factories
                 //subscription            
                 if (model.IsCustomerAllowedToSubscribe)
                 {
-                    var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id, 0, forumTopic.Id, 0, 1)).FirstOrDefault();
+                    var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id, 0, forumTopic.Id, 0, 1)).FirstOrDefault();
                     model.Subscribed = forumSubscription != null;
                 }
             }
@@ -535,6 +538,7 @@ namespace Nop.Web.Factories
             if (forum == null)
                 throw new ArgumentException("forum cannot be loaded");
 
+            var currentCustomer = await _workContext.GetCurrentCustomerAsync();
             var model = new EditForumPostModel
             {
                 ForumTopicId = forumTopic.Id,
@@ -543,7 +547,7 @@ namespace Nop.Web.Factories
                 ForumName = forum.Name,
                 ForumTopicSubject = forumTopic.Subject,
                 ForumTopicSeName = await _forumService.GetTopicSeNameAsync(forumTopic),
-                IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()),
+                IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(currentCustomer),
                 DisplayCaptcha = _captchaSettings.Enabled && _captchaSettings.ShowOnForum
             };
 
@@ -552,7 +556,7 @@ namespace Nop.Web.Factories
                 //subscription            
                 if (model.IsCustomerAllowedToSubscribe)
                 {
-                    var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id,
+                    var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(currentCustomer.Id,
                         0, forumTopic.Id, 0, 1)).FirstOrDefault();
                     model.Subscribed = forumSubscription != null;
                 }
@@ -562,7 +566,7 @@ namespace Nop.Web.Factories
                 if (quote.HasValue)
                 {
                     var quotePost = await _forumService.GetPostByIdAsync(quote.Value);
-                    
+
                     if (quotePost != null && quotePost.TopicId == forumTopic.Id)
                     {
                         var customer = await _customerService.GetCustomerByIdAsync(quotePost.CustomerId);
@@ -575,7 +579,7 @@ namespace Nop.Web.Factories
                                 text = $"{await _customerService.FormatUsernameAsync(customer)}:\n{quotePostText}\n";
                                 break;
                             case EditorType.BBCodeEditor:
-                                text = $"[quote={await _customerService.FormatUsernameAsync(customer)}]{BBCodeHelper.RemoveQuotes(quotePostText)}[/quote]";
+                                text = $"[quote={await _customerService.FormatUsernameAsync(customer)}]{_bbCodeHelper.RemoveQuotes(quotePostText)}[/quote]";
                                 break;
                         }
                         model.Text = text;
@@ -608,6 +612,7 @@ namespace Nop.Web.Factories
             if (forum == null)
                 throw new ArgumentException("forum cannot be loaded");
 
+            var customer = await _workContext.GetCurrentCustomerAsync();
             var model = new EditForumPostModel
             {
                 Id = forumPost.Id,
@@ -617,7 +622,7 @@ namespace Nop.Web.Factories
                 ForumName = forum.Name,
                 ForumTopicSubject = forumTopic.Subject,
                 ForumTopicSeName = await _forumService.GetTopicSeNameAsync(forumTopic),
-                IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()),
+                IsCustomerAllowedToSubscribe = await _forumService.IsCustomerAllowedToSubscribeAsync(customer),
                 DisplayCaptcha = _captchaSettings.Enabled && _captchaSettings.ShowOnForum
             };
 
@@ -627,7 +632,7 @@ namespace Nop.Web.Factories
                 //subscription
                 if (model.IsCustomerAllowedToSubscribe)
                 {
-                    var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id, 0, forumTopic.Id, 0, 1)).FirstOrDefault();
+                    var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id, 0, forumTopic.Id, 0, 1)).FirstOrDefault();
                     model.Subscribed = forumSubscription != null;
                 }
             }
@@ -753,13 +758,13 @@ namespace Nop.Web.Factories
             };
             model.WithinList = withinList;
 
-            int.TryParse(forumId, out var forumIdSelected);
+            _ = int.TryParse(forumId, out var forumIdSelected);
             model.ForumIdSelected = forumIdSelected;
 
-            int.TryParse(within, out var withinSelected);
+            _ = int.TryParse(within, out var withinSelected);
             model.WithinSelected = withinSelected;
 
-            int.TryParse(limitDays, out var limitDaysSelected);
+            _ = int.TryParse(limitDays, out var limitDaysSelected);
             model.LimitDaysSelected = limitDaysSelected;
 
             var searchTermMinimumLength = _forumSettings.ForumSearchTermMinimumLength;
@@ -983,7 +988,7 @@ namespace Nop.Web.Factories
                 });
             }
 
-            model.PagerModel = new PagerModel
+            model.PagerModel = new PagerModel(_localizationService)
             {
                 PageSize = list.PageSize,
                 TotalRecords = list.TotalCount,
@@ -991,7 +996,7 @@ namespace Nop.Web.Factories
                 ShowTotalSummary = false,
                 RouteActionName = "CustomerForumSubscriptions",
                 UseRouteLinks = true,
-                RouteValues = new ForumSubscriptionsRouteValues { pageNumber = pageIndex }
+                RouteValues = new ForumSubscriptionsRouteValues { PageNumber = pageIndex }
             };
 
             return model;
@@ -1061,6 +1066,36 @@ namespace Nop.Web.Factories
             };
 
             return forumModel;
+        }
+
+        #endregion
+
+        #region Nested class
+
+        /// <summary>
+        /// record that has only page for route value. Used for (My Account) Forum Subscriptions pagination
+        /// </summary>
+        public partial record ForumSubscriptionsRouteValues : BaseRouteValues
+        {
+        }
+
+        /// <summary>
+        /// record that has search options for route values. Used for Search result pagination
+        /// </summary>
+        public partial record ForumSearchRouteValues : BaseRouteValues
+        {
+            public string Searchterms { get; set; }
+            public string Advs { get; set; }
+            public string ForumId { get; set; }
+            public string Within { get; set; }
+            public string LimitDays { get; set; }
+        }
+
+        /// <summary>
+        /// record that has only page for route value. Used for Active Discussions (forums) pagination
+        /// </summary>
+        public partial record ForumActiveDiscussionsRouteValues : BaseRouteValues
+        {
         }
 
         #endregion

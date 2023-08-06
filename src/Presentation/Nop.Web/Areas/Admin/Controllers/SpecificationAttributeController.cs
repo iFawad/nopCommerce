@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core.Domain.Catalog;
 using Nop.Services.Catalog;
 using Nop.Services.Localization;
@@ -21,13 +17,13 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedEntityService _localizedEntityService;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly ISpecificationAttributeModelFactory _specificationAttributeModelFactory;
-        private readonly ISpecificationAttributeService _specificationAttributeService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedEntityService _localizedEntityService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly ISpecificationAttributeModelFactory _specificationAttributeModelFactory;
+        protected readonly ISpecificationAttributeService _specificationAttributeService;
 
         #endregion Fields
 
@@ -54,7 +50,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateAttributeLocalesAsync(SpecificationAttribute specificationAttribute, SpecificationAttributeModel model)
         {
             foreach (var localized in model.Locales)
@@ -66,7 +61,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateAttributeGroupLocalesAsync(SpecificationAttributeGroup specificationAttributeGroup, SpecificationAttributeGroupModel model)
         {
             foreach (var localized in model.Locales)
@@ -78,7 +72,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateOptionLocalesAsync(SpecificationAttributeOption specificationAttributeOption, SpecificationAttributeOptionModel model)
         {
             foreach (var localized in model.Locales)
@@ -207,7 +200,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("List");
-                
+
                 return RedirectToAction("EditSpecificationAttribute", new { id = specificationAttribute.Id });
             }
 
@@ -306,7 +299,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("List");
-                
+
                 return RedirectToAction("EditSpecificationAttribute", new { id = specificationAttribute.Id });
             }
 
@@ -364,16 +357,16 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageAttributes))
                 return AccessDeniedView();
 
-            if (selectedIds != null)
-            {
-                var specificationAttributes = await _specificationAttributeService.GetSpecificationAttributeByIdsAsync(selectedIds.ToArray());
-                await _specificationAttributeService.DeleteSpecificationAttributesAsync(specificationAttributes);
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
-                foreach (var specificationAttribute in specificationAttributes)
-                {
-                    await _customerActivityService.InsertActivityAsync("DeleteSpecAttribute",
-                        string.Format(await _localizationService.GetResourceAsync("ActivityLog.DeleteSpecAttribute"), specificationAttribute.Name), specificationAttribute);
-                }
+            var specificationAttributes = await _specificationAttributeService.GetSpecificationAttributeByIdsAsync(selectedIds.ToArray());
+            await _specificationAttributeService.DeleteSpecificationAttributesAsync(specificationAttributes);
+
+            foreach (var specificationAttribute in specificationAttributes)
+            {
+                await _customerActivityService.InsertActivityAsync("DeleteSpecAttribute",
+                    string.Format(await _localizationService.GetResourceAsync("ActivityLog.DeleteSpecAttribute"), specificationAttribute.Name), specificationAttribute);
             }
 
             return Json(new { Result = true });

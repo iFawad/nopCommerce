@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 using Nop.Data;
@@ -17,10 +14,10 @@ namespace Nop.Services.Orders
     {
         #region Fields
 
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly ILocalizationService _localizationService;
-        private readonly IRepository<RewardPointsHistory> _rewardPointsHistoryRepository;
-        private readonly RewardPointsSettings _rewardPointsSettings;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IRepository<RewardPointsHistory> _rewardPointsHistoryRepository;
+        protected readonly RewardPointsSettings _rewardPointsSettings;
 
         #endregion
 
@@ -64,7 +61,7 @@ namespace Nop.Services.Orders
                 query = query.Where(historyEntry => historyEntry.StoreId == storeId);
 
             //whether to show only the points that already activated
-            if (!showNotActivated) 
+            if (!showNotActivated)
                 query = query.Where(historyEntry => historyEntry.CreatedOnUtc < DateTime.UtcNow);
 
             //update points balance
@@ -187,20 +184,6 @@ namespace Nop.Services.Orders
         }
 
         /// <summary>
-        /// Gets reduced reward points balance per order
-        /// </summary>
-        /// <param name="rewardPointsBalance">Reward points balance</param>
-        /// <returns>Reduced balance</returns>
-        public virtual int GetReducedPointsBalance(int rewardPointsBalance)
-        {
-            if (_rewardPointsSettings.MaximumRewardPointsToUsePerOrder > 0 &&
-                rewardPointsBalance > _rewardPointsSettings.MaximumRewardPointsToUsePerOrder)
-                return _rewardPointsSettings.MaximumRewardPointsToUsePerOrder;
-
-            return rewardPointsBalance;
-        }
-
-        /// <summary>
         /// Add reward points history record
         /// </summary>
         /// <param name="customer">Customer</param>
@@ -244,7 +227,7 @@ namespace Nop.Services.Orders
             await InsertRewardPointsHistoryEntryAsync(newHistoryEntry);
 
             //reduce valid points of previous entries
-            if (points >= 0) 
+            if (points >= 0)
                 return newHistoryEntry.Id;
 
             var withValidPoints = (await GetRewardPointsQueryAsync(customer.Id, storeId))

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core.Domain.Common;
+﻿using Nop.Core.Domain.Common;
 
 namespace Nop.Services.Common
 {
@@ -70,7 +68,6 @@ namespace Nop.Services.Common
         /// </returns>
         Task<bool> IsAddressValidAsync(Address address);
 
-        //TODO: migrate to an extension method
         /// <summary>
         /// Find an address
         /// </summary>
@@ -94,11 +91,23 @@ namespace Nop.Services.Common
             string faxNumber, string company, string address1, string address2, string city, string county, int? stateProvinceId,
             string zipPostalCode, int? countryId, string customAttributes);
 
-        //TODO: migrate to an extension method
         /// <summary>
         /// Clone address
         /// </summary>
         /// <returns>A deep copy of address</returns>
         Address CloneAddress(Address address);
+
+        /// <summary>
+        /// Address format
+        /// </summary>
+        /// <param name="address">Address</param>
+        /// <param name="languageId">Language identifier</param>
+        /// <param name="separator">Separator</param>
+        /// <param name="htmlEncode">Encode to HTML</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// Address line, array address fields
+        /// </returns> 
+        Task<(string, KeyValuePair<AddressField, string>[])> FormatAddressAsync(Address address, int languageId = 0, string separator = ", ", bool htmlEncode = false);
     }
 }

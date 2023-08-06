@@ -1,9 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Data;
-using Nop.Data.Extensions;
 using Nop.Plugin.Tax.Avalara.Domain;
 
 namespace Nop.Plugin.Tax.Avalara.Services
@@ -15,7 +11,7 @@ namespace Nop.Plugin.Tax.Avalara.Services
     {
         #region Fields
 
-        private readonly IRepository<TaxTransactionLog> _taxTransactionLogRepository;
+        protected readonly IRepository<TaxTransactionLog> _taxTransactionLogRepository;
 
         #endregion
 
@@ -42,7 +38,7 @@ namespace Nop.Plugin.Tax.Avalara.Services
         /// A task that represents the asynchronous operation
         /// The task result contains the paged list of tax transaction log items
         /// </returns>
-        public virtual async Task<IPagedList<TaxTransactionLog>> GetTaxTransactionLogAsync(int? customerId = null,
+        public async Task<IPagedList<TaxTransactionLog>> GetTaxTransactionLogAsync(int? customerId = null,
             DateTime? createdFromUtc = null, DateTime? createdToUtc = null,
             int pageIndex = 0, int pageSize = int.MaxValue)
         {
@@ -74,7 +70,7 @@ namespace Nop.Plugin.Tax.Avalara.Services
         /// A task that represents the asynchronous operation
         /// The task result contains the log item
         /// </returns>
-        public virtual async Task<TaxTransactionLog> GetTaxTransactionLogByIdAsync(int logItemId)
+        public async Task<TaxTransactionLog> GetTaxTransactionLogByIdAsync(int logItemId)
         {
             return await _taxTransactionLogRepository.GetByIdAsync(logItemId);
         }
@@ -84,7 +80,7 @@ namespace Nop.Plugin.Tax.Avalara.Services
         /// </summary>
         /// <param name="logItem">Log item</param>
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task InsertTaxTransactionLogAsync(TaxTransactionLog logItem)
+        public async Task InsertTaxTransactionLogAsync(TaxTransactionLog logItem)
         {
             if (logItem == null)
                 throw new ArgumentNullException(nameof(logItem));
@@ -97,7 +93,7 @@ namespace Nop.Plugin.Tax.Avalara.Services
         /// </summary>
         /// <param name="logItem">Log item</param>
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task UpdateTaxTransactionLogAsync(TaxTransactionLog logItem)
+        public async Task UpdateTaxTransactionLogAsync(TaxTransactionLog logItem)
         {
             if (logItem == null)
                 throw new ArgumentNullException(nameof(logItem));
@@ -110,7 +106,7 @@ namespace Nop.Plugin.Tax.Avalara.Services
         /// </summary>
         /// <param name="logItem">Log item</param>
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task DeleteTaxTransactionLogAsync(TaxTransactionLog logItem)
+        public async Task DeleteTaxTransactionLogAsync(TaxTransactionLog logItem)
         {
             await _taxTransactionLogRepository.DeleteAsync(logItem, false);
         }
@@ -120,9 +116,18 @@ namespace Nop.Plugin.Tax.Avalara.Services
         /// </summary>
         /// <param name="ids">Log items identifiers</param>
         /// <returns>A task that represents the asynchronous operation</returns>
-        public virtual async Task DeleteTaxTransactionLogAsync(int[] ids)
+        public async Task DeleteTaxTransactionLogAsync(int[] ids)
         {
             await _taxTransactionLogRepository.DeleteAsync(logItem => ids.Contains(logItem.Id));
+        }
+
+        /// <summary>
+        /// Clear the log
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public async Task ClearLogAsync()
+        {
+            await _taxTransactionLogRepository.TruncateAsync();
         }
 
         #endregion

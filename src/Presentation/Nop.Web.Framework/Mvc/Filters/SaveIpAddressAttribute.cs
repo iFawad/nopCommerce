@@ -1,6 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Nop.Core;
@@ -34,10 +32,10 @@ namespace Nop.Web.Framework.Mvc.Filters
         {
             #region Fields
 
-            private readonly CustomerSettings _customerSettings;
-            private readonly IRepository<Customer> _customerRepository;
-            private readonly IWebHelper _webHelper;
-            private readonly IWorkContext _workContext;
+            protected readonly CustomerSettings _customerSettings;
+            protected readonly IRepository<Customer> _customerRepository;
+            protected readonly IWebHelper _webHelper;
+            protected readonly IWorkContext _workContext;
 
             #endregion
 
@@ -75,7 +73,7 @@ namespace Nop.Web.Framework.Mvc.Filters
                 if (!context.HttpContext.Request.Method.Equals(WebRequestMethods.Http.Get, StringComparison.InvariantCultureIgnoreCase))
                     return;
 
-                if (!await DataSettingsManager.IsDatabaseInstalledAsync())
+                if (!DataSettingsManager.IsDatabaseInstalled())
                     return;
 
                 //check whether we store IP addresses

@@ -38,7 +38,7 @@ namespace Nop.Services.Customers
         /// <remarks>
         /// {0} : system name
         /// </remarks>
-        public static CacheKey CustomerBySystemNameCacheKey => new CacheKey("Nop.customer.bysystemname.{0}");
+        public static CacheKey CustomerBySystemNameCacheKey => new("Nop.customer.bysystemname.{0}");
 
         /// <summary>
         /// Gets a key for caching
@@ -46,19 +46,7 @@ namespace Nop.Services.Customers
         /// <remarks>
         /// {0} : customer GUID
         /// </remarks>
-        public static CacheKey CustomerByGuidCacheKey => new CacheKey("Nop.customer.byguid.{0}");
-
-        #endregion
-
-        #region Customer attributes
-
-        /// <summary>
-        /// Gets a key for caching
-        /// </summary>
-        /// <remarks>
-        /// {0} : customer attribute ID
-        /// </remarks>
-        public static CacheKey CustomerAttributeValuesByAttributeCacheKey => new CacheKey("Nop.customerattributevalue.byattribute.{0}");
+        public static CacheKey CustomerByGuidCacheKey => new("Nop.customer.byguid.{0}");
 
         #endregion
 
@@ -70,7 +58,7 @@ namespace Nop.Services.Customers
         /// <remarks>
         /// {0} : show hidden records?
         /// </remarks>
-        public static CacheKey CustomerRolesAllCacheKey => new CacheKey("Nop.customerrole.all.{0}", NopEntityCacheDefaults<CustomerRole>.AllPrefix);
+        public static CacheKey CustomerRolesAllCacheKey => new("Nop.customerrole.all.{0}", NopEntityCacheDefaults<CustomerRole>.AllPrefix);
 
         /// <summary>
         /// Gets a key for caching
@@ -78,7 +66,7 @@ namespace Nop.Services.Customers
         /// <remarks>
         /// {0} : system name
         /// </remarks>
-        public static CacheKey CustomerRolesBySystemNameCacheKey => new CacheKey("Nop.customerrole.bysystemname.{0}", CustomerRolesBySystemNamePrefix);
+        public static CacheKey CustomerRolesBySystemNameCacheKey => new("Nop.customerrole.bysystemname.{0}", CustomerRolesBySystemNamePrefix);
 
         /// <summary>
         /// Gets a key pattern to clear cache
@@ -92,7 +80,7 @@ namespace Nop.Services.Customers
         /// {0} : customer identifier
         /// {1} : show hidden
         /// </remarks>
-        public static CacheKey CustomerRoleIdsCacheKey => new CacheKey("Nop.customer.customerrole.ids.{0}-{1}", CustomerCustomerRolesPrefix);
+        public static CacheKey CustomerRoleIdsCacheKey => new("Nop.customer.customerrole.ids.{0}-{1}", CustomerCustomerRolesPrefix);
 
         /// <summary>
         /// Gets a key for caching
@@ -101,7 +89,7 @@ namespace Nop.Services.Customers
         /// {0} : customer identifier
         /// {1} : show hidden
         /// </remarks>
-        public static CacheKey CustomerRolesCacheKey => new CacheKey("Nop.customer.customerrole.{0}-{1}", CustomerCustomerRolesByCustomerPrefix, CustomerCustomerRolesPrefix);
+        public static CacheKey CustomerRolesCacheKey => new("Nop.customer.customerrole.{0}-{1}", CustomerCustomerRolesByCustomerPrefix, CustomerCustomerRolesPrefix);
 
         /// <summary>
         /// Gets a key pattern to clear cache
@@ -115,7 +103,7 @@ namespace Nop.Services.Customers
         /// {0} : customer identifier
         /// </remarks>
         public static string CustomerCustomerRolesByCustomerPrefix => "Nop.customer.customerrole.{0}";
-        
+
         #endregion
 
         #region Addresses
@@ -126,7 +114,7 @@ namespace Nop.Services.Customers
         /// <remarks>
         /// {0} : customer identifier
         /// </remarks>
-        public static CacheKey CustomerAddressesCacheKey => new CacheKey("Nop.customer.addresses.{0}", CustomerAddressesPrefix);
+        public static CacheKey CustomerAddressesCacheKey => new("Nop.customer.addresses.{0}", CustomerAddressesPrefix);
 
         /// <summary>
         /// Gets a key for caching
@@ -135,7 +123,7 @@ namespace Nop.Services.Customers
         /// {0} : customer identifier
         /// {1} : address identifier
         /// </remarks>
-        public static CacheKey CustomerAddressCacheKey => new CacheKey("Nop.customer.addresses.address.{0}-{1}", CustomerAddressesByCustomerPrefix, CustomerAddressesPrefix);
+        public static CacheKey CustomerAddressCacheKey => new("Nop.customer.addresses.{0}-{1}", CustomerAddressesByCustomerPrefix, CustomerAddressesPrefix);
 
         /// <summary>
         /// Gets a key pattern to clear cache
@@ -149,7 +137,7 @@ namespace Nop.Services.Customers
         /// {0} : customer identifier
         /// </remarks>
         public static string CustomerAddressesByCustomerPrefix => "Nop.customer.addresses.{0}";
-        
+
         #endregion
 
         #region Customer password
@@ -160,7 +148,7 @@ namespace Nop.Services.Customers
         /// <remarks>
         /// {0} : customer identifier
         /// </remarks>
-        public static CacheKey CustomerPasswordLifetimeCacheKey => new CacheKey("Nop.customerpassword.lifetime.{0}");
+        public static CacheKey CustomerPasswordLifetimeCacheKey => new("Nop.customerpassword.lifetime.{0}");
 
         #endregion
 

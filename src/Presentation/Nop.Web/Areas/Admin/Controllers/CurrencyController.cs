@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Directory;
 using Nop.Services.Configuration;
@@ -24,17 +20,17 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly CurrencySettings _currencySettings;
-        private readonly ICurrencyModelFactory _currencyModelFactory;
-        private readonly ICurrencyService _currencyService;
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedEntityService _localizedEntityService;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly ISettingService _settingService;
-        private readonly IStoreMappingService _storeMappingService;
-        private readonly IStoreService _storeService;
+        protected readonly CurrencySettings _currencySettings;
+        protected readonly ICurrencyModelFactory _currencyModelFactory;
+        protected readonly ICurrencyService _currencyService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedEntityService _localizedEntityService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly ISettingService _settingService;
+        protected readonly IStoreMappingService _storeMappingService;
+        protected readonly IStoreService _storeService;
 
         #endregion
 
@@ -69,7 +65,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(Currency currency, CurrencyModel model)
         {
             foreach (var localized in model.Locales)
@@ -78,7 +73,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(Currency currency, CurrencyModel model)
         {
             currency.LimitedToStores = model.SelectedStoreIds.Any();
@@ -91,7 +85,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(currency, store.Id);
                 }
                 else

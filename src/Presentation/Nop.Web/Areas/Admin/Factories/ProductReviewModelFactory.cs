@@ -1,14 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
-using Nop.Core.Html;
 using Nop.Services.Catalog;
 using Nop.Services.Customers;
 using Nop.Services.Helpers;
+using Nop.Services.Html;
 using Nop.Services.Localization;
 using Nop.Services.Stores;
 using Nop.Web.Areas.Admin.Infrastructure.Mapper.Extensions;
@@ -25,15 +22,16 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly CatalogSettings _catalogSettings;
-        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
-        private readonly ICustomerService _customerService;
-        private readonly IDateTimeHelper _dateTimeHelper;
-        private readonly ILocalizationService _localizationService;
-        private readonly IProductService _productService;
-        private readonly IReviewTypeService _reviewTypeService;
-        private readonly IStoreService _storeService;
-        private readonly IWorkContext _workContext;
+        protected readonly CatalogSettings _catalogSettings;
+        protected readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDateTimeHelper _dateTimeHelper;
+        protected readonly IHtmlFormatter _htmlFormatter;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IProductService _productService;
+        protected readonly IReviewTypeService _reviewTypeService;
+        protected readonly IStoreService _storeService;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
@@ -43,6 +41,7 @@ namespace Nop.Web.Areas.Admin.Factories
             IBaseAdminModelFactory baseAdminModelFactory,
             ICustomerService customerService,
             IDateTimeHelper dateTimeHelper,
+            IHtmlFormatter htmlFormatter,
             ILocalizationService localizationService,
             IProductService productService,
             IReviewTypeService reviewTypeService,
@@ -53,6 +52,7 @@ namespace Nop.Web.Areas.Admin.Factories
             _baseAdminModelFactory = baseAdminModelFactory;
             _customerService = customerService;
             _dateTimeHelper = dateTimeHelper;
+            _htmlFormatter = htmlFormatter;
             _localizationService = localizationService;
             _productService = productService;
             _reviewTypeService = reviewTypeService;
@@ -126,7 +126,8 @@ namespace Nop.Web.Areas.Admin.Factories
             var createdToFromValue = !searchModel.CreatedOnTo.HasValue ? null
                 : (DateTime?)_dateTimeHelper.ConvertToUtcTime(searchModel.CreatedOnTo.Value, await _dateTimeHelper.GetCurrentTimeZoneAsync()).AddDays(1);
             var isApprovedOnly = searchModel.SearchApprovedId == 0 ? null : searchModel.SearchApprovedId == 1 ? true : (bool?)false;
-            var vendorId = (await _workContext.GetCurrentVendorAsync())?.Id ?? 0;
+            var vendor = await _workContext.GetCurrentVendorAsync();
+            var vendorId = vendor?.Id ?? 0;
 
             //get product reviews
             var productReviews = await _productService.GetAllProductReviewsAsync(showHidden: true,
@@ -158,8 +159,8 @@ namespace Nop.Web.Areas.Admin.Factories
                         ? customer.Email
                         : await _localizationService.GetResourceAsync("Admin.Customers.Guest");
 
-                    productReviewModel.ReviewText = HtmlHelper.FormatText(productReview.ReviewText, false, true, false, false, false, false);
-                    productReviewModel.ReplyText = HtmlHelper.FormatText(productReview.ReplyText, false, true, false, false, false, false);
+                    productReviewModel.ReviewText = _htmlFormatter.FormatText(productReview.ReviewText, false, true, false, false, false, false);
+                    productReviewModel.ReplyText = _htmlFormatter.FormatText(productReview.ReplyText, false, true, false, false, false, false);
 
                     return productReviewModel;
                 });

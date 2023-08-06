@@ -1,13 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Nop.Core.Domain.Messages;
 using Nop.Core.Events;
 using Nop.Services.Events;
 using Nop.Services.Messages;
 using NUnit.Framework;
 
-namespace Nop.Tests.Nop.Services.Tests.Messages 
+namespace Nop.Tests.Nop.Services.Tests.Messages
 {
     [TestFixture]
     public class NewsLetterSubscriptionServiceTests : ServiceTest
@@ -48,7 +46,7 @@ namespace Nop.Tests.Nop.Services.Tests.Messages
 
             NewsLetterSubscriptionConsumer.LastEventType.Should().Be(typeof(EmailUnsubscribedEvent));
         }
-        
+
         /// <summary>
         /// Verifies the insert event is fired.
         /// </summary>
@@ -66,10 +64,78 @@ namespace Nop.Tests.Nop.Services.Tests.Messages
             eventType.Should().Be(typeof(EntityInsertedEvent<NewsLetterSubscription>));
         }
 
+        [Test]
+        public async Task CanCRUD()
+        {
+            var guid = Guid.NewGuid();
+
+            var subscription = new NewsLetterSubscription
+            {
+                Active = true,
+                Email = NopTestsDefaults.AdminEmail,
+                NewsLetterSubscriptionGuid = guid
+            };
+
+            await _newsLetterSubscriptionService.InsertNewsLetterSubscriptionAsync(subscription);
+            subscription.Id.Should().BeGreaterThan(0);
+            subscription = await _newsLetterSubscriptionService.GetNewsLetterSubscriptionByIdAsync(subscription.Id);
+            subscription.Active.Should().BeTrue();
+            subscription.Active = false;
+            await _newsLetterSubscriptionService.UpdateNewsLetterSubscriptionAsync(subscription);
+            subscription = await _newsLetterSubscriptionService.GetNewsLetterSubscriptionByGuidAsync(guid);
+            subscription.Active.Should().BeFalse();
+
+            subscription =
+                await _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreIdAsync(
+                    NopTestsDefaults.AdminEmail, 0);
+            subscription.Should().NotBeNull();
+
+            await _newsLetterSubscriptionService.DeleteNewsLetterSubscriptionAsync(subscription);
+            subscription = await _newsLetterSubscriptionService.GetNewsLetterSubscriptionByGuidAsync(guid);
+            subscription.Should().BeNull();
+            subscription =
+                await _newsLetterSubscriptionService.GetNewsLetterSubscriptionByEmailAndStoreIdAsync(
+                    NopTestsDefaults.AdminEmail, 1);
+            subscription.Should().BeNull();
+        }
+
+        [Test]
+        public async Task CanGetAllNewsLetterSubscriptions()
+        {
+            var guid = Guid.NewGuid();
+
+            var subscription = new NewsLetterSubscription
+            {
+                Active = true,
+                Email = NopTestsDefaults.AdminEmail,
+                NewsLetterSubscriptionGuid = guid
+            };
+            await _newsLetterSubscriptionService.InsertNewsLetterSubscriptionAsync(subscription);
+
+            var subscriptions = await _newsLetterSubscriptionService.GetAllNewsLetterSubscriptionsAsync();
+            subscriptions.Count.Should().Be(1);
+            subscriptions = await _newsLetterSubscriptionService.GetAllNewsLetterSubscriptionsAsync(NopTestsDefaults.AdminEmail);
+            subscriptions.Count.Should().Be(1);
+            subscriptions = await _newsLetterSubscriptionService.GetAllNewsLetterSubscriptionsAsync(isActive: true);
+            subscriptions.Count.Should().Be(1);
+            subscriptions = await _newsLetterSubscriptionService.GetAllNewsLetterSubscriptionsAsync(isActive: false);
+            subscriptions.Count.Should().Be(0);
+
+            subscriptions = await _newsLetterSubscriptionService.GetAllNewsLetterSubscriptionsAsync(customerRoleId: 1);
+            subscriptions.Count.Should().Be(1);
+            subscriptions = await _newsLetterSubscriptionService.GetAllNewsLetterSubscriptionsAsync(customerRoleId: 1, storeId: 1);
+            subscriptions.Count.Should().Be(0);
+            subscriptions = await _newsLetterSubscriptionService.GetAllNewsLetterSubscriptionsAsync(NopTestsDefaults.AdminEmail, customerRoleId: 4);
+            subscriptions.Count.Should().Be(0);
+
+
+            await _newsLetterSubscriptionService.DeleteNewsLetterSubscriptionAsync(subscription);
+        }
+
         public class NewsLetterSubscriptionConsumer : IConsumer<EmailSubscribedEvent>, IConsumer<EmailUnsubscribedEvent>, IConsumer<EntityInsertedEvent<NewsLetterSubscription>>
         {
             public static Type LastEventType { get; set; }
-            
+
             public Task HandleEventAsync(EmailSubscribedEvent eventMessage)
             {
                 LastEventType = typeof(EmailSubscribedEvent);

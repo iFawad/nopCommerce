@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Nop.Data;
 using Nop.Services.Security;
@@ -45,8 +42,8 @@ namespace Nop.Web.Framework.Mvc.Filters
         {
             #region Fields
 
-            private readonly bool _ignoreFilter;
-            private readonly IPermissionService _permissionService;
+            protected readonly bool _ignoreFilter;
+            protected readonly IPermissionService _permissionService;
 
             #endregion
 
@@ -72,7 +69,7 @@ namespace Nop.Web.Framework.Mvc.Filters
                 if (context == null)
                     throw new ArgumentNullException(nameof(context));
 
-                if (!await DataSettingsManager.IsDatabaseInstalledAsync())
+                if (!DataSettingsManager.IsDatabaseInstalled())
                     return;
 
                 //check whether this filter has been overridden for the Action

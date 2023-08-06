@@ -63,7 +63,7 @@
         </div>
         <div class="col-md-9">
             <div class="input-group">
-                <nop-editor asp-for="Password" autocomplete="new-password"/>
+                <nop-editor asp-for="Password" html-attributes="@(new { autocomplete = "new-password" })"/>
                 <div class="input-group-append">
                     @if (Model.Id > 0)
                     {
@@ -311,11 +311,7 @@
                 </div>
                 <script>
                 $(document).ready(function() {
-                    var newsletterSubscriptionStoreIdsInput = $('#@Html.IdFor(model => model.SelectedNewsletterSubscriptionStoreIds)').data("kendoMultiSelect");
-                    newsletterSubscriptionStoreIdsInput.setOptions({
-                        newsletterSubscriptionStoreIdsInput: false,
-                        filter: "contains"
-                    });
+                    var newsletterSubscriptionStoreIdsInput = $('#@Html.IdFor(model => model.SelectedNewsletterSubscriptionStoreIds)').select2();
                 });
                 </script>
             </div>
@@ -337,23 +333,16 @@
             </div>
             <script>
                 $(document).ready(function() {
-                    var customerRoleIdsInput = $('#@Html.IdFor(model => model.SelectedCustomerRoleIds)').data("kendoMultiSelect");
-                    customerRoleIdsInput.setOptions({
-                        customerRoleIdsInput: false,
-                        filter: "contains"
-                    });
-
-                    @if (Model.AvailableCustomerRoles.Count == 0)
-                    {
+                    var customerRoleIdsInput = $('#@Html.IdFor(model => model.SelectedCustomerRoleIds)').select2({
+                        closeOnSelect: false,
+                        @if (!Model.AvailableCustomerRoles.Any())
+                        {
                         <text>
-                            customerRoleIdsInput.setOptions({
-                                enable: false,
-                                placeholder: '@T("Admin.Customers.Customers.Fields.CustomerRoles.NoRoles")'
-                            });
-                            customerRoleIdsInput._placeholder();
-                            customerRoleIdsInput._enable();
+                        disabled: true,
+                        placeholder: '@T("Admin.Customers.Customers.Fields.CustomerRoles.NoRoles")',
                         </text>
-                    }
+                        }
+                    });
                 });
             </script>
         </div>
@@ -399,7 +388,7 @@
             </div>
             <div class="col-md-9">
                 <div class="input-group">
-                    <nop-editor asp-for="MultiFactorAuthenticationProvider" asp-disabled="true"/>
+                    <nop-editor asp-for="MultiFactorAuthenticationProvider" html-attributes="@(new { disabled = true })"/>
                     <div class="input-group-append">
                         @if (Model.Id > 0)
                         {
@@ -448,9 +437,10 @@
                     },
                     Data = JsonConvert.SerializeObject(Model.CustomerAssociatedExternalAuthRecordsSearchModel.AssociatedExternalAuthRecords.Select(externalAuthRecord => new
                     {
-                        AuthMethodName = JavaScriptEncoder.Default.Encode(externalAuthRecord.AuthMethodName),
-                        Email = JavaScriptEncoder.Default.Encode(externalAuthRecord.Email),
-                        ExternalIdentifier = JavaScriptEncoder.Default.Encode(externalAuthRecord.ExternalIdentifier)
+                        //We must display this data encoded, since the data can contain Unicode characters or malicious exploits
+                        AuthMethodName = WebUtility.HtmlEncode(externalAuthRecord.AuthMethodName),
+                        Email = WebUtility.HtmlEncode(externalAuthRecord.Email),
+                        ExternalIdentifier = WebUtility.HtmlEncode(externalAuthRecord.ExternalIdentifier)
                     }).ToList())
                 })
             </div>

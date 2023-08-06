@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
@@ -17,6 +15,7 @@ namespace Nop.Web.Models.Catalog
         {
             DefaultPictureModel = new PictureModel();
             PictureModels = new List<PictureModel>();
+            VideoModels = new List<VideoModel>();
             GiftCard = new GiftCardModel();
             ProductPrice = new ProductPriceModel();
             AddToCart = new AddToCartModel();
@@ -28,6 +27,7 @@ namespace Nop.Web.Models.Catalog
             ProductSpecificationModel = new ProductSpecificationModel();
             ProductManufacturers = new List<ManufacturerBriefInfoModel>();
             ProductReviewOverview = new ProductReviewOverviewModel();
+            ProductReviews = new ProductReviewsModel();
             TierPrices = new List<TierPriceModel>();
             ProductEstimateShipping = new ProductEstimateShippingModel();
         }
@@ -37,9 +37,13 @@ namespace Nop.Web.Models.Catalog
         public PictureModel DefaultPictureModel { get; set; }
         public IList<PictureModel> PictureModels { get; set; }
 
+        //videos
+        public IList<VideoModel> VideoModels { get; set; }
+
         public string Name { get; set; }
         public string ShortDescription { get; set; }
         public string FullDescription { get; set; }
+        public string JsonLd { get; set; }
         public string MetaKeywords { get; set; }
         public string MetaDescription { get; set; }
         public string MetaTitle { get; set; }
@@ -81,6 +85,8 @@ namespace Nop.Web.Models.Catalog
 
         public bool DisplayBackInStockSubscription { get; set; }
 
+        public bool DisplayAttributeCombinationImagesOnly { get; set; }
+
         public bool EmailAFriendEnabled { get; set; }
         public bool CompareProductsEnabled { get; set; }
 
@@ -102,6 +108,8 @@ namespace Nop.Web.Models.Catalog
 
         public ProductReviewOverviewModel ProductReviewOverview { get; set; }
 
+        public ProductReviewsModel ProductReviews { get; set; }
+
         public ProductEstimateShippingModel ProductEstimateShipping { get; set; }
 
         public IList<TierPriceModel> TierPrices { get; set; }
@@ -117,7 +125,7 @@ namespace Nop.Web.Models.Catalog
 
         public bool AllowAddingOnlyExistingAttributeCombinations { get; set; }
 
-        #region Nested Classes
+        #region Nested Classes
 
         public partial record ProductBreadcrumbModel : BaseNopModel
         {
@@ -127,6 +135,7 @@ namespace Nop.Web.Models.Catalog
             }
 
             public bool Enabled { get; set; }
+            public string JsonLd { get; set; }
             public int ProductId { get; set; }
             public string ProductName { get; set; }
             public string ProductSeName { get; set; }
@@ -178,10 +187,12 @@ namespace Nop.Web.Models.Catalog
             public string CurrencyCode { get; set; }
 
             public string OldPrice { get; set; }
+            public decimal? OldPriceValue { get; set; }
 
             public string Price { get; set; }
-            public string PriceWithDiscount { get; set; }
             public decimal PriceValue { get; set; }
+            public string PriceWithDiscount { get; set; }
+            public decimal? PriceWithDiscountValue { get; set; }
 
             public bool CustomerEntersPrice { get; set; }
 
@@ -194,6 +205,7 @@ namespace Nop.Web.Models.Catalog
             //rental
             public bool IsRental { get; set; }
             public string RentalPrice { get; set; }
+            public decimal? RentalPriceValue { get; set; }
 
             /// <summary>
             /// A value indicating whether we should display tax/shipping info (used in Germany)
@@ -203,6 +215,7 @@ namespace Nop.Web.Models.Catalog
             /// PAngV baseprice (used in Germany)
             /// </summary>
             public string BasePricePAngV { get; set; }
+            public decimal? BasePricePAngVValue { get; set; }
         }
 
         public partial record GiftCardModel : BaseNopModel
@@ -232,6 +245,7 @@ namespace Nop.Web.Models.Catalog
         public partial record TierPriceModel : BaseNopModel
         {
             public string Price { get; set; }
+            public decimal PriceValue { get; set; }
 
             public int Quantity { get; set; }
         }
@@ -303,7 +317,7 @@ namespace Nop.Web.Models.Catalog
             public PictureModel ImageSquaresPictureModel { get; set; }
 
             public string PriceAdjustment { get; set; }
-            
+
             public bool PriceAdjustmentUsePercentage { get; set; }
 
             public decimal PriceAdjustmentValue { get; set; }

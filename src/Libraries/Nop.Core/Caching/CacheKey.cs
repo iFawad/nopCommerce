@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Nop.Core.Configuration;
+﻿using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 
 namespace Nop.Core.Caching
@@ -61,12 +58,12 @@ namespace Nop.Core.Caching
         /// <summary>
         /// Gets or sets prefixes for remove by prefix functionality
         /// </summary>
-        public List<string> Prefixes { get; protected set; } = new List<string>();
+        public List<string> Prefixes { get; protected set; } = new();
 
         /// <summary>
         /// Gets or sets a cache time in minutes
         /// </summary>
-        public int CacheTime { get; set; } = Singleton<AppSettings>.Instance.CacheConfig.DefaultCacheTime;
+        public int CacheTime { get; set; } = Singleton<AppSettings>.Instance.Get<CacheConfig>().DefaultCacheTime;
 
         #endregion
     }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
@@ -11,25 +8,27 @@ using Nop.Services.Localization;
 using Nop.Services.Messages;
 using Nop.Services.Seo;
 using Nop.Web.Framework.Mvc.Filters;
+using Nop.Web.Infrastructure;
 using Nop.Web.Models.Catalog;
 using Nop.Web.Models.Common;
 
 namespace Nop.Web.Controllers
 {
+    [AutoValidateAntiforgeryToken]
     public partial class BackInStockSubscriptionController : BasePublicController
     {
         #region Fields
 
-        private readonly IBackInStockSubscriptionService _backInStockSubscriptionService;
-        private readonly CatalogSettings _catalogSettings;
-        private readonly CustomerSettings _customerSettings;
-        private readonly ICustomerService _customerService;
-        private readonly ILocalizationService _localizationService;
-        private readonly INotificationService _notificationService;
-        private readonly IProductService _productService;
-        private readonly IStoreContext _storeContext;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IWorkContext _workContext;
+        protected readonly IBackInStockSubscriptionService _backInStockSubscriptionService;
+        protected readonly CatalogSettings _catalogSettings;
+        protected readonly CustomerSettings _customerSettings;
+        protected readonly ICustomerService _customerService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IProductService _productService;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IUrlRecordService _urlRecordService;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
@@ -63,22 +62,24 @@ namespace Nop.Web.Controllers
         #region Methods
 
         // Product details page > back in stock subscribe
-        [CheckLanguageSeoCode(true)]
+        [CheckLanguageSeoCode(ignore: true)]
         public virtual async Task<IActionResult> SubscribePopup(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
             if (product == null || product.Deleted)
                 throw new ArgumentException("No product found with the specified id");
 
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
             var model = new BackInStockSubscribeModel
             {
                 ProductId = product.Id,
                 ProductName = await _localizationService.GetLocalizedAsync(product, x => x.Name),
                 ProductSeName = await _urlRecordService.GetSeNameAsync(product),
-                IsCurrentCustomerRegistered = await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()),
+                IsCurrentCustomerRegistered = await _customerService.IsRegisteredAsync(customer),
                 MaximumBackInStockSubscriptions = _catalogSettings.MaximumBackInStockSubscriptions,
                 CurrentNumberOfBackInStockSubscriptions = (await _backInStockSubscriptionService
-                .GetAllSubscriptionsByCustomerIdAsync((await _workContext.GetCurrentCustomerAsync()).Id, (await _storeContext.GetCurrentStoreAsync()).Id, 0, 1))
+                .GetAllSubscriptionsByCustomerIdAsync(customer.Id, store.Id, 0, 1))
                 .TotalCount
             };
             if (product.ManageInventoryMethod == ManageInventoryMethod.ManageStock &&
@@ -89,21 +90,21 @@ namespace Nop.Web.Controllers
                 //out of stock
                 model.SubscriptionAllowed = true;
                 model.AlreadySubscribed = await _backInStockSubscriptionService
-                    .FindSubscriptionAsync((await _workContext.GetCurrentCustomerAsync()).Id, product.Id, (await _storeContext.GetCurrentStoreAsync()).Id) != null;
+                    .FindSubscriptionAsync(customer.Id, product.Id, store.Id) != null;
             }
 
             return PartialView(model);
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
         public virtual async Task<IActionResult> SubscribePopupPOST(int productId)
         {
             var product = await _productService.GetProductByIdAsync(productId);
             if (product == null || product.Deleted)
                 throw new ArgumentException("No product found with the specified id");
 
-            if (!await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()))
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (!await _customerService.IsRegisteredAsync(customer))
                 return Content(await _localizationService.GetResourceAsync("BackInStockSubscriptions.OnlyRegistered"));
 
             if (product.ManageInventoryMethod == ManageInventoryMethod.ManageStock &&
@@ -112,8 +113,9 @@ namespace Nop.Web.Controllers
                 await _productService.GetTotalStockQuantityAsync(product) <= 0)
             {
                 //out of stock
+                var store = await _storeContext.GetCurrentStoreAsync();
                 var subscription = await _backInStockSubscriptionService
-                    .FindSubscriptionAsync((await _workContext.GetCurrentCustomerAsync()).Id, product.Id, (await _storeContext.GetCurrentStoreAsync()).Id);
+                    .FindSubscriptionAsync(customer.Id, product.Id, store.Id);
                 if (subscription != null)
                 {
                     //subscription already exists
@@ -127,7 +129,7 @@ namespace Nop.Web.Controllers
                 //subscription does not exist
                 //subscribe
                 if ((await _backInStockSubscriptionService
-                    .GetAllSubscriptionsByCustomerIdAsync((await _workContext.GetCurrentCustomerAsync()).Id, (await _storeContext.GetCurrentStoreAsync()).Id, 0, 1))
+                    .GetAllSubscriptionsByCustomerIdAsync(customer.Id, store.Id, 0, 1))
                     .TotalCount >= _catalogSettings.MaximumBackInStockSubscriptions)
                 {
                     return Json(new
@@ -137,9 +139,9 @@ namespace Nop.Web.Controllers
                 }
                 subscription = new BackInStockSubscription
                 {
-                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    CustomerId = customer.Id,
                     ProductId = product.Id,
-                    StoreId = (await _storeContext.GetCurrentStoreAsync()).Id,
+                    StoreId = store.Id,
                     CreatedOnUtc = DateTime.UtcNow
                 };
                 await _backInStockSubscriptionService.InsertSubscriptionAsync(subscription);
@@ -168,8 +170,9 @@ namespace Nop.Web.Controllers
             var pageSize = 10;
 
             var customer = await _workContext.GetCurrentCustomerAsync();
+            var store = await _storeContext.GetCurrentStoreAsync();
             var list = await _backInStockSubscriptionService.GetAllSubscriptionsByCustomerIdAsync(customer.Id,
-                (await _storeContext.GetCurrentStoreAsync()).Id, pageIndex, pageSize);
+                store.Id, pageIndex, pageSize);
 
             var model = new CustomerBackInStockSubscriptionsModel();
 
@@ -190,7 +193,7 @@ namespace Nop.Web.Controllers
                 }
             }
 
-            model.PagerModel = new PagerModel
+            model.PagerModel = new PagerModel(_localizationService)
             {
                 PageSize = list.PageSize,
                 TotalRecords = list.TotalCount,
@@ -198,14 +201,13 @@ namespace Nop.Web.Controllers
                 ShowTotalSummary = false,
                 RouteActionName = "CustomerBackInStockSubscriptions",
                 UseRouteLinks = true,
-                RouteValues = new BackInStockSubscriptionsRouteValues { pageNumber = pageIndex }
+                RouteValues = new BackInStockSubscriptionsRouteValues { PageNumber = pageIndex }
             };
 
             return View(model);
         }
 
         [HttpPost, ActionName("CustomerSubscriptions")]
-        [IgnoreAntiforgeryToken]
         public virtual async Task<IActionResult> CustomerSubscriptionsPOST(IFormCollection formCollection)
         {
             foreach (var key in formCollection.Keys)
@@ -218,7 +220,8 @@ namespace Nop.Web.Controllers
                     if (int.TryParse(id, out var subscriptionId))
                     {
                         var subscription = await _backInStockSubscriptionService.GetSubscriptionByIdAsync(subscriptionId);
-                        if (subscription != null && subscription.CustomerId == (await _workContext.GetCurrentCustomerAsync()).Id)
+                        var customer = await _workContext.GetCurrentCustomerAsync();
+                        if (subscription != null && subscription.CustomerId == customer.Id)
                         {
                             await _backInStockSubscriptionService.DeleteSubscriptionAsync(subscription);
                         }
@@ -227,6 +230,17 @@ namespace Nop.Web.Controllers
             }
 
             return RedirectToRoute("CustomerBackInStockSubscriptions");
+        }
+
+        #endregion
+
+        #region Nested class
+
+        /// <summary>
+        /// record that has only page for route value. Used for (My Account) Back in stock subscriptions pagination
+        /// </summary>
+        public partial record BackInStockSubscriptionsRouteValues : BaseRouteValues
+        {
         }
 
         #endregion

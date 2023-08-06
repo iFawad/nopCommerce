@@ -1,5 +1,4 @@
-﻿using System;
-using Nop.Web.Framework.Models;
+﻿using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Areas.Admin.Models.Orders
 {
@@ -9,6 +8,8 @@ namespace Nop.Web.Areas.Admin.Models.Orders
     public partial record ShipmentStatusEventModel : BaseNopModel
     {
         #region Properties
+
+        public string Status { get; set; }
 
         public string EventName { get; set; }
 

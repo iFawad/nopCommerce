@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Common;
+using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Shipping;
 using Nop.Plugin.Pickup.PickupInStore.Domain;
 using Nop.Plugin.Pickup.PickupInStore.Services;
@@ -20,13 +17,13 @@ namespace Nop.Plugin.Pickup.PickupInStore
     {
         #region Fields
 
-        private readonly IAddressService _addressService;
-        private readonly ICountryService _countryService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IStateProvinceService _stateProvinceService;
-        private readonly IStoreContext _storeContext;
-        private readonly IStorePickupPointService _storePickupPointService;
-        private readonly IWebHelper _webHelper;
+        protected readonly IAddressService _addressService;
+        protected readonly ICountryService _countryService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IStateProvinceService _stateProvinceService;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IStorePickupPointService _storePickupPointService;
+        protected readonly IWebHelper _webHelper;
 
         #endregion
 
@@ -51,30 +48,23 @@ namespace Nop.Plugin.Pickup.PickupInStore
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// Gets a shipment tracker
-        /// </summary>
-        public IShipmentTracker ShipmentTracker => null;
-
-        #endregion
-
         #region Methods
 
         /// <summary>
         /// Get pickup points for the address
         /// </summary>
+        /// <param name="cart">Shopping Cart</param>
         /// <param name="address">Address</param>
         /// <returns>
         /// A task that represents the asynchronous operation
         /// The task result contains the represents a response of getting pickup points
         /// </returns>
-        public async Task<GetPickupPointsResponse> GetPickupPointsAsync(Address address)
+        public async Task<GetPickupPointsResponse> GetPickupPointsAsync(IList<ShoppingCartItem> cart, Address address)
         {
             var result = new GetPickupPointsResponse();
+            var store = await _storeContext.GetCurrentStoreAsync();
 
-            foreach (var point in await _storePickupPointService.GetAllStorePickupPointsAsync((await _storeContext.GetCurrentStoreAsync()).Id))
+            foreach (var point in await _storePickupPointService.GetAllStorePickupPointsAsync(store.Id))
             {
                 var pointAddress = await _addressService.GetAddressByIdAsync(point.AddressId);
                 if (pointAddress == null)
@@ -105,6 +95,18 @@ namespace Nop.Plugin.Pickup.PickupInStore
                 result.AddError(await _localizationService.GetResourceAsync("Plugins.Pickup.PickupInStore.NoPickupPoints"));
 
             return result;
+        }
+
+        /// <summary>
+        /// Get associated shipment tracker
+        /// </summary>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the shipment tracker
+        /// </returns>
+        public Task<IShipmentTracker> GetShipmentTrackerAsync()
+        {
+            return Task.FromResult<IShipmentTracker>(null);
         }
 
         /// <summary>
@@ -146,7 +148,7 @@ namespace Nop.Plugin.Pickup.PickupInStore
             await _storePickupPointService.InsertStorePickupPointAsync(pickupPoint);
 
             //locales
-            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
+            await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Plugins.Pickup.PickupInStore.AddNew"] = "Add a new pickup point",
                 ["Plugins.Pickup.PickupInStore.Fields.Description"] = "Description",

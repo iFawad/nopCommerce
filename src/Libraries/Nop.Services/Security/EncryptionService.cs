@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Nop.Core;
 using Nop.Core.Domain.Security;
@@ -10,11 +8,11 @@ namespace Nop.Services.Security
     /// <summary>
     /// Encryption service
     /// </summary>
-    public class EncryptionService : IEncryptionService
+    public partial class EncryptionService : IEncryptionService
     {
         #region Fields
 
-        private readonly SecuritySettings _securitySettings;
+        protected readonly SecuritySettings _securitySettings;
 
         #endregion
 
@@ -29,10 +27,16 @@ namespace Nop.Services.Security
 
         #region Utilities
 
-        private byte[] EncryptTextToMemory(string data, byte[] key, byte[] iv)
+        /// <summary>
+        /// Encrypt text
+        /// </summary>
+        /// <param name="data">Text to encrypt</param>
+        /// <param name="provider">Encryption algorithm</param>
+        /// <returns>Encrypted data</returns>
+        protected static byte[] EncryptTextToMemory(string data, SymmetricAlgorithm provider)
         {
             using var ms = new MemoryStream();
-            using (var cs = new CryptoStream(ms, new TripleDESCryptoServiceProvider().CreateEncryptor(key, iv), CryptoStreamMode.Write))
+            using (var cs = new CryptoStream(ms, provider.CreateEncryptor(), CryptoStreamMode.Write))
             {
                 var toEncrypt = Encoding.Unicode.GetBytes(data);
                 cs.Write(toEncrypt, 0, toEncrypt.Length);
@@ -42,12 +46,39 @@ namespace Nop.Services.Security
             return ms.ToArray();
         }
 
-        private string DecryptTextFromMemory(byte[] data, byte[] key, byte[] iv)
+        /// <summary>
+        /// Decrypt text
+        /// </summary>
+        /// <param name="data">Encrypted data</param>
+        /// <param name="provider">Encryption algorithm</param>
+        /// <returns>Decrypted text</returns>
+        protected static string DecryptTextFromMemory(byte[] data, SymmetricAlgorithm provider)
         {
             using var ms = new MemoryStream(data);
-            using var cs = new CryptoStream(ms, new TripleDESCryptoServiceProvider().CreateDecryptor(key, iv), CryptoStreamMode.Read);
+            using var cs = new CryptoStream(ms, provider.CreateDecryptor(), CryptoStreamMode.Read);
             using var sr = new StreamReader(cs, Encoding.Unicode);
+            
             return sr.ReadToEnd();
+        }
+
+        /// <summary>
+        /// Gets encryption algorithm
+        /// </summary>
+        /// <param name="encryptionKey">Encryption key</param>
+        /// <returns>Encryption algorithm</returns>
+        protected virtual SymmetricAlgorithm GetEncryptionAlgorithm(string encryptionKey)
+        {
+            if (string.IsNullOrEmpty(encryptionKey))
+                throw new ArgumentNullException(nameof(encryptionKey));
+
+            SymmetricAlgorithm provider = _securitySettings.UseAesEncryptionAlgorithm ? Aes.Create() : TripleDES.Create();
+
+            var vectorBlockSize = provider.BlockSize / 8;
+
+            provider.Key = Encoding.ASCII.GetBytes(encryptionKey[0..16]);
+            provider.IV = Encoding.ASCII.GetBytes(encryptionKey[^vectorBlockSize..]);
+
+            return provider;
         }
 
         #endregion
@@ -62,7 +93,7 @@ namespace Nop.Services.Security
         public virtual string CreateSaltKey(int size)
         {
             //generate a cryptographic random number
-            using var provider = new RNGCryptoServiceProvider();
+            using var provider = RandomNumberGenerator.Create();
             var buff = new byte[size];
             provider.GetBytes(buff);
 
@@ -96,13 +127,9 @@ namespace Nop.Services.Security
             if (string.IsNullOrEmpty(encryptionPrivateKey))
                 encryptionPrivateKey = _securitySettings.EncryptionKey;
 
-            using var provider = new TripleDESCryptoServiceProvider
-            {
-                Key = Encoding.ASCII.GetBytes(encryptionPrivateKey[0..16]),
-                IV = Encoding.ASCII.GetBytes(encryptionPrivateKey[8..16])
-            };
+            using var provider = GetEncryptionAlgorithm(encryptionPrivateKey);
+            var encryptedBinary = EncryptTextToMemory(plainText, provider);
 
-            var encryptedBinary = EncryptTextToMemory(plainText, provider.Key, provider.IV);
             return Convert.ToBase64String(encryptedBinary);
         }
 
@@ -120,14 +147,10 @@ namespace Nop.Services.Security
             if (string.IsNullOrEmpty(encryptionPrivateKey))
                 encryptionPrivateKey = _securitySettings.EncryptionKey;
 
-            using var provider = new TripleDESCryptoServiceProvider
-            {
-                Key = Encoding.ASCII.GetBytes(encryptionPrivateKey[0..16]),
-                IV = Encoding.ASCII.GetBytes(encryptionPrivateKey[8..16])
-            };
+            using var provider = GetEncryptionAlgorithm(encryptionPrivateKey);
 
             var buffer = Convert.FromBase64String(cipherText);
-            return DecryptTextFromMemory(buffer, provider.Key, provider.IV);
+            return DecryptTextFromMemory(buffer, provider);
         }
 
         #endregion

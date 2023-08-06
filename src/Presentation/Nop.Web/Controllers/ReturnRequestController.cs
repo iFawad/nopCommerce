@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Localization;
 using Nop.Core.Domain.Media;
@@ -23,20 +19,20 @@ namespace Nop.Web.Controllers
     {
         #region Fields
 
-        private readonly ICustomerService _customerService;
-        private readonly ICustomNumberFormatter _customNumberFormatter;
-        private readonly IDownloadService _downloadService;
-        private readonly ILocalizationService _localizationService;
-        private readonly INopFileProvider _fileProvider;
-        private readonly IOrderProcessingService _orderProcessingService;
-        private readonly IOrderService _orderService;
-        private readonly IReturnRequestModelFactory _returnRequestModelFactory;
-        private readonly IReturnRequestService _returnRequestService;
-        private readonly IStoreContext _storeContext;
-        private readonly IWorkContext _workContext;
-        private readonly IWorkflowMessageService _workflowMessageService;
-        private readonly LocalizationSettings _localizationSettings;
-        private readonly OrderSettings _orderSettings;
+        protected readonly ICustomerService _customerService;
+        protected readonly ICustomNumberFormatter _customNumberFormatter;
+        protected readonly IDownloadService _downloadService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly INopFileProvider _fileProvider;
+        protected readonly IOrderProcessingService _orderProcessingService;
+        protected readonly IOrderService _orderService;
+        protected readonly IReturnRequestModelFactory _returnRequestModelFactory;
+        protected readonly IReturnRequestService _returnRequestService;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IWorkContext _workContext;
+        protected readonly IWorkflowMessageService _workflowMessageService;
+        protected readonly LocalizationSettings _localizationSettings;
+        protected readonly OrderSettings _orderSettings;
 
         #endregion
 
@@ -89,7 +85,8 @@ namespace Nop.Web.Controllers
         public virtual async Task<IActionResult> ReturnRequest(int orderId)
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
-            if (order == null || order.Deleted || (await _workContext.GetCurrentCustomerAsync()).Id != order.CustomerId)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (order == null || order.Deleted || customer.Id != order.CustomerId)
                 return Challenge();
 
             if (!await _orderProcessingService.IsReturnRequestAllowedAsync(order))
@@ -104,7 +101,8 @@ namespace Nop.Web.Controllers
         public virtual async Task<IActionResult> ReturnRequestSubmit(int orderId, SubmitReturnRequestModel model, IFormCollection form)
         {
             var order = await _orderService.GetOrderByIdAsync(orderId);
-            if (order == null || order.Deleted || (await _workContext.GetCurrentCustomerAsync()).Id != order.CustomerId)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (order == null || order.Deleted || customer.Id != order.CustomerId)
                 return Challenge();
 
             if (!await _orderProcessingService.IsReturnRequestAllowedAsync(order))
@@ -128,21 +126,22 @@ namespace Nop.Web.Controllers
                 foreach (var formKey in form.Keys)
                     if (formKey.Equals($"quantity{orderItem.Id}", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        int.TryParse(form[formKey], out quantity);
+                        _ = int.TryParse(form[formKey], out quantity);
                         break;
                     }
                 if (quantity > 0)
                 {
                     var rrr = await _returnRequestService.GetReturnRequestReasonByIdAsync(model.ReturnRequestReasonId);
                     var rra = await _returnRequestService.GetReturnRequestActionByIdAsync(model.ReturnRequestActionId);
+                    var store = await _storeContext.GetCurrentStoreAsync();
 
                     var rr = new ReturnRequest
                     {
                         CustomNumber = "",
-                        StoreId = (await _storeContext.GetCurrentStoreAsync()).Id,
+                        StoreId = store.Id,
                         OrderItemId = orderItem.Id,
                         Quantity = quantity,
-                        CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                        CustomerId = customer.Id,
                         ReasonForReturn = rrr != null ? await _localizationService.GetLocalizedAsync(rrr, x => x.Name) : "not available",
                         RequestedAction = rra != null ? await _localizationService.GetLocalizedAsync(rra, x => x.Name) : "not available",
                         CustomerComments = model.Comments,
@@ -157,7 +156,7 @@ namespace Nop.Web.Controllers
 
                     //set return request custom number
                     rr.CustomNumber = _customNumberFormatter.GenerateReturnRequestCustomNumber(rr);
-                    await _customerService.UpdateCustomerAsync(await _workContext.GetCurrentCustomerAsync());
+                    await _customerService.UpdateCustomerAsync(customer);
                     await _returnRequestService.UpdateReturnRequestAsync(rr);
 
                     //notify store owner
@@ -253,7 +252,7 @@ namespace Nop.Web.Controllers
             {
                 success = true,
                 message = await _localizationService.GetResourceAsync("ShoppingCart.FileUploaded"),
-                downloadUrl = Url.Action("GetFileUpload", "Download", new { downloadId = download.DownloadGuid }),
+                downloadUrl = Url.RouteUrl("DownloadGetFileUpload", new { downloadId = download.DownloadGuid }),
                 downloadGuid = download.DownloadGuid,
             });
         }

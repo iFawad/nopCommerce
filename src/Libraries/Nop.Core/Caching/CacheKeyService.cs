@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Text;
 using Nop.Core.Configuration;
 
@@ -11,15 +9,6 @@ namespace Nop.Core.Caching
     /// </summary>
     public abstract partial class CacheKeyService
     {
-        #region Constants
-
-        /// <summary>
-        /// Gets an algorithm used to create the hash value of identifiers need to cache
-        /// </summary>
-        private string HashAlgorithm => "SHA1";
-
-        #endregion
-
         #region Fields
 
         protected readonly AppSettings _appSettings;
@@ -108,7 +97,7 @@ namespace Nop.Core.Caching
         {
             var key = cacheKey.Create(CreateCacheKeyParameters, cacheKeyParameters);
 
-            key.CacheTime = _appSettings.CacheConfig.DefaultCacheTime;
+            key.CacheTime = _appSettings.Get<CacheConfig>().DefaultCacheTime;
 
             return key;
         }
@@ -123,10 +112,19 @@ namespace Nop.Core.Caching
         {
             var key = cacheKey.Create(CreateCacheKeyParameters, cacheKeyParameters);
 
-            key.CacheTime = _appSettings.CacheConfig.ShortTermCacheTime;
+            key.CacheTime = _appSettings.Get<CacheConfig>().ShortTermCacheTime;
 
             return key;
         }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets an algorithm used to create the hash value of identifiers need to cache
+        /// </summary>
+        protected string HashAlgorithm => "SHA1";
 
         #endregion
     }

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core.Domain.Catalog;
+﻿using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Tax;
@@ -67,6 +65,17 @@ namespace Nop.Services.Tax
         Task<(decimal price, decimal taxRate)> GetProductPriceAsync(Product product, int taxCategoryId, decimal price,
             bool includingTax, Customer customer,
             bool priceIncludesTax);
+
+        /// <summary>
+        /// Gets a value indicating whether a product is tax exempt
+        /// </summary>
+        /// <param name="product">Product</param>
+        /// <param name="customer">Customer</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains a value indicating whether a product is tax exempt
+        /// </returns>
+        Task<bool> IsTaxExemptAsync(Product product, Customer customer);
 
         #endregion
 

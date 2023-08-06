@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Orders;
 
@@ -53,6 +50,16 @@ namespace Nop.Services.Orders
         /// The task result contains the order
         /// </returns>
         Task<IList<Order>> GetOrdersByIdsAsync(int[] orderIds);
+
+        /// <summary>
+        /// Get orders by guids
+        /// </summary>
+        /// <param name="orderGuids">Order guids</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the orders
+        /// </returns>
+        Task<IList<Order>> GetOrdersByGuidsAsync(Guid[] orderGuids);
 
         /// <summary>
         /// Gets an order
@@ -150,6 +157,16 @@ namespace Nop.Services.Orders
         Task<bool> HasItemsToShipAsync(Order order);
 
         /// <summary>
+        /// Gets a value indicating whether there are shipment items to mark as 'ready for pickup' in order shipments.
+        /// </summary>
+        /// <param name="order">Order</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains a value indicating whether there are shipment items to mark as 'ready for pickup' in order shipments.
+        /// </returns>
+        Task<bool> HasItemsToReadyForPickupAsync(Order order);
+
+        /// <summary>
         /// Gets a value indicating whether an order has items to deliver
         /// </summary>
         /// <param name="order">Order</param>
@@ -229,9 +246,9 @@ namespace Nop.Services.Orders
         /// <param name="orderItem">Order item</param>
         /// <returns>
         /// A task that represents the asynchronous operation
-        /// The task result contains the otal number of items in all shipments
+        /// The task result contains the total number of items in all shipments
         /// </returns>
-        Task<int> GetTotalNumberOfItemsInAllShipmentAsync(OrderItem orderItem);
+        Task<int> GetTotalNumberOfItemsInAllShipmentsAsync(OrderItem orderItem);
 
         /// <summary>
         /// Gets a total number of already items which can be added to new shipments
@@ -239,7 +256,7 @@ namespace Nop.Services.Orders
         /// <param name="orderItem">Order item</param>
         /// <returns>
         /// A task that represents the asynchronous operation
-        /// The task result contains the otal number of already delivered items which can be added to new shipments
+        /// The task result contains the total number of already delivered items which can be added to new shipments
         /// </returns>
         Task<int> GetTotalNumberOfItemsCanBeAddedToShipmentAsync(OrderItem orderItem);
 
@@ -249,7 +266,7 @@ namespace Nop.Services.Orders
         /// <param name="orderItem">Order item to check</param>
         /// <returns>
         /// A task that represents the asynchronous operation
-        /// The task result contains the rue if download is allowed; otherwise, false.
+        /// The task result contains the true if download is allowed; otherwise, false.
         /// </returns>
         Task<bool> IsDownloadAllowedAsync(OrderItem orderItem);
 
@@ -259,7 +276,7 @@ namespace Nop.Services.Orders
         /// <param name="orderItem">Order item to check</param>
         /// <returns>
         /// A task that represents the asynchronous operation
-        /// The task result contains the rue if license download is allowed; otherwise, false.
+        /// The task result contains the true if license download is allowed; otherwise, false.
         /// </returns>
         Task<bool> IsLicenseDownloadAllowedAsync(OrderItem orderItem);
 

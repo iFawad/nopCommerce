@@ -1,6 +1,5 @@
-﻿using System;
-using Nop.Core.Domain.Customers;
-using Nop.Services.Tasks;
+﻿using Nop.Core.Domain.Customers;
+using Nop.Services.ScheduleTasks;
 
 namespace Nop.Services.Customers
 {
@@ -11,8 +10,8 @@ namespace Nop.Services.Customers
     {
         #region Fields
 
-        private readonly CustomerSettings _customerSettings;
-        private readonly ICustomerService _customerService;
+        protected readonly CustomerSettings _customerSettings;
+        protected readonly ICustomerService _customerService;
 
         #endregion
 

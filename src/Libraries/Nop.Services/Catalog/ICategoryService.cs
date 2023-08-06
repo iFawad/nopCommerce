@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
@@ -257,7 +255,6 @@ namespace Nop.Services.Catalog
         /// </returns>
         Task<IList<Category>> GetCategoriesByIdsAsync(int[] categoryIds);
 
-        //TODO: migrate to an extension method
         /// <summary>
         /// Returns a ProductCategory that has the specified values
         /// </summary>

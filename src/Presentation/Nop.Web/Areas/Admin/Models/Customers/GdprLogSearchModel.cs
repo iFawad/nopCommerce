@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Nop.Web.Framework.Mvc.ModelBinding;
 using Nop.Web.Framework.Models;
+using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Web.Areas.Admin.Models.Customers
 {
@@ -22,6 +22,7 @@ namespace Nop.Web.Areas.Admin.Models.Customers
         #region Properties
 
         [NopResourceDisplayName("Admin.Customers.GdprLog.List.SearchEmail")]
+        [DataType(DataType.EmailAddress)]
         public string SearchEmail { get; set; }
 
         [NopResourceDisplayName("Admin.Customers.GdprLog.List.SearchRequestType")]

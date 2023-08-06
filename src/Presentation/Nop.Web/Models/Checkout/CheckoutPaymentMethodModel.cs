@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Nop.Web.Framework.Models;
+﻿using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Models.Checkout
 {
@@ -14,7 +13,8 @@ namespace Nop.Web.Models.Checkout
 
         public bool DisplayRewardPoints { get; set; }
         public int RewardPointsBalance { get; set; }
-        public string RewardPointsAmount { get; set; }
+        public int RewardPointsToUse { get; set; }
+        public string RewardPointsToUseAmount { get; set; }
         public bool RewardPointsEnoughToPayForOrder { get; set; }
         public bool UseRewardPoints { get; set; }
 

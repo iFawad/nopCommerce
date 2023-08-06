@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Nop.Core;
@@ -54,9 +51,9 @@ namespace Nop.Web.Framework.Mvc.Filters
         {
             #region Fields
 
-            private readonly bool _ignoreFilter;
+            protected readonly bool _ignoreFilter;
             private bool _persistForTheNextRequest;
-            private readonly IWebHelper _webHelper;
+            protected readonly IWebHelper _webHelper;
 
             #endregion
 
@@ -79,7 +76,7 @@ namespace Nop.Web.Framework.Mvc.Filters
             /// </summary>
             /// <param name="context">A context for action filters</param>
             /// <returns>A task that represents the asynchronous operation</returns>
-            private async Task SaveSelectedTabAsync(ActionExecutingContext context)
+            private void SaveSelectedTab(ActionExecutingContext context)
             {
                 if (context == null)
                     throw new ArgumentNullException(nameof(context));
@@ -95,7 +92,7 @@ namespace Nop.Web.Framework.Mvc.Filters
                 if (_webHelper.IsAjaxRequest(context.HttpContext.Request))
                     return;
 
-                if (!await DataSettingsManager.IsDatabaseInstalledAsync())
+                if (!DataSettingsManager.IsDatabaseInstalled())
                     return;
 
                 //check whether this filter has been overridden for the Action
@@ -128,7 +125,7 @@ namespace Nop.Web.Framework.Mvc.Filters
             public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
             {
                 await next();
-                await SaveSelectedTabAsync(context);
+                SaveSelectedTab(context);
             }
 
             #endregion

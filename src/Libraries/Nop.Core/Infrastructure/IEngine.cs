@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Nop.Core.Configuration;
 
 namespace Nop.Core.Infrastructure
 {
@@ -55,12 +52,5 @@ namespace Nop.Core.Infrastructure
         /// <param name="type">Type of service</param>
         /// <returns>Resolved service</returns>
         object ResolveUnregistered(Type type);
-
-        /// <summary>
-        /// Register dependencies
-        /// </summary>
-        /// <param name="services">Collection of service descriptors</param>
-        /// <param name="appSettings">App settings</param>
-        void RegisterDependencies(IServiceCollection services, AppSettings appSettings);
     }
 }

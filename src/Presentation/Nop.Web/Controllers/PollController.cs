@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Polls;
 using Nop.Services.Customers;
@@ -11,23 +9,24 @@ using Nop.Web.Factories;
 
 namespace Nop.Web.Controllers
 {
+    [AutoValidateAntiforgeryToken]
     public partial class PollController : BasePublicController
     {
         #region Fields
 
-        private readonly ICustomerService _customerService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IPollModelFactory _pollModelFactory;
-        private readonly IPollService _pollService;
-        private readonly IStoreMappingService _storeMappingService;
-        private readonly IWorkContext _workContext;
+        protected readonly ICustomerService _customerService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IPollModelFactory _pollModelFactory;
+        protected readonly IPollService _pollService;
+        protected readonly IStoreMappingService _storeMappingService;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
         #region Ctor
 
-        public PollController(ICustomerService customerService, 
-            ILocalizationService localizationService, 
+        public PollController(ICustomerService customerService,
+            ILocalizationService localizationService,
             IPollModelFactory pollModelFactory,
             IPollService pollService,
             IStoreMappingService storeMappingService,
@@ -46,7 +45,6 @@ namespace Nop.Web.Controllers
         #region Methods
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
         public virtual async Task<IActionResult> Vote(int pollAnswerId)
         {
             var pollAnswer = await _pollService.GetPollAnswerByIdAsync(pollAnswerId);
@@ -58,17 +56,18 @@ namespace Nop.Web.Controllers
             if (!poll.Published || !await _storeMappingService.AuthorizeAsync(poll))
                 return Json(new { error = "Poll is not available" });
 
-            if (await _customerService.IsGuestAsync(await _workContext.GetCurrentCustomerAsync()) && !poll.AllowGuestsToVote)
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (await _customerService.IsGuestAsync(customer) && !poll.AllowGuestsToVote)
                 return Json(new { error = await _localizationService.GetResourceAsync("Polls.OnlyRegisteredUsersVote") });
 
-            var alreadyVoted = await _pollService.AlreadyVotedAsync(poll.Id, (await _workContext.GetCurrentCustomerAsync()).Id);
+            var alreadyVoted = await _pollService.AlreadyVotedAsync(poll.Id, customer.Id);
             if (!alreadyVoted)
             {
                 //vote
                 await _pollService.InsertPollVotingRecordAsync(new PollVotingRecord
                 {
                     PollAnswerId = pollAnswer.Id,
-                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    CustomerId = customer.Id,
                     CreatedOnUtc = DateTime.UtcNow
                 });
 

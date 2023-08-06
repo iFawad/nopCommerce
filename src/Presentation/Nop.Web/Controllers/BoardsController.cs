@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Forums;
 using Nop.Core.Domain.Security;
@@ -23,15 +18,15 @@ namespace Nop.Web.Controllers
     {
         #region Fields
 
-        private readonly CaptchaSettings _captchaSettings;
-        private readonly ForumSettings _forumSettings;
-        private readonly ICustomerService _customerService;
-        private readonly IForumModelFactory _forumModelFactory;
-        private readonly IForumService _forumService;
-        private readonly ILocalizationService _localizationService;
-        private readonly IStoreContext _storeContext;
-        private readonly IWebHelper _webHelper;
-        private readonly IWorkContext _workContext;
+        protected readonly CaptchaSettings _captchaSettings;
+        protected readonly ForumSettings _forumSettings;
+        protected readonly ICustomerService _customerService;
+        protected readonly IForumModelFactory _forumModelFactory;
+        protected readonly IForumService _forumService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IStoreContext _storeContext;
+        protected readonly IWebHelper _webHelper;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
@@ -68,7 +63,7 @@ namespace Nop.Web.Controllers
                 return RedirectToRoute("Homepage");
 
             var model = await _forumModelFactory.PrepareBoardsIndexModelAsync();
-            
+
             return View(model);
         }
 
@@ -78,11 +73,11 @@ namespace Nop.Web.Controllers
                 return RedirectToRoute("Homepage");
 
             var model = await _forumModelFactory.PrepareActiveDiscussionsModelAsync(forumId, pageNumber);
-            
+
             return View(model);
         }
 
-        [CheckLanguageSeoCode(true)]
+        [CheckLanguageSeoCode(ignore: true)]
         public virtual async Task<IActionResult> ActiveDiscussionsRss(int forumId = 0)
         {
             if (!_forumSettings.ForumsEnabled)
@@ -97,8 +92,9 @@ namespace Nop.Web.Controllers
             var feedTitle = await _localizationService.GetResourceAsync("Forum.ActiveDiscussionsFeedTitle");
             var feedDescription = await _localizationService.GetResourceAsync("Forum.ActiveDiscussionsFeedDescription");
 
+            var store = await _storeContext.GetCurrentStoreAsync();
             var feed = new RssFeed(
-                string.Format(feedTitle, await _localizationService.GetLocalizedAsync(await _storeContext.GetCurrentStoreAsync(), x => x.Name)),
+                string.Format(feedTitle, await _localizationService.GetLocalizedAsync(store, x => x.Name)),
                 feedDescription,
                 new Uri(url),
                 DateTime.UtcNow);
@@ -114,7 +110,7 @@ namespace Nop.Web.Controllers
                 var content = $"{repliesText}: {(topic.NumPosts > 0 ? topic.NumPosts - 1 : 0)}, {viewsText}: {topic.Views}";
 
                 items.Add(new RssItem(topic.Subject, content, new Uri(topicUrl),
-                    $"urn:store:{(await _storeContext.GetCurrentStoreAsync()).Id}:activeDiscussions:topic:{topic.Id}", topic.LastPostTime ?? topic.UpdatedOnUtc));
+                    $"urn:store:{store.Id}:activeDiscussions:topic:{topic.Id}", topic.LastPostTime ?? topic.UpdatedOnUtc));
             }
             feed.Items = items;
 
@@ -131,7 +127,7 @@ namespace Nop.Web.Controllers
                 return RedirectToRoute("Boards");
 
             var model = await _forumModelFactory.PrepareForumGroupModelAsync(forumGroup);
-            
+
             return View(model);
         }
 
@@ -145,7 +141,7 @@ namespace Nop.Web.Controllers
                 return RedirectToRoute("Boards");
 
             var model = await _forumModelFactory.PrepareForumPageModelAsync(forum, pageNumber);
-            
+
             return View(model);
         }
 
@@ -171,8 +167,9 @@ namespace Nop.Web.Controllers
                 var feedTitle = await _localizationService.GetResourceAsync("Forum.ForumFeedTitle");
                 var feedDescription = await _localizationService.GetResourceAsync("Forum.ForumFeedDescription");
 
+                var store = await _storeContext.GetCurrentStoreAsync();
                 var feed = new RssFeed(
-                    string.Format(feedTitle, await _localizationService.GetLocalizedAsync(await _storeContext.GetCurrentStoreAsync(), x => x.Name), forum.Name),
+                    string.Format(feedTitle, await _localizationService.GetLocalizedAsync(store, x => x.Name), forum.Name),
                     feedDescription,
                     new Uri(url),
                     DateTime.UtcNow);
@@ -187,7 +184,7 @@ namespace Nop.Web.Controllers
                     var topicUrl = Url.RouteUrl("TopicSlug", new { id = topic.Id, slug = await _forumService.GetTopicSeNameAsync(topic) }, _webHelper.GetCurrentRequestProtocol());
                     var content = $"{repliesText}: {(topic.NumPosts > 0 ? topic.NumPosts - 1 : 0)}, {viewsText}: {topic.Views}";
 
-                    items.Add(new RssItem(topic.Subject, content, new Uri(topicUrl), $"urn:store:{(await _storeContext.GetCurrentStoreAsync()).Id}:forum:topic:{topic.Id}", topic.LastPostTime ?? topic.UpdatedOnUtc));
+                    items.Add(new RssItem(topic.Subject, content, new Uri(topicUrl), $"urn:store:{store.Id}:forum:topic:{topic.Id}", topic.LastPostTime ?? topic.UpdatedOnUtc));
                 }
 
                 feed.Items = items;
@@ -199,7 +196,6 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
         public virtual async Task<IActionResult> ForumWatch(int id)
         {
             var watchTopic = await _localizationService.GetResourceAsync("Forum.WatchForum");
@@ -210,10 +206,11 @@ namespace Nop.Web.Controllers
             if (forum == null)
                 return Json(new { Subscribed = false, Text = returnText, Error = true });
 
-            if (!await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()))
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (!await _forumService.IsCustomerAllowedToSubscribeAsync(customer))
                 return Json(new { Subscribed = false, Text = returnText, Error = true });
 
-            var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id,
+            var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id,
                 forum.Id, 0, 0, 1)).FirstOrDefault();
 
             bool subscribed;
@@ -222,7 +219,7 @@ namespace Nop.Web.Controllers
                 forumSubscription = new ForumSubscription
                 {
                     SubscriptionGuid = Guid.NewGuid(),
-                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    CustomerId = customer.Id,
                     ForumId = forum.Id,
                     CreatedOnUtc = DateTime.UtcNow
                 };
@@ -261,7 +258,6 @@ namespace Nop.Web.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
         public virtual async Task<IActionResult> TopicWatch(int id)
         {
             var watchTopic = await _localizationService.GetResourceAsync("Forum.WatchTopic");
@@ -272,10 +268,11 @@ namespace Nop.Web.Controllers
             if (forumTopic == null)
                 return Json(new { Subscribed = false, Text = returnText, Error = true });
 
-            if (!await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()))
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (!await _forumService.IsCustomerAllowedToSubscribeAsync(customer))
                 return Json(new { Subscribed = false, Text = returnText, Error = true });
 
-            var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id,
+            var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id,
                 0, forumTopic.Id, 0, 1)).FirstOrDefault();
 
             bool subscribed;
@@ -284,7 +281,7 @@ namespace Nop.Web.Controllers
                 forumSubscription = new ForumSubscription
                 {
                     SubscriptionGuid = Guid.NewGuid(),
-                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                    CustomerId = customer.Id,
                     TopicId = forumTopic.Id,
                     CreatedOnUtc = DateTime.UtcNow
                 };
@@ -311,11 +308,11 @@ namespace Nop.Web.Controllers
                 return RedirectToRoute("Boards");
 
             var model = await _forumModelFactory.PrepareTopicMoveAsync(forumTopic);
-            
+
             return View(model);
         }
 
-        [HttpPost]        
+        [HttpPost]
         public virtual async Task<IActionResult> TopicMove(TopicMoveModel model)
         {
             if (!_forumSettings.ForumsEnabled)
@@ -405,7 +402,8 @@ namespace Nop.Web.Controllers
             {
                 try
                 {
-                    if (!await _forumService.IsCustomerAllowedToCreateTopicAsync(await _workContext.GetCurrentCustomerAsync(), forum))
+                    var customer = await _workContext.GetCurrentCustomerAsync();
+                    if (!await _forumService.IsCustomerAllowedToCreateTopicAsync(customer, forum))
                     {
                         return Challenge();
                     }
@@ -426,14 +424,14 @@ namespace Nop.Web.Controllers
                     var ipAddress = _webHelper.GetCurrentIpAddress();
                     var nowUtc = DateTime.UtcNow;
 
-                    if (await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(await _workContext.GetCurrentCustomerAsync()))
+                    if (await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(customer))
                         topicType = (ForumTopicType)Enum.ToObject(typeof(ForumTopicType), model.TopicTypeId);
 
                     //forum topic
                     var forumTopic = new ForumTopic
                     {
                         ForumId = forum.Id,
-                        CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                        CustomerId = customer.Id,
                         TopicTypeId = (int)topicType,
                         Subject = subject,
                         CreatedOnUtc = nowUtc,
@@ -445,7 +443,7 @@ namespace Nop.Web.Controllers
                     var forumPost = new ForumPost
                     {
                         TopicId = forumTopic.Id,
-                        CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                        CustomerId = customer.Id,
                         Text = text,
                         IPAddress = ipAddress,
                         CreatedOnUtc = nowUtc,
@@ -462,14 +460,14 @@ namespace Nop.Web.Controllers
                     await _forumService.UpdateTopicAsync(forumTopic);
 
                     //subscription                
-                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()))
+                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(customer))
                     {
                         if (model.Subscribed)
                         {
                             var forumSubscription = new ForumSubscription
                             {
                                 SubscriptionGuid = Guid.NewGuid(),
-                                CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                                CustomerId = customer.Id,
                                 TopicId = forumTopic.Id,
                                 CreatedOnUtc = nowUtc
                             };
@@ -488,7 +486,7 @@ namespace Nop.Web.Controllers
 
             //redisplay form
             await _forumModelFactory.PrepareTopicCreateModelAsync(forum, model);
-            
+
             return View(model);
         }
 
@@ -506,7 +504,7 @@ namespace Nop.Web.Controllers
 
             var model = new EditForumTopicModel();
             await _forumModelFactory.PrepareTopicEditModelAsync(forumTopic, model, false);
-            
+
             return View(model);
         }
 
@@ -536,7 +534,8 @@ namespace Nop.Web.Controllers
             {
                 try
                 {
-                    if (!await _forumService.IsCustomerAllowedToEditTopicAsync(await _workContext.GetCurrentCustomerAsync(), forumTopic))
+                    var customer = await _workContext.GetCurrentCustomerAsync();
+                    if (!await _forumService.IsCustomerAllowedToEditTopicAsync(customer, forumTopic))
                         return Challenge();
 
                     var subject = model.Subject;
@@ -555,7 +554,7 @@ namespace Nop.Web.Controllers
                     var ipAddress = _webHelper.GetCurrentIpAddress();
                     var nowUtc = DateTime.UtcNow;
 
-                    if (await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(await _workContext.GetCurrentCustomerAsync()))
+                    if (await _forumService.IsCustomerAllowedToSetTopicPriorityAsync(customer))
                         topicType = (ForumTopicType)Enum.ToObject(typeof(ForumTopicType), model.TopicTypeId);
 
                     //forum topic
@@ -588,9 +587,9 @@ namespace Nop.Web.Controllers
                     }
 
                     //subscription
-                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()))
+                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(customer))
                     {
-                        var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id,
+                        var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id,
                             0, forumTopic.Id, 0, 1)).FirstOrDefault();
                         if (model.Subscribed)
                         {
@@ -599,7 +598,7 @@ namespace Nop.Web.Controllers
                                 forumSubscription = new ForumSubscription
                                 {
                                     SubscriptionGuid = Guid.NewGuid(),
-                                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                                    CustomerId = customer.Id,
                                     TopicId = forumTopic.Id,
                                     CreatedOnUtc = nowUtc
                                 };
@@ -643,7 +642,7 @@ namespace Nop.Web.Controllers
             var forumPost = await _forumService.GetPostByIdAsync(id);
 
             if (forumPost == null)
-                return Json(new {redirect = Url.RouteUrl("Boards")});
+                return Json(new { redirect = Url.RouteUrl("Boards") });
 
             if (!await _forumService.IsCustomerAllowedToDeletePostAsync(await _workContext.GetCurrentCustomerAsync(), forumPost))
                 return Challenge();
@@ -683,7 +682,7 @@ namespace Nop.Web.Controllers
                 return Challenge();
 
             var model = await _forumModelFactory.PreparePostCreateModelAsync(forumTopic, quote, false);
-            
+
             return View(model);
         }
 
@@ -708,7 +707,8 @@ namespace Nop.Web.Controllers
             {
                 try
                 {
-                    if (!await _forumService.IsCustomerAllowedToCreatePostAsync(await _workContext.GetCurrentCustomerAsync(), forumTopic))
+                    var customer = await _workContext.GetCurrentCustomerAsync();
+                    if (!await _forumService.IsCustomerAllowedToCreatePostAsync(customer, forumTopic))
                         return Challenge();
 
                     var text = model.Text;
@@ -723,7 +723,7 @@ namespace Nop.Web.Controllers
                     var forumPost = new ForumPost
                     {
                         TopicId = forumTopic.Id,
-                        CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                        CustomerId = customer.Id,
                         Text = text,
                         IPAddress = ipAddress,
                         CreatedOnUtc = nowUtc,
@@ -732,9 +732,9 @@ namespace Nop.Web.Controllers
                     await _forumService.InsertPostAsync(forumPost, true);
 
                     //subscription
-                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()))
+                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(customer))
                     {
-                        var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id,
+                        var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id,
                             0, forumPost.TopicId, 0, 1)).FirstOrDefault();
                         if (model.Subscribed)
                         {
@@ -743,7 +743,7 @@ namespace Nop.Web.Controllers
                                 forumSubscription = new ForumSubscription
                                 {
                                     SubscriptionGuid = Guid.NewGuid(),
-                                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                                    CustomerId = customer.Id,
                                     TopicId = forumPost.TopicId,
                                     CreatedOnUtc = nowUtc
                                 };
@@ -795,7 +795,7 @@ namespace Nop.Web.Controllers
                 return Challenge();
 
             var model = await _forumModelFactory.PreparePostEditModelAsync(forumPost, false);
-            
+
             return View(model);
         }
 
@@ -810,7 +810,8 @@ namespace Nop.Web.Controllers
             if (forumPost == null)
                 return RedirectToRoute("Boards");
 
-            if (!await _forumService.IsCustomerAllowedToEditPostAsync(await _workContext.GetCurrentCustomerAsync(), forumPost))
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (!await _forumService.IsCustomerAllowedToEditPostAsync(customer, forumPost))
                 return Challenge();
 
             var forumTopic = await _forumService.GetTopicByIdAsync(forumPost.TopicId);
@@ -845,9 +846,9 @@ namespace Nop.Web.Controllers
                     await _forumService.UpdatePostAsync(forumPost);
 
                     //subscription
-                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(await _workContext.GetCurrentCustomerAsync()))
+                    if (await _forumService.IsCustomerAllowedToSubscribeAsync(customer))
                     {
-                        var forumSubscription = (await _forumService.GetAllSubscriptionsAsync((await _workContext.GetCurrentCustomerAsync()).Id,
+                        var forumSubscription = (await _forumService.GetAllSubscriptionsAsync(customer.Id,
                             0, forumPost.TopicId, 0, 1)).FirstOrDefault();
                         if (model.Subscribed)
                         {
@@ -856,7 +857,7 @@ namespace Nop.Web.Controllers
                                 forumSubscription = new ForumSubscription
                                 {
                                     SubscriptionGuid = Guid.NewGuid(),
-                                    CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                                    CustomerId = customer.Id,
                                     TopicId = forumPost.TopicId,
                                     CreatedOnUtc = nowUtc
                                 };
@@ -904,7 +905,7 @@ namespace Nop.Web.Controllers
                 return RedirectToRoute("Homepage");
 
             var model = await _forumModelFactory.PrepareSearchModelAsync(searchterms, advs, forumId, within, limitDays, pageNumber);
-            
+
             return View(model);
         }
 
@@ -914,12 +915,11 @@ namespace Nop.Web.Controllers
                 return RedirectToRoute("CustomerInfo");
 
             var model = await _forumModelFactory.PrepareCustomerForumSubscriptionsModelAsync(pageNumber);
-            
+
             return View(model);
         }
 
         [HttpPost, ActionName("CustomerForumSubscriptions")]
-        [IgnoreAntiforgeryToken]
         public virtual async Task<IActionResult> CustomerForumSubscriptionsPOST(IFormCollection formCollection)
         {
             foreach (var key in formCollection.Keys)
@@ -932,7 +932,9 @@ namespace Nop.Web.Controllers
                     if (int.TryParse(id, out var forumSubscriptionId))
                     {
                         var forumSubscription = await _forumService.GetSubscriptionByIdAsync(forumSubscriptionId);
-                        if (forumSubscription != null && forumSubscription.CustomerId == (await _workContext.GetCurrentCustomerAsync()).Id)
+                        var customer = await _workContext.GetCurrentCustomerAsync();
+
+                        if (forumSubscription != null && forumSubscription.CustomerId == customer.Id)
                         {
                             await _forumService.DeleteSubscriptionAsync(forumSubscription);
                         }
@@ -953,21 +955,22 @@ namespace Nop.Web.Controllers
             if (forumPost == null)
                 return new NullJsonResult();
 
-            if (!await _customerService.IsRegisteredAsync(await _workContext.GetCurrentCustomerAsync()))
+            var customer = await _workContext.GetCurrentCustomerAsync();
+            if (!await _customerService.IsRegisteredAsync(customer))
                 return Json(new
                 {
                     Error = await _localizationService.GetResourceAsync("Forum.Votes.Login"),
                     VoteCount = forumPost.VoteCount
                 });
 
-            if ((await _workContext.GetCurrentCustomerAsync()).Id == forumPost.CustomerId)
+            if (customer.Id == forumPost.CustomerId)
                 return Json(new
                 {
                     Error = await _localizationService.GetResourceAsync("Forum.Votes.OwnPost"),
                     VoteCount = forumPost.VoteCount
                 });
 
-            var forumPostVote = await _forumService.GetPostVoteAsync(postId, await _workContext.GetCurrentCustomerAsync());
+            var forumPostVote = await _forumService.GetPostVoteAsync(postId, customer);
             if (forumPostVote != null)
             {
                 if ((forumPostVote.IsUp && isUp) || (!forumPostVote.IsUp && !isUp))
@@ -981,7 +984,7 @@ namespace Nop.Web.Controllers
                 return Json(new { VoteCount = forumPost.VoteCount });
             }
 
-            if (await _forumService.GetNumberOfPostVotesAsync(await _workContext.GetCurrentCustomerAsync(), DateTime.UtcNow.AddDays(-1)) >= _forumSettings.MaxVotesPerDay)
+            if (await _forumService.GetNumberOfPostVotesAsync(customer, DateTime.UtcNow.AddDays(-1)) >= _forumSettings.MaxVotesPerDay)
                 return Json(new
                 {
                     Error = string.Format(await _localizationService.GetResourceAsync("Forum.Votes.MaxVotesReached"), _forumSettings.MaxVotesPerDay),
@@ -990,7 +993,7 @@ namespace Nop.Web.Controllers
 
             await _forumService.InsertPostVoteAsync(new ForumPostVote
             {
-                CustomerId = (await _workContext.GetCurrentCustomerAsync()).Id,
+                CustomerId = customer.Id,
                 ForumPostId = postId,
                 IsUp = isUp,
                 CreatedOnUtc = DateTime.UtcNow

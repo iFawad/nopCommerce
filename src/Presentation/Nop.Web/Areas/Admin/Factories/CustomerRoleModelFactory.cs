@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Services.Catalog;
@@ -22,11 +18,11 @@ namespace Nop.Web.Areas.Admin.Factories
     {
         #region Fields
 
-        private readonly IBaseAdminModelFactory _baseAdminModelFactory;
-        private readonly ICustomerService _customerService;
-        private readonly IProductService _productService;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IWorkContext _workContext;
+        protected readonly IBaseAdminModelFactory _baseAdminModelFactory;
+        protected readonly ICustomerService _customerService;
+        protected readonly IProductService _productService;
+        protected readonly IUrlRecordService _urlRecordService;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
@@ -182,8 +178,9 @@ namespace Nop.Web.Areas.Admin.Factories
                 throw new ArgumentNullException(nameof(searchModel));
 
             //a vendor should have access only to his products
-            if (await _workContext.GetCurrentVendorAsync() != null)
-                searchModel.SearchVendorId = (await _workContext.GetCurrentVendorAsync()).Id;
+            var currentVendor = await _workContext.GetCurrentVendorAsync();
+            if (currentVendor != null)
+                searchModel.SearchVendorId = currentVendor.Id;
 
             //get products
             var products = await _productService.SearchProductsAsync(showHidden: true,

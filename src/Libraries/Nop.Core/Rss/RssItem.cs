@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 namespace Nop.Core.Rss
 {
@@ -93,7 +91,7 @@ namespace Nop.Core.Rss
         /// <summary>
         /// Get URL
         /// </summary>
-        public Uri Url => new Uri(Link.Value);
+        public Uri Url => new(Link.Value);
 
         /// <summary>
         /// Unique identifier

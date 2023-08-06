@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using Nop.Core.Domain.Catalog;
+﻿using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Forums;
 using Nop.Core.Domain.News;
+using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Security;
 using Nop.Core.Domain.Shipping;
+using Nop.Core.Domain.Vendors;
 
 namespace Nop.Data.Mapping
 {
@@ -15,7 +16,7 @@ namespace Nop.Data.Mapping
     /// </summary>
     public partial class BaseNameCompatibility : INameCompatibility
     {
-        public Dictionary<Type, string> TableNames => new Dictionary<Type, string>
+        public Dictionary<Type, string> TableNames => new()
         {
             { typeof(ProductAttributeMapping), "Product_ProductAttribute_Mapping" },
             { typeof(ProductProductTagMapping), "Product_ProductTag_Mapping" },
@@ -41,7 +42,7 @@ namespace Nop.Data.Mapping
             { typeof(NewsItem), "News" }
         };
 
-        public Dictionary<(Type, string), string> ColumnName => new Dictionary<(Type, string), string>
+        public Dictionary<(Type, string), string> ColumnName => new()
         {
             { (typeof(Customer), "BillingAddressId"), "BillingAddress_Id" },
             { (typeof(Customer), "ShippingAddressId"), "ShippingAddress_Id" },
@@ -61,6 +62,10 @@ namespace Nop.Data.Mapping
             { (typeof(CustomerAddressMapping), "CustomerId"), "Customer_Id" },
             { (typeof(ShippingMethodCountryMapping), "ShippingMethodId"), "ShippingMethod_Id" },
             { (typeof(ShippingMethodCountryMapping), "CountryId"), "Country_Id" },
+            { (typeof(VendorAttributeValue), "AttributeId"), "VendorAttributeId" },
+            { (typeof(CustomerAttributeValue), "AttributeId"), "CustomerAttributeId" },
+            { (typeof(AddressAttributeValue), "AttributeId"), "AddressAttributeId" },
+            { (typeof(CheckoutAttributeValue), "AttributeId"), "CheckoutAttributeId" },
         };
     }
 }

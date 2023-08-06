@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Catalog;
@@ -32,24 +27,24 @@ namespace Nop.Web.Areas.Admin.Controllers
     {
         #region Fields
 
-        private readonly IAclService _aclService;
-        private readonly ICustomerActivityService _customerActivityService;
-        private readonly ICustomerService _customerService;
-        private readonly IDiscountService _discountService;
-        private readonly IExportManager _exportManager;
-        private readonly IImportManager _importManager;
-        private readonly ILocalizationService _localizationService;
-        private readonly ILocalizedEntityService _localizedEntityService;
-        private readonly IManufacturerModelFactory _manufacturerModelFactory;
-        private readonly IManufacturerService _manufacturerService;
-        private readonly INotificationService _notificationService;
-        private readonly IPermissionService _permissionService;
-        private readonly IPictureService _pictureService;
-        private readonly IProductService _productService;
-        private readonly IStoreMappingService _storeMappingService;
-        private readonly IStoreService _storeService;
-        private readonly IUrlRecordService _urlRecordService;
-        private readonly IWorkContext _workContext;
+        protected readonly IAclService _aclService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IDiscountService _discountService;
+        protected readonly IExportManager _exportManager;
+        protected readonly IImportManager _importManager;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly ILocalizedEntityService _localizedEntityService;
+        protected readonly IManufacturerModelFactory _manufacturerModelFactory;
+        protected readonly IManufacturerService _manufacturerService;
+        protected readonly INotificationService _notificationService;
+        protected readonly IPermissionService _permissionService;
+        protected readonly IPictureService _pictureService;
+        protected readonly IProductService _productService;
+        protected readonly IStoreMappingService _storeMappingService;
+        protected readonly IStoreService _storeService;
+        protected readonly IUrlRecordService _urlRecordService;
+        protected readonly IWorkContext _workContext;
 
         #endregion
 
@@ -98,7 +93,6 @@ namespace Nop.Web.Areas.Admin.Controllers
 
         #region Utilities
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdateLocalesAsync(Manufacturer manufacturer, ManufacturerModel model)
         {
             foreach (var localized in model.Locales)
@@ -134,7 +128,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task UpdatePictureSeoNamesAsync(Manufacturer manufacturer)
         {
             var picture = await _pictureService.GetPictureByIdAsync(manufacturer.PictureId);
@@ -142,7 +135,6 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await _pictureService.SetSeoFilenameAsync(picture.Id, await _pictureService.GetPictureSeNameAsync(manufacturer.Name));
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveManufacturerAclAsync(Manufacturer manufacturer, ManufacturerModel model)
         {
             manufacturer.SubjectToAcl = model.SelectedCustomerRoleIds.Any();
@@ -155,7 +147,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedCustomerRoleIds.Contains(customerRole.Id))
                 {
                     //new role
-                    if (existingAclRecords.Count(acl => acl.CustomerRoleId == customerRole.Id) == 0)
+                    if (!existingAclRecords.Any(acl => acl.CustomerRoleId == customerRole.Id))
                         await _aclService.InsertAclRecordAsync(manufacturer, customerRole.Id);
                 }
                 else
@@ -168,7 +160,6 @@ namespace Nop.Web.Areas.Admin.Controllers
             }
         }
 
-        /// <returns>A task that represents the asynchronous operation</returns>
         protected virtual async Task SaveStoreMappingsAsync(Manufacturer manufacturer, ManufacturerModel model)
         {
             manufacturer.LimitedToStores = model.SelectedStoreIds.Any();
@@ -181,7 +172,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 if (model.SelectedStoreIds.Contains(store.Id))
                 {
                     //new store
-                    if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
+                    if (!existingStoreMappings.Any(sm => sm.StoreId == store.Id))
                         await _storeMappingService.InsertStoreMappingAsync(manufacturer, store.Id);
                 }
                 else
@@ -262,7 +253,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await UpdateLocalesAsync(manufacturer, model);
 
                 //discounts
-                var allDiscounts = await _discountService.GetAllDiscountsAsync(DiscountType.AssignedToManufacturers, showHidden: true);
+                var allDiscounts = await _discountService.GetAllDiscountsAsync(DiscountType.AssignedToManufacturers, showHidden: true, isActive: null);
                 foreach (var discount in allDiscounts)
                 {
                     if (model.SelectedDiscountIds != null && model.SelectedDiscountIds.Contains(discount.Id))
@@ -290,7 +281,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("List");
-                
+
                 return RedirectToAction("Edit", new { id = manufacturer.Id });
             }
 
@@ -343,7 +334,7 @@ namespace Nop.Web.Areas.Admin.Controllers
                 await UpdateLocalesAsync(manufacturer, model);
 
                 //discounts
-                var allDiscounts = await _discountService.GetAllDiscountsAsync(DiscountType.AssignedToManufacturers, showHidden: true);
+                var allDiscounts = await _discountService.GetAllDiscountsAsync(DiscountType.AssignedToManufacturers, showHidden: true, isActive: null);
                 foreach (var discount in allDiscounts)
                 {
                     if (model.SelectedDiscountIds != null && model.SelectedDiscountIds.Contains(discount.Id))
@@ -387,7 +378,7 @@ namespace Nop.Web.Areas.Admin.Controllers
 
                 if (!continueEditing)
                     return RedirectToAction("List");
-                
+
                 return RedirectToAction("Edit", new { id = manufacturer.Id });
             }
 
@@ -426,17 +417,17 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageManufacturers))
                 return AccessDeniedView();
 
-            if (selectedIds != null)
-            {
-                var manufacturers = await _manufacturerService.GetManufacturersByIdsAsync(selectedIds.ToArray());
-                await _manufacturerService.DeleteManufacturersAsync(manufacturers);
+            if (selectedIds == null || selectedIds.Count == 0)
+                return NoContent();
 
-                var locale = await _localizationService.GetResourceAsync("ActivityLog.DeleteManufacturer");
-                foreach (var manufacturer in manufacturers)
-                {
-                    //activity log
-                    await _customerActivityService.InsertActivityAsync("DeleteManufacturer", string.Format(locale, manufacturer.Name), manufacturer);
-                }
+            var manufacturers = await _manufacturerService.GetManufacturersByIdsAsync(selectedIds.ToArray());
+            await _manufacturerService.DeleteManufacturersAsync(manufacturers);
+
+            var locale = await _localizationService.GetResourceAsync("ActivityLog.DeleteManufacturer");
+            foreach (var manufacturer in manufacturers)
+            {
+                //activity log
+                await _customerActivityService.InsertActivityAsync("DeleteManufacturer", string.Format(locale, manufacturer.Name), manufacturer);
             }
 
             return Json(new { Result = true });

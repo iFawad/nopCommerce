@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nop.Core.Domain.Shipping
+﻿namespace Nop.Core.Domain.Shipping
 {
     /// <summary>
     /// Represents a shipment
@@ -11,7 +9,7 @@ namespace Nop.Core.Domain.Shipping
         /// Gets or sets the order identifier
         /// </summary>
         public int OrderId { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the tracking number of this shipment
         /// </summary>
@@ -32,6 +30,11 @@ namespace Nop.Core.Domain.Shipping
         /// Gets or sets the delivery date and time
         /// </summary>
         public DateTime? DeliveryDateUtc { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ready for pickup date and time
+        /// </summary>
+        public DateTime? ReadyForPickupDateUtc { get; set; }
 
         /// <summary>
         /// Gets or sets the admin comment

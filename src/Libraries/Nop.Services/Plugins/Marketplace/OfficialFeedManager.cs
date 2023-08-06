@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml;
+﻿using System.Xml;
 using Nop.Core;
 using Nop.Services.Common;
 using Nop.Services.Logging;
@@ -16,8 +12,8 @@ namespace Nop.Services.Plugins.Marketplace
     {
         #region Fields
 
-        private readonly ILogger _logger;
-        private readonly NopHttpClient _nopHttpClient;
+        protected readonly ILogger _logger;
+        protected readonly NopHttpClient _nopHttpClient;
 
         #endregion
 
@@ -145,7 +141,7 @@ namespace Nop.Services.Plugins.Marketplace
                 Price = GetElementValue(node, @"price")
             }).ToList();
 
-            int.TryParse(GetElementValue(xml.SelectNodes(@"//totalRecords")?[0], @"value"), out var totalRecords);
+            _ = int.TryParse(GetElementValue(xml.SelectNodes(@"//totalRecords")?[0], @"value"), out var totalRecords);
 
             return new PagedList<OfficialFeedPlugin>(list, pageIndex, pageSize, totalRecords);
         }

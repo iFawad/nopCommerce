@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Nop.Web.Framework.Mvc.ModelBinding;
 using Nop.Web.Framework.Models;
+using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Web.Areas.Admin.Models.Settings
 {
@@ -28,6 +28,10 @@ namespace Nop.Web.Areas.Admin.Models.Settings
         [NopResourceDisplayName("Admin.Configuration.Settings.RewardPoints.MaximumRewardPointsToUsePerOrder")]
         public int MaximumRewardPointsToUsePerOrder { get; set; }
         public bool MaximumRewardPointsToUsePerOrder_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Admin.Configuration.Settings.RewardPoints.MaximumRedeemedRate")]
+        public decimal MaximumRedeemedRate { get; set; }
+        public bool MaximumRedeemedRate_OverrideForStore { get; set; }
 
         [NopResourceDisplayName("Admin.Configuration.Settings.RewardPoints.PointsForRegistration")]
         public int PointsForRegistration { get; set; }

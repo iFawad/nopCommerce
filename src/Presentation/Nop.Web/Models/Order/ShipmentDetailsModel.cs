@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Nop.Web.Framework.Models;
+﻿using Nop.Web.Framework.Models;
 
 namespace Nop.Web.Models.Order
 {
@@ -15,6 +13,7 @@ namespace Nop.Web.Models.Order
         public string TrackingNumber { get; set; }
         public string TrackingNumberUrl { get; set; }
         public DateTime? ShippedDate { get; set; }
+        public DateTime? ReadyForPickupDate { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public IList<ShipmentStatusEventModel> ShipmentStatusEvents { get; set; }
         public bool ShowSku { get; set; }
@@ -22,7 +21,7 @@ namespace Nop.Web.Models.Order
 
         public OrderDetailsModel Order { get; set; }
 
-		#region Nested Classes
+        #region Nested Classes
 
         public partial record ShipmentItemModel : BaseNopEntityModel
         {
@@ -39,12 +38,13 @@ namespace Nop.Web.Models.Order
 
         public partial record ShipmentStatusEventModel : BaseNopModel
         {
+            public string Status { get; set; }
             public string EventName { get; set; }
             public string Location { get; set; }
             public string Country { get; set; }
             public DateTime? Date { get; set; }
         }
 
-		#endregion
+        #endregion
     }
 }

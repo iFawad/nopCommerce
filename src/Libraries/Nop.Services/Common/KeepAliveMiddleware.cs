@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Nop.Core;
 using Nop.Data;
 
@@ -13,7 +11,7 @@ namespace Nop.Services.Common
     {
         #region Fields
 
-        private readonly RequestDelegate _next;
+        protected readonly RequestDelegate _next;
 
         #endregion
 
@@ -37,11 +35,11 @@ namespace Nop.Services.Common
         public async Task InvokeAsync(HttpContext context, IWebHelper webHelper)
         {
             //whether database is installed
-            if (await DataSettingsManager.IsDatabaseInstalledAsync())
+            if (DataSettingsManager.IsDatabaseInstalled())
             {
                 //keep alive page requested (we ignore it to prevent creating a guest customer records)
                 var keepAliveUrl = $"{webHelper.GetStoreLocation()}{NopCommonDefaults.KeepAlivePath}";
-                if ((webHelper.GetThisPageUrl(false)).StartsWith(keepAliveUrl, StringComparison.InvariantCultureIgnoreCase))
+                if (webHelper.GetThisPageUrl(false).StartsWith(keepAliveUrl, StringComparison.InvariantCultureIgnoreCase))
                     return;
             }
 

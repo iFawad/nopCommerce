@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
@@ -88,7 +86,7 @@ namespace Nop.Services.Catalog
         /// <summary>
         /// Gets the manufacturers by category identifier
         /// </summary>
-        /// <param name="categoryId">Cateogry identifier</param>
+        /// <param name="categoryId">Category identifier</param>
         /// <returns>
         /// A task that represents the asynchronous operation
         /// The task result contains the manufacturers
@@ -209,7 +207,6 @@ namespace Nop.Services.Catalog
         /// </returns>
         Task<string[]> GetNotExistingManufacturersAsync(string[] manufacturerIdsNames);
 
-        //TODO: migrate to an extension method
         /// <summary>
         /// Returns a ProductManufacturer that has the specified values
         /// </summary>

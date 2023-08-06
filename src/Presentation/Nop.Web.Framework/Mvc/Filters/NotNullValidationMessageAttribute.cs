@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -38,7 +35,7 @@ namespace Nop.Web.Framework.Mvc.Filters
         {
             #region Fields
 
-            private readonly ILocalizationService _localizationService;
+            protected readonly ILocalizationService _localizationService;
 
             #endregion
 
@@ -70,7 +67,7 @@ namespace Nop.Web.Framework.Mvc.Filters
                 if (!context.HttpContext.Request.Method.Equals(WebRequestMethods.Http.Post, StringComparison.InvariantCultureIgnoreCase))
                     return;
 
-                if (!await DataSettingsManager.IsDatabaseInstalledAsync())
+                if (!DataSettingsManager.IsDatabaseInstalled())
                     return;
 
                 //whether the model state is invalid

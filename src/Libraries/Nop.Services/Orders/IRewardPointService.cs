@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Nop.Core;
+﻿using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
 
@@ -26,13 +24,6 @@ namespace Nop.Services.Orders
         /// </returns>
         Task<IPagedList<RewardPointsHistory>> GetRewardPointsHistoryAsync(int customerId = 0, int? storeId = null,
             bool showNotActivated = false, Guid? orderGuid = null, int pageIndex = 0, int pageSize = int.MaxValue);
-
-        /// <summary>
-        /// Gets reduced reward points balance per order
-        /// </summary>
-        /// <param name="rewardPointsBalance">Reward points balance</param>
-        /// <returns>Reduced balance</returns>
-        int GetReducedPointsBalance(int rewardPointsBalance);
 
         /// <summary>
         /// Gets reward points balance
