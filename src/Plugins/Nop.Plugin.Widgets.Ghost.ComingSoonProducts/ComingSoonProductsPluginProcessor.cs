@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Nop.Core;
 using Nop.Core.Domain.Seo;
+using Nop.Plugin.Widgets.Ghost.ComingSoonProducts.Components;
 using Nop.Services.Cms;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
@@ -35,9 +36,9 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts
 
         public bool HideInWidgetList => false;
 
-        public string GetWidgetViewComponentName(string widgetZone)
+        public Type GetWidgetViewComponent(string widgetZone)
         {
-            return "WidgetsComingSoonProducts";
+            return typeof(WidgetsComingSoonProductsViewComponent);
         }
 
         public Task<IList<string>> GetWidgetZonesAsync()
@@ -70,7 +71,7 @@ namespace Nop.Plugin.Widgets.Ghost.ComingSoonProducts
             await _settingService.ClearCacheAsync();
 
 
-            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
+            await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Plugin.Widgets.Ghost.ComingSoonProducts.CategoryList"] = "Category:",
                 ["Plugin.Widgets.Ghost.ComingSoonProducts.CategoryList.Hint"] = "Select a category, prodcuts of which will display on home screen.",

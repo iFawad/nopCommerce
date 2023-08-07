@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Copyright>Ghost Product</Copyright>
     <Company>Ghost Product</Company>
     <Authors>Fawad A. Khan</Authors>
@@ -13,6 +13,10 @@
     to ensure that the dlls copied from the NuGet cache to the output of your project-->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Infrastructure\DependencyRegistrar.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="plugin.json" />
