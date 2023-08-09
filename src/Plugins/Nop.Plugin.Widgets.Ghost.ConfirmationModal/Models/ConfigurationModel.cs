@@ -27,5 +27,9 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Models
         [NopResourceDisplayName("Plugin.Widgets.Ghost.ConfirmationModal.NoText")]
         public string NoText { get; set; }
         public bool NoText_OverrideForStore { get; set; }
+
+        [NopResourceDisplayName("Plugin.Widgets.Ghost.ConfirmationModal.UrlOnNo")]
+        public string UrlOnNo { get; set; }
+        public bool UrlOnNo_OverrideForStore { get; set; }
     }
 }

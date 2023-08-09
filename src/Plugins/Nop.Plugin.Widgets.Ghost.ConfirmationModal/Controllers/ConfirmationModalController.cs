@@ -70,7 +70,8 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Controllers
                 Topic = confirmationModalSettings.Topic,
                 Title = confirmationModalSettings.Title,
                 YesText = confirmationModalSettings.YesText,
-                NoText = confirmationModalSettings.NoText
+                NoText = confirmationModalSettings.NoText,
+                UrlOnNo = confirmationModalSettings.UrlOnNo
             };
 
             
@@ -80,6 +81,7 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Controllers
                 model.Title_OverrideForStore = await _settingService.SettingExistsAsync(confirmationModalSettings, x => x.Title, storeScope);
                 model.YesText_OverrideForStore = await _settingService.SettingExistsAsync(confirmationModalSettings, x => x.YesText, storeScope);
                 model.NoText_OverrideForStore = await _settingService.SettingExistsAsync(confirmationModalSettings, x => x.NoText, storeScope);
+                model.UrlOnNo_OverrideForStore = await _settingService.SettingExistsAsync(confirmationModalSettings, x => x.UrlOnNo, storeScope);
             }
 
             return View("~/Plugins/Widgets.Ghost.ConfirmationModal/Views/Configure.cshtml", model);
@@ -103,6 +105,7 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Controllers
             confirmationModalSettings.Title = model.Title;
             confirmationModalSettings.YesText = model.YesText;
             confirmationModalSettings.NoText = model.NoText;
+            confirmationModalSettings.UrlOnNo = model.UrlOnNo;
 
             /* We do not clear cache after each setting update.
              * This behavior can increase performance because cached settings will not be cleared 
@@ -111,6 +114,7 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Controllers
             await _settingService.SaveSettingOverridablePerStoreAsync(confirmationModalSettings, x => x.Title, model.Title_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(confirmationModalSettings, x => x.YesText, model.YesText_OverrideForStore, storeScope, false);
             await _settingService.SaveSettingOverridablePerStoreAsync(confirmationModalSettings, x => x.NoText, model.NoText_OverrideForStore, storeScope, false);
+            await _settingService.SaveSettingOverridablePerStoreAsync(confirmationModalSettings, x => x.UrlOnNo, model.UrlOnNo_OverrideForStore, storeScope, false);
 
             //now clear settings cache
             await _settingService.ClearCacheAsync();

@@ -80,7 +80,9 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal
                 ["Plugin.Widgets.Ghost.ConfirmationModal.YesText"] = "Yes text:",
                 ["Plugin.Widgets.Ghost.ConfirmationModal.YesText.Hint"] = "Text to display on 'Yes' button.",
                 ["Plugin.Widgets.Ghost.ConfirmationModal.NoText"] = "No text:",
-                ["Plugin.Widgets.Ghost.ConfirmationModal.NoText.Hint"] = "Text to display on 'No' button."
+                ["Plugin.Widgets.Ghost.ConfirmationModal.NoText.Hint"] = "Text to display on 'No' button.",
+                ["Plugin.Widgets.Ghost.ConfirmationModal.UrlOnNo"] = "Url on No:",
+                ["Plugin.Widgets.Ghost.ConfirmationModal.UrlOnNo.Hint"] = "URL to redirect when 'No' is selected."
             });
 
 

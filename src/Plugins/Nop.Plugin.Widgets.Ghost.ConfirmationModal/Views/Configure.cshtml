@@ -55,6 +55,16 @@
                         <span asp-validation-for="NoText"></span>
                     </div>
                 </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="UrlOnNo_OverrideForStore" asp-input="UrlOnNo" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="UrlOnNo" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="UrlOnNo" />
+                        <span asp-validation-for="UrlOnNo"></span>
+                    </div>
+                </div>
 
                 <div class="form-group row">
                     <div class="col-md-9">

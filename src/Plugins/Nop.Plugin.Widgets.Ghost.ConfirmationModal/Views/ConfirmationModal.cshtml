@@ -12,11 +12,12 @@
         var title = settings.Title;
         var yesText = settings.YesText;
         var noText = settings.NoText;
+        var urlOnNo = settings.UrlOnNo;
         var storeClosed = settings.StoreClosed;
         
         if(!storeClosed){
             if (localStorage.getItem('advertOnce') !== 'true') {
-                displayPopupContentFromUrlYesNoAgeVerification('@Url.RouteUrl("TopicPopup", new {SystemName = Model.Topic})', title, true, yesText, noText);
+                displayPopupContentFromUrlYesNoAgeVerification('@Url.RouteUrl("TopicPopup", new {SystemName = Model.Topic})', title, true, yesText, noText, urlOnNo);
             }
         }
     });

@@ -2,7 +2,7 @@
 ** custom js functions
 */
 
-function displayPopupContentFromUrlYesNoAgeVerification(url, title, modal, yesText, noText, width) {
+function displayPopupContentFromUrlYesNoAgeVerification(url, title, modal, yesText, noText, urlOnNO, width) {
   var isModal = (modal ? true : false);
   var targetWidth = (width ? width : 550);
   var maxHeight = $(window).height() - 20;
@@ -25,7 +25,7 @@ function displayPopupContentFromUrlYesNoAgeVerification(url, title, modal, yesTe
       {
         text: noText,
         click: function (event, ui) {
-          window.location.href = 'http://google.com/';
+          window.location.href = urlOnNO;
           $(this).dialog('destroy').remove();
         }
       }],

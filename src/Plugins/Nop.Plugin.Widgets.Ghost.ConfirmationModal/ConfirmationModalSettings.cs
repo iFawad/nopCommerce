@@ -13,6 +13,7 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal
         public string Title { get; set; }
         public string YesText { get; set; }
         public string NoText { get; set; }
+        public string UrlOnNo { get; set; }
         public bool StoreClosed { get; set; }
     }
 }
