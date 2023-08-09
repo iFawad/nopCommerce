@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
+using Nop.Core.Domain;
 using Nop.Services.Configuration;
 using Nop.Services.Security;
 using Nop.Services.Stores;
@@ -39,6 +40,8 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Components
             //Get Settings
             var storeScope = await _storeContext.GetActiveStoreScopeConfigurationAsync();
             var confirmationModalSettings = await _settingService.LoadSettingAsync<ConfirmationModalSettings>(storeScope);
+            var storeInformationSettings = await _settingService.LoadSettingAsync<StoreInformationSettings>(storeScope);
+            confirmationModalSettings.StoreClosed = storeInformationSettings.StoreClosed;
 
             return View("~/Plugins/Widgets.Ghost.ConfirmationModal/Views/ConfirmationModal.cshtml", confirmationModalSettings);
         }
