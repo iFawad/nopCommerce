@@ -21,6 +21,9 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Components
         private readonly IStoreMappingService _storeMappingService;
         private readonly ISettingService _settingService;
         private readonly IStoreContext _storeContext;
+        private readonly string _yes = "Yes";
+        private readonly string _no = "No";
+        private readonly string _urlOnNo = "http://google.com/";
 
         public WidgetsConfirmationModalViewComponent(ConfirmationModalSettings confirmationModalSettings,
             IAclService aclService,
@@ -43,7 +46,16 @@ namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Components
             var storeInformationSettings = await _settingService.LoadSettingAsync<StoreInformationSettings>(storeScope);
             confirmationModalSettings.StoreClosed = storeInformationSettings.StoreClosed;
 
+            LoadDefaultSettings(confirmationModalSettings);
+
             return View("~/Plugins/Widgets.Ghost.ConfirmationModal/Views/ConfirmationModal.cshtml", confirmationModalSettings);
+        }
+
+        private void LoadDefaultSettings(ConfirmationModalSettings confirmationModalSettings)
+        {
+            confirmationModalSettings.YesText = string.IsNullOrEmpty(confirmationModalSettings.YesText) ? _yes : confirmationModalSettings.YesText;
+            confirmationModalSettings.NoText = string.IsNullOrEmpty(confirmationModalSettings.NoText) ? _no : confirmationModalSettings.NoText;
+            confirmationModalSettings.UrlOnNo = string.IsNullOrEmpty(confirmationModalSettings.UrlOnNo) ? _urlOnNo : confirmationModalSettings.UrlOnNo;
         }
     }
 }
