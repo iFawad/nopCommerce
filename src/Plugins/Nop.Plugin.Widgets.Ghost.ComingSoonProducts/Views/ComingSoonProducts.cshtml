@@ -1,0 +1,20 @@
+﻿@model Nop.Plugin.Widgets.Ghost.ComingSoonProducts.ViewModels.ComingSoonProductsViewModel
+
+@if (Model.Products.Count > 0)
+{
+    <div class="product-grid home-page-product-grid">
+        <div class="title sub-title">
+            @*<strong>@T("Homepage.Products")</strong>*@
+            @*<strong>Coming soon</strong>*@
+            <strong>@Model.ComingSoonProductsSettings.SectionName</strong>
+        </div>
+        <div class="item-grid">
+            @foreach (var item in Model.Products)
+            {
+                <div class="item-box">
+                    @await Html.PartialAsync("_ProductBox", item)
+                </div>
+            }
+        </div>
+    </div>
+}
