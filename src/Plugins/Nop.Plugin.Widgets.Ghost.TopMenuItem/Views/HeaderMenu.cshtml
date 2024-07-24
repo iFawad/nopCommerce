@@ -1,0 +1,19 @@
+﻿
+@model Nop.Plugin.Widgets.Ghost.TopMenuItem.TopMenuItemSettings
+@using Nop.Web.Framework;
+@using Nop.Core.Domain.Customers
+@inject Nop.Core.IWebHelper webHelper
+@{
+    if (!string.IsNullOrEmpty(Model.RouteUrlHome))
+    {
+        <li><a href="@Url.RouteUrl(Model.RouteUrlHome)" class="ico-account">@Model.TitleHome</a></li>
+    }
+    if (!string.IsNullOrEmpty(Model.RouteUrlContactUs))
+    {
+        <li><a href="@Url.RouteUrl(Model.RouteUrlContactUs)" class="ico-account">@Model.TitleContactUs</a></li>
+    }
+    if (!string.IsNullOrEmpty(Model.RouteUrlTopMenuItem))
+    {
+        <li><a href="@Url.RouteUrl(Model.RouteUrlTopMenuItem)" class="ico-account">@Model.TitleTopMenuItem</a></li>
+    }
+}

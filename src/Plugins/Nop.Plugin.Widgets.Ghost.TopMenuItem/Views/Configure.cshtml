@@ -1,0 +1,92 @@
+﻿
+@model Nop.Plugin.Widgets.Ghost.TopMenuItem.Models.ConfigurationModel
+@using Nop.Web.Framework;
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+
+
+
+<form asp-controller="TopMenuItem" asp-action="Configure" method="post">
+    <div class="cards-group">
+         
+        <div class="card card-default">
+            <div class="card-body">
+
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="TitleTopMenuItem_OverrideForStore" asp-input="TitleTopMenuItem" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="TitleTopMenuItem" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="TitleTopMenuItem" />
+                        <span asp-validation-for="TitleTopMenuItem"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="RouteUrlTopMenuItem_OverrideForStore" asp-input="RouteUrlTopMenuItem" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="RouteUrlTopMenuItem" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="RouteUrlTopMenuItem" />
+                        <span asp-validation-for="RouteUrlTopMenuItem"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="TitleContactUs_OverrideForStore" asp-input="TitleContactUs" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="TitleContactUs" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="TitleContactUs" />
+                        <span asp-validation-for="TitleContactUs"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="RouteUrlContactUs_OverrideForStore" asp-input="RouteUrlContactUs" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="RouteUrlContactUs" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="RouteUrlContactUs" />
+                        <span asp-validation-for="RouteUrlContactUs"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="TitleHome_OverrideForStore" asp-input="TitleHome" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="TitleHome" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="TitleHome" />
+                        <span asp-validation-for="TitleHome"></span>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <nop-override-store-checkbox asp-for="RouteUrlHome_OverrideForStore" asp-input="RouteUrlHome" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="RouteUrlHome" />
+                    </div>
+                    <div class="col-md-8">
+                        <nop-editor asp-for="RouteUrlHome" />
+                        <span asp-validation-for="RouteUrlHome"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-9">
+                        &nbsp;
+                    </div>
+                    <div class="col-md-3">
+                        <input type="submit" name="save" class="btn btn-primary" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
