@@ -17,7 +17,7 @@ using Nop.Web.Framework.Mvc.Filters;
 
 namespace Nop.Plugin.Widgets.Ghost.ConfirmationModal.Controllers
 {
-    [Area(AreaNames.Admin)]
+    [Area(AreaNames.ADMIN)]
     [AuthorizeAdmin]
     [AutoValidateAntiforgeryToken]
     public class ConfirmationModalController : BasePluginController
