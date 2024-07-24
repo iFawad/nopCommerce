@@ -3,7 +3,7 @@
   "FriendlyName": "Coming Soon Products",
   "SystemName": "Widgets.Ghost.ComingSoonProducts",
   "Version": "1.0",
-  "SupportedVersions": [ "4.70" ],
+  "SupportedVersions": [ "4.70", "4.80" ],
   "Author": "Ghost Product",
   "DisplayOrder": 1,
   "FileName": "Nop.Plugin.Widgets.Ghost.ComingSoonProducts.dll",
