@@ -27,10 +27,8 @@
     <None Remove="Views\Configure.cshtml" />
     <None Remove="Views\Confirm.cshtml" />
     <None Remove="Views\DoNotUseWithAmazonPay.cshtml" />
-    <None Remove="Views\MiniCart.cshtml" />
     <None Remove="Views\PaymentInfo.cshtml" />
     <None Remove="Views\SignIn.cshtml" />
-    <None Remove="Views\_Checkout.cshtml" />
     <None Remove="Views\_ViewImports.cshtml" />
   </ItemGroup>
 
