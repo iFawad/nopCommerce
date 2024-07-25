@@ -116,18 +116,16 @@
         </div>
     </div>
     <div class="footer-lower">
-        <span style="float:left;">Disclaimer: Any product you purchase using the link from this website, we may earn a commission on it.</span>
-        <span class="footer-disclaimer" style="float:right;">@T("Content.CopyrightNotice", DateTime.Now.Year, Model.StoreName)</span>
-        @if (Model.DisplayTaxShippingInfoFooter)
-        {
-            var inclTax = await workContext.GetTaxDisplayTypeAsync() == TaxDisplayType.IncludingTax;
-            <span class="footer-tax-shipping">
-                @T(inclTax ? "Footer.TaxShipping.InclTax" : "Footer.TaxShipping.ExclTax", Url.RouteTopicUrl("shippinginfo"))
-            </span>
-        }
-    </div>
         <div class="footer-info">
-            
+            <span class="footer-disclaimer">@T("Content.CopyrightNotice", DateTime.Now.Year, Model.StoreName)</span>
+            @if (Model.DisplayTaxShippingInfoFooter)
+            {
+                var inclTax = await workContext.GetTaxDisplayTypeAsync() == TaxDisplayType.IncludingTax;
+                <span class="footer-tax-shipping">
+                    @T(inclTax ? "Footer.TaxShipping.InclTax" : "Footer.TaxShipping.ExclTax", Url.RouteTopicUrl("shippinginfo"))
+                </span>
+            }
+        </div>
         @if (!Model.HidePoweredByNopCommerce)
         {
             <div class="footer-powered-by">
@@ -141,7 +139,7 @@
     @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.Footer, additionalData = Model })
 </div>
 <script asp-location="Footer">
-    $(document).ready(function () {
+    $(function () {
         $('.footer-block .title').on('click', function () {
             var e = window, a = 'inner';
             if (!('innerWidth' in window)) {
@@ -156,7 +154,7 @@
     });
 </script>
 <script asp-location="Footer">
-    $(document).ready(function () {
+    $(function () {
         $('.block .title').on('click', function () {
             var e = window, a = 'inner';
             if (!('innerWidth' in window)) {
