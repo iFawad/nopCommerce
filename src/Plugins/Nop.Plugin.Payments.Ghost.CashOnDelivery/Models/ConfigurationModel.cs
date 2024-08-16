@@ -49,7 +49,7 @@ namespace Nop.Plugin.Payments.Ghost.CashOnDelivery.Models
         {
             public int LanguageId { get; set; }
 
-            [NopResourceDisplayName("Plugin.Payment.Ghost.CashOnDelivery.DescriptionText")]
+            [NopResourceDisplayName("Plugin.Payments.Ghost.CashOnDelivery.DescriptionText")]
             public string DescriptionText { get; set; }
         }
 
