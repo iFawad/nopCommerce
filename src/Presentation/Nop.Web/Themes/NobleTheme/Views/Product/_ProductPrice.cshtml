@@ -1,7 +1,10 @@
-﻿@model ProductDetailsModel.ProductPriceModel
+﻿@model ProductPriceModel
+
 @using Nop.Core
 @using Nop.Core.Domain.Tax
+
 @inject IWorkContext workContext
+
 @if (!Model.CustomerEntersPrice)
 {
     <div class="prices">
@@ -30,10 +33,13 @@
                 </div>
             }
             <div class="@if (string.IsNullOrWhiteSpace(Model.PriceWithDiscount))
-                        {<text>product-price</text>}
+                        {
+                            <text>product-price</text>
+                        }
                         else
-                        {<text>non-discounted-price</text>}">
-
+                        {
+                            <text>non-discounted-price</text>
+                        }">
                 @if (!string.IsNullOrWhiteSpace(Model.OldPrice) || !string.IsNullOrWhiteSpace(Model.PriceWithDiscount))
                 {
                     @*display "Price:" label if we have old price or discounted one*@
