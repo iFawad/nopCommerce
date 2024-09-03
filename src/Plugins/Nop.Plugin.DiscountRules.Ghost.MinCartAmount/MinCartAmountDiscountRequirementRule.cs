@@ -3,12 +3,16 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Nop.Core;
 using Nop.Core.Domain.Orders;
+using Nop.Core.Domain.Stores;
 using Nop.Services.Configuration;
 using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Orders;
 using Nop.Services.Plugins;
+using Nop.Web.Factories;
+using Nop.Web.Models.ShoppingCart;
+using NUglify.Helpers;
 
 namespace Nop.Plugin.DiscountRules.Ghost.MinCartAmount;
 
@@ -22,6 +26,10 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
     private readonly ISettingService _settingService;
     private readonly IUrlHelperFactory _urlHelperFactory;
     private readonly IWebHelper _webHelper;
+    private readonly IShoppingCartService _shoppingCartService;
+    private readonly IStoreContext _storeContext;
+    private readonly IWorkContext _workContext;
+    private readonly IShoppingCartModelFactory _shoppingCartModelFactory;
 
     public MinCartAmountDiscountRequirementRule(IActionContextAccessor actionContextAccessor,
         ICustomerService customerService,
@@ -30,7 +38,11 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         IOrderService orderService,
         ISettingService settingService,
         IUrlHelperFactory urlHelperFactory,
-        IWebHelper webHelper)
+        IWebHelper webHelper,
+        IShoppingCartService shoppingCartService,
+        IStoreContext storeContext,
+        IWorkContext workContext,
+        IShoppingCartModelFactory shoppingCartModelFactory)
     {
         _actionContextAccessor = actionContextAccessor;
         _customerService = customerService;
@@ -40,6 +52,10 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         _settingService = settingService;
         _urlHelperFactory = urlHelperFactory;
         _webHelper = webHelper;
+        _shoppingCartService = shoppingCartService;
+        _storeContext = storeContext;
+        _workContext = workContext;
+        _shoppingCartModelFactory = shoppingCartModelFactory;
     }
 
     /// <summary>
@@ -57,8 +73,8 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         //invalid by default
         var result = new DiscountRequirementValidationResult();
 
-        var spentAmountRequirement = await _settingService.GetSettingByKeyAsync<decimal>($"DiscountRequirement.MinCartAmount-{request.DiscountRequirementId}");
-        if (spentAmountRequirement == decimal.Zero)
+        var minCartAmountRequirement = await _settingService.GetSettingByKeyAsync<decimal>($"DiscountRequirement.MinCartAmount-{request.DiscountRequirementId}");
+        if (minCartAmountRequirement == decimal.Zero)
         {
             //valid
             result.IsValid = true;
@@ -68,11 +84,24 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         if (request.Customer == null || await _customerService.IsGuestAsync(request.Customer))
             return result;
 
-        var orders = await _orderService.SearchOrdersAsync(request.Store.Id,
-            customerId: request.Customer.Id,
-            osIds: new List<int> { (int)OrderStatus.Complete });
-        var spentAmount = orders.Sum(o => o.OrderTotal);
-        if (spentAmount > spentAmountRequirement)
+        var store = await _storeContext.GetCurrentStoreAsync();
+        var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
+        var model = new ShoppingCartModel();
+        model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(model, cart);
+
+        //var orders = await _orderService.SearchOrdersAsync(request.Store.Id,
+        //    customerId: request.Customer.Id,
+        //    osIds: new List<int> { (int)OrderStatus.Complete });
+        //var spentAmount = orders.Sum(o => o.OrderTotal);
+
+        decimal minCartAmount = decimal.Zero;
+        foreach(var item in model.Items)
+        {
+            minCartAmount += item.SubTotalValue;
+        }
+
+
+        if (minCartAmount > minCartAmountRequirement)
         {
             result.IsValid = true;
         }
