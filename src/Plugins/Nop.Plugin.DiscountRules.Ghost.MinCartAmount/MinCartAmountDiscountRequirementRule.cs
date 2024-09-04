@@ -107,7 +107,7 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         }
         else
         {
-            result.UserError = await _localizationService.GetResourceAsync("Plugin.DiscountRules.Ghost.MinCartAmount.NotEnough");
+            result.UserError = await _localizationService.GetResourceAsync("Plugins.DiscountRules.Ghost.MinCartAmount.NotEnough");
         }
 
         return result;
@@ -136,11 +136,11 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         //locales
         await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
         {
-            ["Plugin.DiscountRules.Ghost.MinCartAmount.Fields.Amount"] = "Minimum cart amount",
-            ["Plugin.DiscountRules.Ghost.MinCartAmount.Fields.Amount.Hint"] = "Discount will be applied if customer has minimum x.xx amount in the cart.",
-            ["Plugin.DiscountRules.Ghost.MinCartAmount.NotEnough"] = "Sorry, this offer requires more money in the cart",
-            ["Plugin.DiscountRules.Ghost.MinCartAmount.Fields.MinCartAmount.Required"] = "Minimum cart amount should be greater than 0",
-            ["Plugin.DiscountRules.Ghost.MinCartAmount.Fields.DiscountId.Required"] = "Discount is required"
+            ["Plugins.DiscountRules.Ghost.MinCartAmount.Fields.Amount"] = "Minimum cart amount",
+            ["Plugins.DiscountRules.Ghost.MinCartAmount.Fields.Amount.Hint"] = "Discount will be applied if customer has minimum x.xx amount in the cart.",
+            ["Plugins.DiscountRules.Ghost.MinCartAmount.NotEnough"] = "Sorry, this offer requires more money in the cart",
+            ["Plugins.DiscountRules.Ghost.MinCartAmount.Fields.MinCartAmount.Required"] = "Minimum cart amount should be greater than 0",
+            ["Plugins.DiscountRules.Ghost.MinCartAmount.Fields.DiscountId.Required"] = "Discount is required"
         });
 
         await base.InstallAsync();
@@ -161,7 +161,7 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         }
 
         //locales
-        await _localizationService.DeleteLocaleResourcesAsync("Plugin.DiscountRules.Ghost.MinCartAmount");
+        await _localizationService.DeleteLocaleResourcesAsync("Plugins.DiscountRules.Ghost.MinCartAmount");
 
         await base.UninstallAsync();
     }
