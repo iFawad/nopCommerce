@@ -10,8 +10,6 @@ using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Orders;
 using Nop.Services.Plugins;
-using Nop.Web.Factories;
-using Nop.Web.Models.ShoppingCart;
 using NUglify.Helpers;
 
 namespace Nop.Plugin.DiscountRules.Ghost.MinCartAmount;
@@ -29,7 +27,6 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
     private readonly IShoppingCartService _shoppingCartService;
     private readonly IStoreContext _storeContext;
     private readonly IWorkContext _workContext;
-    private readonly IShoppingCartModelFactory _shoppingCartModelFactory;
 
     public MinCartAmountDiscountRequirementRule(IActionContextAccessor actionContextAccessor,
         ICustomerService customerService,
@@ -41,8 +38,7 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         IWebHelper webHelper,
         IShoppingCartService shoppingCartService,
         IStoreContext storeContext,
-        IWorkContext workContext,
-        IShoppingCartModelFactory shoppingCartModelFactory)
+        IWorkContext workContext)
     {
         _actionContextAccessor = actionContextAccessor;
         _customerService = customerService;
@@ -55,7 +51,6 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
         _shoppingCartService = shoppingCartService;
         _storeContext = storeContext;
         _workContext = workContext;
-        _shoppingCartModelFactory = shoppingCartModelFactory;
     }
 
     /// <summary>
@@ -86,20 +81,14 @@ public partial class MinCartAmountDiscountRequirementRule : BasePlugin, IDiscoun
 
         var store = await _storeContext.GetCurrentStoreAsync();
         var cart = await _shoppingCartService.GetShoppingCartAsync(await _workContext.GetCurrentCustomerAsync(), ShoppingCartType.ShoppingCart, store.Id);
-        var model = new ShoppingCartModel();
-        model = await _shoppingCartModelFactory.PrepareShoppingCartModelAsync(model, cart);
+        var minCartAmount = decimal.Zero;
 
-        //var orders = await _orderService.SearchOrdersAsync(request.Store.Id,
-        //    customerId: request.Customer.Id,
-        //    osIds: new List<int> { (int)OrderStatus.Complete });
-        //var spentAmount = orders.Sum(o => o.OrderTotal);
-
-        decimal minCartAmount = decimal.Zero;
-        foreach(var item in model.Items)
+        //cart items
+        foreach (var sci in cart)
         {
-            minCartAmount += item.SubTotalValue;
+            var (subTotal, shoppingCartItemDiscountBase, _, maximumDiscountQty) = await _shoppingCartService.GetSubTotalAsync(sci, true);
+            minCartAmount += subTotal;
         }
-
 
         if (minCartAmount > minCartAmountRequirement)
         {
