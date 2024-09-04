@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Discount requirements",
+  "FriendlyName": "Customer have min x.xx amount in cart",
+  "SystemName": "DiscountRequirement.MinCartAmount",
+  "Version": "4.7.0.4",
+  "SupportedVersions": [ "4.70", "4.80" ],
+  "Author": "Ghost Product",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.DiscountRules.Ghost.MinCartAmount.dll",
+  "Description": "This plugin allows you to configure discounts for customers who spent more than the certain amount"
+}
